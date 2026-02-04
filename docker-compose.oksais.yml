@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: oksais-api
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - API_PREFIX=api/v1
+      - DB_TYPE=postgresql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=oksais
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change-me-in-production}
+      - JWT_EXPIRES_IN=1d
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - MODULE_AUTH_ENABLED=true
+      - MODULE_TENANT_ENABLED=true
+      - MODULE_USER_ENABLED=true
+      - MODULE_AUDIT_ENABLED=true
+      - MODULE_ORGANIZATION_ENABLED=true
+      - MODULE_ROLE_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./apps/base-api/logs:/app/apps/base-api/logs
+    restart: unless-stopped
+    networks:
+      - oksais-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: oksais-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=oksais
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - oksais-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: oksais-redis
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - oksais-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  oksais-network:
+    driver: bridge

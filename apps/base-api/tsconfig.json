@@ -1,0 +1,22 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"paths": {
+			"@oksai/plugin": ["../../libs/plugin/src"],
+			"@oksai/core": ["../../libs/core/src"],
+			"@oksai/common": ["../../libs/common/src"],
+			"@oksai/config": ["../../libs/config/src"],
+			"@oksai/database": ["../../libs/database/src"],
+			"@oksai/auth": ["../../libs/auth/src"],
+			"@oksai/tenant": ["../../libs/tenant/src"],
+			"@oksai/user": ["../../libs/user/src"],
+			"@oksai/organization": ["../../libs/organization/src"],
+			"@oksai/role": ["../../libs/role/src"],
+			"@oksai/audit": ["../../libs/audit/src"]
+		}
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "src/plugins.backup"]
+}

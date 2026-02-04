@@ -1,0 +1,41 @@
+{
+	"name": "@oksai/config",
+	"version": "0.1.0",
+	"description": "配置管理包",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc -p tsconfig.lib.json",
+		"build:prod": "tsc -p tsconfig.lib.json",
+		"typecheck": "tsc --noEmit",
+		"test": "jest --passWithNoTests",
+		"lint": "eslint .",
+		"clean": "rimraf dist coverage"
+	},
+	"dependencies": {
+		"@oksai/constants": "workspace:*",
+		"@oksai/utils": "workspace:*",
+		"@oksai/contracts": "workspace:*",
+		"@nestjs/common": "catalog:",
+		"@nestjs/config": "catalog:",
+		"@nestjs/typeorm": "catalog:",
+		"@mikro-orm/better-sqlite": "catalog:",
+		"@mikro-orm/core": "catalog:",
+		"@mikro-orm/mysql": "catalog:",
+		"@mikro-orm/nestjs": "catalog:",
+		"@mikro-orm/postgresql": "catalog:",
+		"@apollo/server": "catalog:",
+		"dotenv": "catalog:",
+		"nest-knexjs": "^0.0.29",
+		"tslib": "catalog:",
+		"typeorm": "catalog:"
+	},
+	"devDependencies": {
+		"@types/jest": "catalog:",
+		"@types/node": "catalog:",
+		"jest": "catalog:",
+		"rimraf": "catalog:",
+		"ts-node": "catalog:",
+		"typescript": "catalog:"
+	}
+}

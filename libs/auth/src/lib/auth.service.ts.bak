@@ -1,0 +1,208 @@
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository, wrap, EntityManager } from '@mikro-orm/core';
+import { User, UserRole } from '../entities/user.entity';
+import { LoginDto, RegisterDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto, VerifyEmailDto } from '../dto/index';
+import { LoginResponse, RefreshTokenResponse, VerifyEmailResponse } from '../interfaces/index';
+import { hashPassword, verifyPassword, validatePasswordStrength, JwtPayload, getJwtUtils, initJwtUtils } from '@oksai/core';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: EntityRepository<User>
+  ) {}
+
+  private get em(): EntityManager {
+    return this.userRepo.getEntityManager();
+  }
+
+  /**
+   * 用户登录
+   *
+   * @param credentials 登录凭证
+   * @returns JWT Token 和用户信息
+   * @throws UnauthorizedException 当凭证无效时
+   */
+  async login(credentials: LoginDto): Promise<LoginResponse> {
+    const user = await this.userRepo.findOne({ email: credentials.email });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isValidPassword = await verifyPassword(credentials.password, user.password);
+
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const jwtUtils = getJwtUtils();
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      tenantId: user.tenantId,
+      role: user.role || UserRole.USER
+    };
+
+    const tokens = jwtUtils.generateTokenPair(payload);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        tenantId: user.tenantId,
+        role: user.role || UserRole.USER
+      }
+    };
+  }
+
+  /**
+   * 用户注册
+   *
+   * @param credentials 注册信息
+   * @returns 创建的用户和 JWT Token
+   * @throws ConflictException 当邮箱已存在时
+   */
+  async register(credentials: RegisterDto): Promise<LoginResponse> {
+    const passwordValidation = validatePasswordStrength(credentials.password);
+
+    if (!passwordValidation.valid) {
+      throw new BadRequestException(passwordValidation.errors.join(', '));
+    }
+
+    const existingUser = await this.userRepo.findOne({ email: credentials.email });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const hashedPassword = await hashPassword(credentials.password);
+
+    const user = this.userRepo.create({
+      email: credentials.email,
+      password: hashedPassword,
+      firstName: credentials.firstName,
+      lastName: credentials.lastName,
+      role: credentials.role ? UserRole[credentials.role] : UserRole.USER,
+      isActive: true,
+      tenantId: 'default'
+    });
+
+    this.em.persist(user);
+    await this.em.flush();
+
+    const jwtUtils = getJwtUtils();
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      tenantId: user.tenantId,
+      role: user.role || UserRole.USER
+    };
+
+    const tokens = jwtUtils.generateTokenPair(payload);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        tenantId: user.tenantId,
+        role: user.role || UserRole.USER
+      }
+    };
+  }
+
+  /**
+   * 刷新 Token
+   *
+   * @param credentials 刷新 Token 凭证
+   * @returns 新的 JWT Token 对
+   */
+  async refreshToken(credentials: RefreshTokenDto): Promise<RefreshTokenResponse> {
+    const jwtUtils = getJwtUtils();
+
+    let payload: JwtPayload;
+
+    try {
+      payload = jwtUtils.verifyRefreshToken(credentials.refreshToken);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const user = await this.userRepo.findOne({ id: payload.sub });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const newPayload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      tenantId: user.tenantId,
+      role: user.role || UserRole.USER
+    };
+
+    const tokens = jwtUtils.generateTokenPair(newPayload);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
+    };
+  }
+
+  /**
+   * 登出
+   */
+  async logout(userId: string): Promise<void> {
+    return;
+  }
+
+  /**
+   * 忘记密码
+   *
+   * @param credentials 忘记凭证
+   * @param token 当前的 JWT Token
+   */
+  async forgotPassword(credentials: ForgotPasswordDto): Promise<void> {
+    // TODO: 生成密码重置链接
+    // TODO: 发送邮件
+  }
+
+  /**
+   * 重置密码
+   *
+   * @param credentials 重置凭证
+   * @param token 密码重置 Token
+   */
+  async resetPassword(credentials: ResetPasswordDto): Promise<void> {
+    return;
+  }
+
+  /**
+   * 邮箱验证
+   *
+   * @param credentials 验证凭证
+   * @returns 验证结果
+   */
+  async verifyEmail(credentials: VerifyEmailDto): Promise<VerifyEmailResponse> {
+    const user = await this.userRepo.findOne({ email: credentials.email });
+
+    if (!user) {
+      return { success: false };
+    }
+
+    user.emailVerifiedAt = new Date();
+    this.em.persist(user);
+    await this.em.flush();
+
+    return { success: true };
+  }
+}

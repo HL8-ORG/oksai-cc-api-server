@@ -1,0 +1,51 @@
+{
+	"name": "@oksai/base-api",
+	"version": "0.1.0",
+	"description": "主 API 应用",
+	"main": "dist/main.js",
+	"scripts": {
+		"build": "tsc -p tsconfig.app.json",
+		"start": "node dist/main.js",
+		"start:dev": "TS_NODE_PROJECT=./tsconfig.json ts-node -r tsconfig-paths/register src/main.ts",
+		"start:watch": "ts-node-dev --respawn src/main.ts",
+		"init-db": "ts-node src/main-init.ts",
+		"typecheck": "tsc --noEmit",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage",
+		"test:e2e": "jest --config ./jest-e2e.config.ts",
+		"test:e2e:watch": "jest --config ./jest-e2e.config.ts --watch",
+		"lint": "eslint .",
+		"format": "prettier --write \"src/**/*.ts\"",
+		"lsof-kill": "lsof -ti :3000 | xargs kill 2>/dev/null && sleep 2 && echo \"应用已停止\""
+	},
+	"devDependencies": {
+		"@types/supertest": "^6.0.2",
+		"supertest": "^6.3.3"
+	},
+	"dependencies": {
+		"@oksai/plugin": "workspace:*",
+		"@oksai/core": "workspace:*",
+		"@oksai/common": "workspace:*",
+		"@oksai/config": "workspace:*",
+		"@oksai/database": "workspace:*",
+		"@oksai/auth": "workspace:*",
+		"@oksai/tenant": "workspace:*",
+		"@oksai/user": "workspace:*",
+		"@oksai/organization": "workspace:*",
+		"@oksai/role": "workspace:*",
+		"@oksai/audit": "workspace:*",
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"@nestjs/platform-express": "catalog:",
+		"@nestjs/config": "catalog:",
+		"@nestjs/testing": "catalog:",
+		"@mikro-orm/core": "catalog:",
+		"@mikro-orm/nestjs": "catalog:",
+		"@mikro-orm/better-sqlite": "catalog:",
+		"@mikro-orm/mysql": "catalog:",
+		"@mikro-orm/postgresql": "catalog:",
+		"class-validator": "catalog:",
+		"chalk": "^5.3.0"
+	}
+}

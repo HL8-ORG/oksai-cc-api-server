@@ -1,0 +1,71 @@
+{
+	"name": "@oksai/auth",
+	"version": "0.1.0",
+	"type": "commonjs",
+	"description": "OKSAI Authentication Library",
+	"author": {
+		"name": "OKSAI Platform Team",
+		"email": "team@oksai.io",
+		"url": "https://oksais.io"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oksais/platform"
+	},
+	"bugs": {
+		"url": "https://github.com/oksais/platform/issues"
+	},
+	"homepage": "https://oksais.io",
+	"license": "AGPL-3.0",
+	"private": true,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.lib.json",
+		"dev": "tsc -p tsconfig.lib.json --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:cov": "jest --coverage"
+	},
+	"keywords": [
+		"oksais",
+		"auth",
+		"authentication",
+		"jwt",
+		"nestjs"
+	],
+	"dependencies": {
+		"@mikro-orm/core": "catalog:",
+		"@mikro-orm/nestjs": "catalog:",
+		"@nestjs/axios": "^4.0.1",
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"@nestjs/passport": "catalog:",
+		"@oksai/core": "workspace:*",
+		"@oksai/plugin": "workspace:*",
+		"chalk": "catalog:",
+		"class-transformer": "catalog:",
+		"class-validator": "catalog:",
+		"passport-auth0": "^1.4.5",
+		"passport-github2": "^0.1.12",
+		"passport-google-oauth20": "^2.0.0",
+		"passport-microsoft": "^2.1.0"
+	},
+	"devDependencies": {
+		"@types/jest": "catalog:",
+		"@types/passport-auth0": "catalog:",
+		"@types/passport-github2": "catalog:",
+		"@types/passport-google-oauth20": "catalog:",
+		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": ">=20.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"sideEffects": false
+}

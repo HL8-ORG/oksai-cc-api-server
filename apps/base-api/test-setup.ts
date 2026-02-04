@@ -1,0 +1,14 @@
+process.env.NODE_ENV = 'test';
+process.env.DATABASE_NAME = 'gauzy_test';
+process.env.DATABASE_HOST = 'localhost';
+process.env.DATABASE_PORT = '5432';
+process.env.DATABASE_USERNAME = 'postgres';
+process.env.DATABASE_PASSWORD = 'gauzy_password';
+process.env.JWT_SECRET = 'test-secret-key';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
+process.env.JWT_ACCESS_EXPIRES_IN = '1d';
+process.env.JWT_REFRESH_EXPIRES_IN = '7d';
+process.env.PORT = '3000';
+process.env.DEFAULT_TENANT_ID = 'default';
+process.env.DEFAULT_TENANT_NAME = 'Default Tenant';

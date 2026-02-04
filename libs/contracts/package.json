@@ -1,0 +1,22 @@
+{
+	"name": "@oksai/contracts",
+	"version": "0.1.0",
+	"description": "契约定义包",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc -p tsconfig.lib.json",
+		"build:prod": "tsc -p tsconfig.lib.json",
+		"typecheck": "tsc --noEmit",
+		"test": "jest --passWithNoTests",
+		"lint": "eslint .",
+		"clean": "rimraf dist coverage"
+	},
+	"devDependencies": {
+		"@types/jest": "catalog:",
+		"@types/node": "catalog:",
+		"jest": "catalog:",
+		"rimraf": "catalog:",
+		"typescript": "catalog:"
+	}
+}
