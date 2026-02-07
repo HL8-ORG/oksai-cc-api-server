@@ -1,4 +1,5 @@
 export * from './lib/entities/tenant.entity';
+export * from './lib/entities/tenant-base.entity';
 export * from './lib/dto/tenant.dto';
 export * from './lib/tenant.service';
 export * from './lib/tenant.controller';

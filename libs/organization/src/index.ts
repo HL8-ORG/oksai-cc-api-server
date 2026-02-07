@@ -1,4 +1,6 @@
 export * from './lib/entities/organization.entity';
+export * from './lib/entities/tenant-organization-base.entity';
+export * from './lib/entities/feature-organization.entity';
 export * from './lib/dto/organization.dto';
 export * from './lib/organization.service';
 export * from './lib/organization.controller';

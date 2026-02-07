@@ -46,6 +46,7 @@
 		"@mikro-orm/nestjs": "catalog:",
 		"@oksai/core": "workspace:*",
 		"@oksai/plugin": "workspace:*",
+		"@oksai/tenant": "workspace:*",
 		"chalk": "catalog:",
 		"class-validator": "catalog:"
 	},

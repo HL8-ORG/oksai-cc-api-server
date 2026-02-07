@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { PluginRegistryService } from './services/plugin-registry.service';
 import { PluginLoaderService } from './services/plugin-loader.service';
+import { PluginController } from './controllers/plugin.controller';
 
 /**
  * 插件模块
@@ -11,6 +12,7 @@ import { PluginLoaderService } from './services/plugin-loader.service';
 @Global()
 @Module({
 	providers: [PluginRegistryService, PluginLoaderService],
+	controllers: [PluginController],
 	exports: [PluginRegistryService, PluginLoaderService]
 })
 export class PluginModule {}

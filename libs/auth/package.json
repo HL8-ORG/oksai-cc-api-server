@@ -45,6 +45,7 @@
 		"@mikro-orm/nestjs": "catalog:",
 		"@nestjs/axios": "^4.0.1",
 		"@nestjs/common": "catalog:",
+		"@nestjs/config": "^4.0.2",
 		"@nestjs/core": "catalog:",
 		"@nestjs/passport": "catalog:",
 		"@oksai/core": "workspace:*",
@@ -58,10 +59,12 @@
 		"passport-microsoft": "^2.1.0"
 	},
 	"devDependencies": {
+		"@types/express": "catalog:",
 		"@types/jest": "catalog:",
 		"@types/passport-auth0": "catalog:",
 		"@types/passport-github2": "catalog:",
 		"@types/passport-google-oauth20": "catalog:",
+		"@types/passport-microsoft": "catalog:",
 		"typescript": "catalog:"
 	},
 	"engines": {

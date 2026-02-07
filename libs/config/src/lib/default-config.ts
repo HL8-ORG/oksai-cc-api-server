@@ -69,30 +69,6 @@ export const defaultConfiguration: ApplicationPluginConfig = {
 		}
 	},
 	dbConnectionOptions: {
-		retryAttempts: 5,
-		retryDelay: 1000,
-		migrationsTransactionMode: 'each',
-		migrationsRun: process.env.DB_SYNCHRONIZE === 'true' ? false : true,
-		type: process.env.DB_TYPE || 'postgres',
-		host: process.env.DB_HOST || 'localhost',
-		port: process.env.DB_PORT ? Number.parseInt(process.env.DB_PORT, 10) : 5432,
-		database: process.env.DB_NAME || 'postgres',
-		username: process.env.DB_USER || 'postgres',
-		password: process.env.DB_PASS || 'root',
-		logging: process.env.DB_LOGGING || 'error',
-		logger: 'advanced-console',
-		synchronize: process.env.DB_SYNCHRONIZE === 'true',
-		uuidExtension: 'pgcrypto',
-		migrations: [],
-		entities: [],
-		extra: {
-			max: process.env.DB_POOL_SIZE ? Number.parseInt(process.env.DB_POOL_SIZE) : 40,
-			minConnection: 0,
-			maxConnection: process.env.DB_POOL_SIZE ? Number.parseInt(process.env.DB_POOL_SIZE) : 40,
-			poolSize: process.env.DB_POOL_SIZE ? Number.parseInt(process.env.DB_POOL_SIZE) : 40
-		}
-	} as any,
-	dbMikroOrmConnectionOptions: {
 		driver: {} as any,
 		host: process.env.DB_HOST || 'localhost',
 		port: process.env.DB_PORT ? Number.parseInt(process.env.DB_PORT, 10) : 5432,
@@ -109,22 +85,6 @@ export const defaultConfiguration: ApplicationPluginConfig = {
 		},
 		persistOnCreate: true
 	} as any,
-	dbKnexConnectionOptions: {
-		config: {
-			client: 'pg',
-			connection: {
-				host: process.env.DB_HOST || 'localhost',
-				port: process.env.DB_PORT ? Number.parseInt(process.env.DB_PORT, 10) : 5432,
-				database: process.env.DB_NAME || 'postgres',
-				user: process.env.DB_USER || 'postgres',
-				password: process.env.DB_PASS || 'root'
-			},
-			pool: {
-				min: 0,
-				max: 10
-			}
-		}
-	},
 	plugins: [],
 	customFields: {
 		Employee: [],

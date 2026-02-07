@@ -1,4 +1,4 @@
-import { Entity, Property, Enum } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, ManyToMany, ManyToOneOptions, OneToManyOptions, ManyToManyOptions, Enum, Index } from '@mikro-orm/core';
 import { BaseEntity } from '@oksai/core';
 
 /**

@@ -18,7 +18,6 @@
 		"@oksai/contracts": "workspace:*",
 		"@nestjs/common": "catalog:",
 		"@nestjs/config": "catalog:",
-		"@nestjs/typeorm": "catalog:",
 		"@mikro-orm/better-sqlite": "catalog:",
 		"@mikro-orm/core": "catalog:",
 		"@mikro-orm/mysql": "catalog:",
@@ -26,9 +25,12 @@
 		"@mikro-orm/postgresql": "catalog:",
 		"@apollo/server": "catalog:",
 		"dotenv": "catalog:",
-		"nest-knexjs": "^0.0.29",
 		"tslib": "catalog:",
-		"typeorm": "catalog:"
+		"@types/jest": "catalog:",
+		"@types/node": "catalog:",
+		"rimraf": "catalog:",
+		"ts-node": "catalog:",
+		"typescript": "catalog:"
 	},
 	"devDependencies": {
 		"@types/jest": "catalog:",

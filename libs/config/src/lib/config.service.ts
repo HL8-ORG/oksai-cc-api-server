@@ -5,9 +5,7 @@
  */
 
 import { DynamicModule, Injectable, Type, Logger } from '@nestjs/common';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
-import { KnexModuleOptions } from 'nest-knexjs';
 import {
 	ApplicationPluginConfig,
 	ApiServerConfigurationOptions,
@@ -89,24 +87,10 @@ export class ConfigService {
 	}
 
 	/**
-	 * 获取 TypeORM 数据库连接选项
-	 */
-	get dbConnectionOptions(): Readonly<TypeOrmModuleOptions> {
-		return this.config.dbConnectionOptions ?? {};
-	}
-
-	/**
 	 * 获取 MikroORM 数据库连接选项
 	 */
-	get dbMikroOrmConnectionOptions(): Readonly<MikroOrmModuleOptions> {
-		return this.config.dbMikroOrmConnectionOptions ?? {};
-	}
-
-	/**
-	 * 获取 Knex 数据库连接选项
-	 */
-	get dbKnexConnectionOptions(): Readonly<KnexModuleOptions> {
-		return this.config.dbKnexConnectionOptions;
+	get dbConnectionOptions(): Readonly<MikroOrmModuleOptions> {
+		return this.config.dbConnectionOptions ?? {};
 	}
 
 	/**

@@ -1,3 +1,4 @@
+import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, ManyToMany, ManyToOneOptions, OneToManyOptions, ManyToManyOptions, Enum, Index } from '@mikro-orm/core';
 import { Report, ReportStatus, ReportType } from './report.entity';
 import { ReportTemplate, TemplateType } from './report-template.entity';
 import { ReportSchedule, ScheduleFrequency } from './report-schedule.entity';

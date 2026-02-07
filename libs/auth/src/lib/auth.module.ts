@@ -9,12 +9,14 @@ import { CoreModule } from '@oksai/core';
 import { GoogleStrategy } from './google';
 import { GithubStrategy } from './github';
 import { Auth0Strategy } from './auth0';
+import { MicrosoftStrategy } from './microsoft';
+import { MicrosoftController } from './microsoft';
 
 @Module({
 	imports: [MikroOrmModule.forFeature([User]), CoreModule],
-	providers: [AuthService, SocialAuthService, GoogleStrategy, GithubStrategy, Auth0Strategy],
-	controllers: [AuthController],
-	exports: [AuthService, SocialAuthService, GoogleStrategy, GithubStrategy, Auth0Strategy]
+	providers: [AuthService, SocialAuthService, GoogleStrategy, GithubStrategy, Auth0Strategy, MicrosoftStrategy],
+	controllers: [AuthController, MicrosoftController],
+	exports: [AuthService, SocialAuthService, GoogleStrategy, GithubStrategy, Auth0Strategy, MicrosoftStrategy]
 })
 export class AuthModule implements OnModuleInit {
 	onModuleInit() {

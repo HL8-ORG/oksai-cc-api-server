@@ -1,8 +1,5 @@
 import { DynamicModule, Type } from '@nestjs/common';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
-import { KnexModuleOptions } from 'nest-knexjs';
-import { ApolloServerPlugin } from '@apollo/server';
 import { ApiServerConfigurationOptions } from './ApiServerConfigurationOptions';
 import { AssetConfigurationOptions } from './AssetConfigurationOptions';
 import { AuthConfigurationOptions } from './AuthConfigurationOptions';
@@ -17,9 +14,9 @@ import { GraphqlConfigurationOptions } from './GraphqlConfigurationOptions';
 /**
  * 数据库连接选项类型
  *
- * 支持 TypeORM 和 MikroORM 的连接选项
+ * 仅支持 MikroORM 的连接选项
  */
-export type IDBConnectionOptions = TypeOrmModuleOptions | MikroOrmModuleOptions;
+export type IDBConnectionOptions = MikroOrmModuleOptions;
 
 /**
  * 应用程序插件配置接口
@@ -33,25 +30,11 @@ export interface ApplicationPluginConfig {
 	apiConfigOptions: ApiServerConfigurationOptions;
 
 	/**
-	 * TypeORM 数据库连接选项
-	 *
-	 * 指定使用 TypeORM 连接数据库的选项
-	 */
-	dbConnectionOptions: TypeOrmModuleOptions;
-
-	/**
 	 * MikroORM 数据库连接选项
 	 *
 	 * 指定使用 MikroORM 连接数据库的选项
 	 */
-	dbMikroOrmConnectionOptions: MikroOrmModuleOptions;
-
-	/**
-	 * Knex 数据库连接选项
-	 *
-	 * 指定使用 Knex 连接数据库的选项
-	 */
-	dbKnexConnectionOptions: KnexModuleOptions;
+	dbConnectionOptions: MikroOrmModuleOptions;
 
 	/**
 	 * 插件数组

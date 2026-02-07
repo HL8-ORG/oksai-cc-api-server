@@ -2,7 +2,6 @@ import { Module, MiddlewareConsumer, NestModule, RequestMethod, Provider } from 
 import { ConfigModule } from '@nestjs/config';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from './config/mikro-orm.config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 
 // Shared Modules
 import { HealthModule } from './shared/health/health.module';
