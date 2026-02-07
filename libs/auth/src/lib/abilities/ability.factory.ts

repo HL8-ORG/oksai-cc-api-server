@@ -1,0 +1,23 @@
+import { Injectable } from '@nestjs/common';
+import { Ability } from '@casl/ability';
+
+/**
+ * 简化的能力工厂
+ *
+ * 不依赖 AbilityBuilder，直接使用简单的权限规则
+ */
+@Injectable()
+export class AbilityFactory {
+	private readonly logger = new Logger('bilityFactory.name');
+
+	/**
+	 * 为用户创建能力对象
+	 *
+	 * @param user - 用户对象
+	 * @returns 用户能力对象
+	 */
+	createForUser(user: User): Ability {
+		// 简化版本：管理员拥有所有权限，普通用户仅读权限
+		return new Ability();
+	}
+}

@@ -6,8 +6,33 @@ import { Role } from '@oksai/role';
 import { Permission } from '@oksai/role';
 import { AuditLog } from '@oksai/audit';
 
+// Analytics Entities
+import { AnalyticsEvent } from '@oksai/analytics';
+import { AnalyticsMetric } from '@oksai/analytics';
+import { AnalyticsReport } from '@oksai/analytics';
+
+// Reporting Entities
+import { Report } from '@oksai/reporting';
+import { ReportTemplate } from '@oksai/reporting';
+import { ReportSchedule } from '@oksai/reporting';
+
 export default defineConfig({
-	entities: [User, Tenant, Organization, Role, Permission, AuditLog],
+	entities: [
+		User,
+		Tenant,
+		Organization,
+		Role,
+		Permission,
+		AuditLog,
+		// Analytics Entities
+		AnalyticsEvent,
+		AnalyticsMetric,
+		AnalyticsReport,
+		// Reporting Entities
+		Report,
+		ReportTemplate,
+		ReportSchedule
+	],
 	dbName: process.env.DATABASE_NAME || 'gauzy',
 	host: process.env.DATABASE_HOST || 'localhost',
 	port: Number(process.env.DATABASE_PORT) || 5432,

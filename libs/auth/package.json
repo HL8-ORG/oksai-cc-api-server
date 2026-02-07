@@ -40,6 +40,7 @@
 		"nestjs"
 	],
 	"dependencies": {
+		"@casl/ability": "^6.8.0",
 		"@mikro-orm/core": "catalog:",
 		"@mikro-orm/nestjs": "catalog:",
 		"@nestjs/axios": "^4.0.1",

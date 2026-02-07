@@ -1,52 +1,26 @@
 {
 	"$schema": "https://turbo.build/schema.json",
-	"globalDependencies": [
-		"package.json",
-		"tsconfig.json",
-		"tsconfig.base.json"
-	],
+	"globalDependencies": ["package.json", "tsconfig.json", "tsconfig.base.json"],
 	"tasks": {
 		"build": {
-			"dependsOn": [
-				"^build"
-			],
-			"outputs": [
-				"dist/**",
-				".next/**",
-				"!.next/cache/**"
-			],
-			"env": [
-				"NODE_ENV"
-			]
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+			"env": ["NODE_ENV"]
 		},
 		"@oksai/**#build": {
 			"outputs": []
 		},
 		"@oksai/**#build": {
-			"outputs": [
-				"dist/**"
-			]
+			"outputs": ["dist/**"]
 		},
 		"build:prod": {
-			"dependsOn": [
-				"^build:prod"
-			],
-			"outputs": [
-				"dist/**",
-				".next/**",
-				"!.next/cache/**"
-			],
-			"env": [
-				"NODE_ENV"
-			]
+			"dependsOn": ["^build:prod"],
+			"outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+			"env": ["NODE_ENV"]
 		},
 		"test": {
-			"dependsOn": [
-				"^build"
-			],
-			"outputs": [
-				"coverage/**"
-			],
+			"dependsOn": ["^build"],
+			"outputs": ["coverage/**"],
 			"cache": false
 		},
 		"lint": {
@@ -54,9 +28,7 @@
 			"cache": false
 		},
 		"typecheck": {
-			"dependsOn": [
-				"^build"
-			],
+			"dependsOn": ["^build"],
 			"outputs": [],
 			"cache": false
 		},

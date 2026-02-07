@@ -13,11 +13,7 @@ import { OAuthUserService } from './oauth-user.service';
 		// Register User entity with TypeORM only
 		TypeOrmModule.forFeature([User])
 	],
-	providers: [
-		OAuthUserService
-	],
-	exports: [
-		OAuthUserService
-	]
+	providers: [OAuthUserService],
+	exports: [OAuthUserService]
 })
 export class UserModule {}

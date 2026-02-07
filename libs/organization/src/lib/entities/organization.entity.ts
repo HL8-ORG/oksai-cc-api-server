@@ -33,47 +33,47 @@ export class Organization extends BaseEntity {
 
 	/** 组织 Logo URL */
 	@Property({ nullable: true, length: 500 })
-	logo!: string;
+	logo?: string;
 
 	/** 组织网站地址 */
-	@Property({ nullable: true, length: 5000 })
-	website!: string;
+	@Property({ nullable: true, length: 500 })
+	website?: string;
 
 	/** 组织电话号码 */
 	@Property({ nullable: true })
-	phoneNumber!: string;
+	phoneNumber?: string;
 
 	/** 组织邮箱 */
 	@Property({ nullable: true, length: 500 })
-	email!: string;
+	email?: string;
 
 	/** 货币代码（如：USD、CNY） */
 	@Property({ nullable: true, length: 20 })
-	currency!: string;
+	currency?: string;
 
 	/** 时区设置 */
 	@Property({ nullable: true, length: 50 })
-	timeZone!: string;
+	timeZone?: string;
 
 	/** 组织地址 */
 	@Property({ nullable: true })
-	address!: string;
+	address?: string;
 
 	/** 组织所在城市 */
 	@Property({ nullable: true })
-	city!: string;
+	city?: string;
 
 	/** 组织所在国家 */
 	@Property({ nullable: true })
-	country!: string;
+	country?: string;
 
 	/** 邮政编码 */
 	@Property({ nullable: true, length: 10 })
-	postalCode!: string;
+	postalCode?: string;
 
 	/** 组织描述信息 */
 	@Property({ nullable: true, length: 5000 })
-	description!: string;
+	description?: string;
 
 	/** 组织状态（默认：ACTIVE） */
 	@Enum(() => OrganizationStatus)

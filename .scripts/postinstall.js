@@ -98,7 +98,9 @@ function handleNativePackages() {
 					console.error(`Failed to rebuild native package ${packageName}:`, error);
 				}
 			} else {
-				console.warn(`Native package ${packageName} does not have a package.json at ${packageJsonPath}. Skipping.`);
+				console.warn(
+					`Native package ${packageName} does not have a package.json at ${packageJsonPath}. Skipping.`
+				);
 			}
 		} else {
 			console.warn(`Native package ${packageName} is not installed in ${packagePath}. Skipping.`);

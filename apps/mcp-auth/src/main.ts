@@ -24,9 +24,14 @@ async function bootstrap() {
 
 		// Configure trust proxy for production environments behind reverse proxies
 		// This allows Express to correctly identify client IPs from X-Forwarded-For headers
-		const baseUrl = process.env.MCP_AUTH_BASE_URL || process.env.MCP_AUTH_JWT_ISSUER || `http://localhost:${process.env.MCP_AUTH_PORT || 3003}`;
+		const baseUrl =
+			process.env.MCP_AUTH_BASE_URL ||
+			process.env.MCP_AUTH_JWT_ISSUER ||
+			`http://localhost:${process.env.MCP_AUTH_PORT || 3003}`;
 		const isHttps = baseUrl.startsWith('https');
-		const trustedProxies = process.env.MCP_TRUSTED_PROXIES?.split(',').map(p => p.trim()).filter(p => p.length > 0);
+		const trustedProxies = process.env.MCP_TRUSTED_PROXIES?.split(',')
+			.map((p) => p.trim())
+			.filter((p) => p.length > 0);
 
 		if (trustedProxies && trustedProxies.length > 0) {
 			expressApp.set('trust proxy', trustedProxies);
@@ -37,7 +42,9 @@ async function bootstrap() {
 			expressApp.set('trust proxy', 1);
 			logger.log('Trust proxy enabled for first proxy (HTTPS/production mode)');
 		} else {
-			logger.warn('⚠️  Trust proxy not configured. X-Forwarded-* headers will be ignored. Set MCP_TRUSTED_PROXIES to enable.');
+			logger.warn(
+				'⚠️  Trust proxy not configured. X-Forwarded-* headers will be ignored. Set MCP_TRUSTED_PROXIES to enable.'
+			);
 		}
 
 		const oauthService = app.get(McpOAuthService);

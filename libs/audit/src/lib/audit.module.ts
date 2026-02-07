@@ -1,10 +1,10 @@
+import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { OksaisPlugin } from '@oksai/plugin';
 import { AuditService } from './audit.service';
 import { AuditController } from './audit.controller';
 import { AuditLog } from './entities/audit-log.entity';
 
-@OksaisPlugin({
+@Module({
 	imports: [MikroOrmModule.forFeature([AuditLog])],
 	providers: [AuditService],
 	controllers: [AuditController],

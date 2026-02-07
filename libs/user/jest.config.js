@@ -1,4 +1,4 @@
-export default {
+module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
 	roots: ['<rootDir>/src'],
@@ -7,5 +7,10 @@ export default {
 	moduleNameMapper: {
 		'^@/(.*)$': '<rootDir>/src/$1'
 	},
-	moduleFileExtensions: ['ts', 'js', 'json']
+	moduleFileExtensions: ['ts', 'js', 'json'],
+	globals: {
+		'ts-jest': {
+			tsconfig: '<rootDir>/tsconfig.lib.json'
+		}
+	}
 };

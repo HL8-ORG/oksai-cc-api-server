@@ -22,6 +22,8 @@
 			"@oksai/contracts": ["./libs/contracts/src/index.ts"],
 			"@oksai/core": ["./libs/core/src/index.ts"],
 			"@oksai/plugin": ["./libs/plugin/src/index.ts"],
+			"@oksai/analytics": ["./libs/analytics/src/index.ts"],
+			"@oksai/reporting": ["./libs/reporting/src/index.ts"],
 			"@oksai/plugin-changelog": ["./libs/plugins/changelog/src/index.ts"],
 			"@oksai/plugin-integration-activepieces": ["./libs/plugins/integration-activepieces/src/index.ts"],
 			"@oksai/plugin-integration-ai": ["./libs/plugins/integration-ai/src/index.ts"],

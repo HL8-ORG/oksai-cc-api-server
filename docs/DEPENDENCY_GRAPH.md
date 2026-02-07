@@ -54,94 +54,103 @@
 
 ### 第一层：基础层（无内部依赖）
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
-| `@oksai/constants` | 常量定义 | 无 |
-| `@oksai/mcp-server` | MCP服务器（独立） | 无 |
+| 包名                | 描述               | 依赖的 @oksai 包 |
+| ------------------- | ------------------ | ---------------- |
+| `@oksai/constants`  | 常量定义           | 无               |
+| `@oksai/mcp-server` | MCP 服务器（独立） | 无               |
 
 ### 第二层：基础契约层
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
-| `@oksai/contracts` | 接口契约、类型定义 | `constants` |
-| `@oksai/utils` | 工具函数 | `constants` |
+| 包名               | 描述               | 依赖的 @oksai 包 |
+| ------------------ | ------------------ | ---------------- |
+| `@oksai/contracts` | 接口契约、类型定义 | `constants`      |
+| `@oksai/utils`     | 工具函数           | `constants`      |
 
 ### 第三层：公共模块层
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
+| 包名            | 描述     | 依赖的 @oksai 包         |
+| --------------- | -------- | ------------------------ |
 | `@oksai/common` | 公共模块 | `constants`, `contracts` |
 
 ### 第四层：配置层
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
+| 包名            | 描述     | 依赖的 @oksai 包                            |
+| --------------- | -------- | ------------------------------------------- |
 | `@oksai/config` | 配置模块 | `common`, `constants`, `contracts`, `utils` |
 
 ### 第五层：功能模块层
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
-| `@oksai/auth` | 认证模块 | `config`, `contracts`, `utils` |
-| `@oksai/plugin` | 插件框架 | `common`, `config`, `utils` |
+| 包名            | 描述     | 依赖的 @oksai 包               |
+| --------------- | -------- | ------------------------------ |
+| `@oksai/auth`   | 认证模块 | `config`, `contracts`, `utils` |
+| `@oksai/plugin` | 插件框架 | `common`, `config`, `utils`    |
 
 ### 第六层：核心层
 
-| 包名 | 描述 | 依赖的 @oksai 包 |
-|------|------|-----------------|
+| 包名          | 描述     | 依赖的 @oksai 包                                                        |
+| ------------- | -------- | ----------------------------------------------------------------------- |
 | `@oksai/core` | 核心模块 | `auth`, `common`, `config`, `constants`, `contracts`, `plugin`, `utils` |
 
 ## 三、详细依赖关系
 
 ### @oksai/constants
+
 ```
 依赖: 无
 被依赖: contracts, utils, common, config, core
 ```
 
 ### @oksai/contracts
+
 ```
 依赖: constants
 被依赖: common, config, auth, core, 所有插件
 ```
 
 ### @oksai/utils
+
 ```
 依赖: constants
 被依赖: config, auth, plugin, core, 部分插件
 ```
 
 ### @oksai/common
+
 ```
 依赖: constants, contracts
 被依赖: config, plugin, core
 ```
 
 ### @oksai/config
+
 ```
 依赖: common, constants, contracts, utils
 被依赖: auth, plugin, core, 所有插件
 ```
 
 ### @oksai/auth
+
 ```
 依赖: config, contracts, utils
 被依赖: core
 ```
 
 ### @oksai/plugin
+
 ```
 依赖: common, config, utils
 被依赖: core, 所有插件
 ```
 
 ### @oksai/core
+
 ```
 依赖: auth, common, config, constants, contracts, plugin, utils
 被依赖: 所有插件
 ```
 
 ### @oksai/mcp-server
+
 ```
 依赖: 无（独立包）
 被依赖: 无
@@ -173,29 +182,29 @@
 
 ### 插件列表
 
-| 插件包名 | 描述 | 核心依赖 |
-|---------|------|---------|
-| `@oksai/plugin-sentry` | Sentry 错误追踪 | `config`, `core`, `plugin` |
-| `@oksai/plugin-integration-github` | GitHub 集成 | `config`, `constants`, `contracts`, `core`, `plugin`, `utils` |
-| `@oksai/plugin-knowledge-base` | 知识库 | `contracts`, `core`, `plugin`, `utils` |
-| `@oksai/plugin-registry` | 插件注册表 | `contracts`, `core`, `plugin` |
-| `@oksai/plugin-posthog` | PostHog 分析 | - |
-| `@oksai/plugin-jitsu-analytics` | Jitsu 分析 | - |
-| `@oksai/plugin-integration-ai` | AI 集成 | - |
-| `@oksai/plugin-integration-jira` | Jira 集成 | - |
-| `@oksai/plugin-integration-hubstaff` | Hubstaff 集成 | - |
-| `@oksai/plugin-integration-upwork` | Upwork 集成 | - |
-| `@oksai/plugin-integration-wakatime` | Wakatime 集成 | - |
-| `@oksai/plugin-integration-zapier` | Zapier 集成 | - |
-| `@oksai/plugin-integration-make-com` | Make.com 集成 | - |
-| `@oksai/plugin-integration-activepieces` | Activepieces 集成 | - |
-| `@oksai/plugin-videos` | 视频管理 | - |
-| `@oksai/plugin-camshot` | 摄像截图 | - |
-| `@oksai/plugin-soundshot` | 声音截图 | - |
-| `@oksai/plugin-changelog` | 变更日志 | - |
-| `@oksai/plugin-job-proposal` | 工作提案 | - |
-| `@oksai/plugin-job-search` | 工作搜索 | - |
-| `@oksai/plugin-product-reviews` | 产品评价 | - |
+| 插件包名                                 | 描述              | 核心依赖                                                      |
+| ---------------------------------------- | ----------------- | ------------------------------------------------------------- |
+| `@oksai/plugin-sentry`                   | Sentry 错误追踪   | `config`, `core`, `plugin`                                    |
+| `@oksai/plugin-integration-github`       | GitHub 集成       | `config`, `constants`, `contracts`, `core`, `plugin`, `utils` |
+| `@oksai/plugin-knowledge-base`           | 知识库            | `contracts`, `core`, `plugin`, `utils`                        |
+| `@oksai/plugin-registry`                 | 插件注册表        | `contracts`, `core`, `plugin`                                 |
+| `@oksai/plugin-posthog`                  | PostHog 分析      | -                                                             |
+| `@oksai/plugin-jitsu-analytics`          | Jitsu 分析        | -                                                             |
+| `@oksai/plugin-integration-ai`           | AI 集成           | -                                                             |
+| `@oksai/plugin-integration-jira`         | Jira 集成         | -                                                             |
+| `@oksai/plugin-integration-hubstaff`     | Hubstaff 集成     | -                                                             |
+| `@oksai/plugin-integration-upwork`       | Upwork 集成       | -                                                             |
+| `@oksai/plugin-integration-wakatime`     | Wakatime 集成     | -                                                             |
+| `@oksai/plugin-integration-zapier`       | Zapier 集成       | -                                                             |
+| `@oksai/plugin-integration-make-com`     | Make.com 集成     | -                                                             |
+| `@oksai/plugin-integration-activepieces` | Activepieces 集成 | -                                                             |
+| `@oksai/plugin-videos`                   | 视频管理          | -                                                             |
+| `@oksai/plugin-camshot`                  | 摄像截图          | -                                                             |
+| `@oksai/plugin-soundshot`                | 声音截图          | -                                                             |
+| `@oksai/plugin-changelog`                | 变更日志          | -                                                             |
+| `@oksai/plugin-job-proposal`             | 工作提案          | -                                                             |
+| `@oksai/plugin-job-search`               | 工作搜索          | -                                                             |
+| `@oksai/plugin-product-reviews`          | 产品评价          | -                                                             |
 
 ## 五、构建顺序
 
@@ -237,16 +246,16 @@ pnpm --filter "@oksai/**" build
 ## 六、依赖关系矩阵
 
 | 包 ↓ 依赖 → | constants | contracts | utils | common | config | auth | plugin | core |
-|------------|:---------:|:---------:|:-----:|:------:|:------:|:----:|:------:|:----:|
-| constants  | -         |           |       |        |        |      |        |      |
-| contracts  | ✓         | -         |       |        |        |      |        |      |
-| utils      | ✓         |           | -     |        |        |      |        |      |
-| common     | ✓         | ✓         |       | -      |        |      |        |      |
-| config     | ✓         | ✓         | ✓     | ✓      | -      |      |        |      |
-| auth       |           | ✓         | ✓     |        | ✓      | -    |        |      |
-| plugin     |           |           | ✓     | ✓      | ✓      |      | -      |      |
-| core       | ✓         | ✓         | ✓     | ✓      | ✓      | ✓    | ✓      | -    |
-| mcp-server |           |           |       |        |        |      |        |      |
+| ----------- | :-------: | :-------: | :---: | :----: | :----: | :--: | :----: | :--: |
+| constants   |     -     |           |       |        |        |      |        |      |
+| contracts   |     ✓     |     -     |       |        |        |      |        |      |
+| utils       |     ✓     |           |   -   |        |        |      |        |      |
+| common      |     ✓     |     ✓     |       |   -    |        |      |        |      |
+| config      |     ✓     |     ✓     |   ✓   |   ✓    |   -    |      |        |      |
+| auth        |           |     ✓     |   ✓   |        |   ✓    |  -   |        |      |
+| plugin      |           |           |   ✓   |   ✓    |   ✓    |      |   -    |      |
+| core        |     ✓     |     ✓     |   ✓   |   ✓    |   ✓    |  ✓   |   ✓    |  -   |
+| mcp-server  |           |           |       |        |        |      |        |      |
 
 > ✓ 表示行包依赖列包
 
@@ -264,10 +273,10 @@ pnpm --filter "@oksai/**" build
 
 ### 设计原则
 
-- **单向依赖**: 上层依赖下层，下层不依赖上层
-- **最小依赖**: 每个包只依赖必要的包
-- **接口隔离**: 通过 contracts 定义接口，降低耦合
-- **插件化**: 通过 plugin 包支持功能扩展
+-   **单向依赖**: 上层依赖下层，下层不依赖上层
+-   **最小依赖**: 每个包只依赖必要的包
+-   **接口隔离**: 通过 contracts 定义接口，降低耦合
+-   **插件化**: 通过 plugin 包支持功能扩展
 
 ## 八、新项目开发建议
 

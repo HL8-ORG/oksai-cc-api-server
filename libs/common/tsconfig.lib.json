@@ -16,7 +16,6 @@
 		"esModuleInterop": true,
 		"strict": false,
 		"strictNullChecks": false,
-		"noImplicitAny": false,
 		"strictBindCallApply": false,
 		"noImplicitThis": false,
 		"forceConsistentCasingInFileNames": true,
@@ -26,5 +25,5 @@
 		"noImplicitReturns": false
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist", "test", "**/*spec.ts", "**/*.test.ts"]
+	"exclude": ["node_modules", "dist", "test", "**/*spec.ts", "**/*.test.ts", "node_modules/prom-client"]
 }

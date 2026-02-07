@@ -64,4 +64,16 @@ export class User extends BaseEntity {
 	/** 密码重置令牌过期时间 */
 	@Property({ nullable: true })
 	resetTokenExpiresAt?: Date;
+
+	/** 用户头像 URL */
+	@Property({ nullable: true })
+	avatar?: string;
+
+	/** 最后登录时间 */
+	@Property({ nullable: true })
+	lastLoginAt?: Date;
+
+	/** 登录次数 */
+	@Property({ nullable: true, default: 0 })
+	loginCount?: number;
 }

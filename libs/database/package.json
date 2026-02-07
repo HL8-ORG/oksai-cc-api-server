@@ -1,7 +1,7 @@
 {
-  "name": "@oksai/database",
-  "version": "0.1.0",
-  "description": "数据库相关包",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts"
+	"name": "@oksai/database",
+	"version": "0.1.0",
+	"description": "数据库相关包",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts"
 }

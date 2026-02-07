@@ -1,18 +1,56 @@
 {
 	"name": "@oksai/plugin",
 	"version": "0.1.0",
-	"description": "插件系统基础包 - 提供插件系统核心功能",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"scripts": {
-		"build": "tsc",
-		"typecheck": "tsc --noEmit"
+	"type": "commonjs",
+	"description": "插件系统基础包，提供插件注册、加载和生命周期管理",
+	"author": {
+		"name": "OKSAI Platform Team",
+		"email": "team@oksai.io",
+		"url": "https://oksais.io"
 	},
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"default": "./dist/index.js"
-		}
-	}
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oksais/platform"
+	},
+	"bugs": {
+		"url": "https://github.com/oksais/platform/issues"
+	},
+	"homepage": "https://oksais.io",
+	"license": "AGPL-3.0",
+	"private": true,
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.lib.json",
+		"dev": "tsc -p tsconfig.lib.json --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"test:cov": "jest --coverage"
+	},
+	"keywords": [
+		"oksais",
+		"plugin",
+		"plugin-system",
+		"nestjs",
+		"microservice"
+	],
+	"dependencies": {
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"rxjs": "^7.8.0"
+	},
+	"devDependencies": {
+		"@types/jest": "29.5.14",
+		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": ">=20.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"sideEffects": false
 }
