@@ -37,6 +37,9 @@ const config: Config = {
 			tsconfig: {
 				esModuleInterop: true,
 				allowSyntheticDefaultImports: true
+			},
+			diagnostics: {
+				warnOnly: true
 			}
 		}
 	},

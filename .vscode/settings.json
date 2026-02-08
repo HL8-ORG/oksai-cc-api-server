@@ -4,6 +4,17 @@
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"typescript.enablePromptUseWorkspaceTsdk": true,
 	"npm.packageManager": "yarn",
+	/**
+	 * PlantUML 渲染配置
+	 *
+	 * 说明：
+	 * - Cursor/VS Code 的 `PlantUML` 插件在渲染 ` ```plantuml ` 代码块时，需要配置 Server 或本地 jar。
+	 * - 这里默认使用官方公共 Server（会将 UML 源码发送到 Server 端生成图片）。
+	 * - 若你们的环境不允许外发源码，请改为本地渲染（见 `docs/uml/README.md`）。
+	 */
+	"plantuml.render": "PlantUMLServer",
+	"plantuml.server": "https://www.plantuml.com/plantuml",
+	"plantuml.exportFormat": "svg",
 	"prettier.trailingComma": "none",
 	"prettier.singleQuote": true,
 	"editor.formatOnSave": true,

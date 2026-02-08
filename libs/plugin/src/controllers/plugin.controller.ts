@@ -41,12 +41,15 @@ export class PluginController {
 	async getAllPlugins() {
 		const plugins = this.registry.getAll().map((plugin) => {
 			const metadata = getPluginMetadata(plugin.constructor);
+			const pluginState = this.loader.getPluginState(plugin.name);
+
 			return {
 				name: plugin.name,
 				version: plugin.version,
 				description: plugin.description,
 				type: plugin.type,
 				status: this.registry.getStatus(plugin.name),
+				enabled: pluginState?.enabled ?? true,
 				isCore: metadata?.isCore || false,
 				dependencies: metadata?.dependencies || [],
 				config: plugin.config || {}
@@ -74,6 +77,7 @@ export class PluginController {
 		}
 
 		const metadata = getPluginMetadata(plugin.constructor);
+		const pluginState = this.loader.getPluginState(plugin.name);
 
 		return {
 			name: plugin.name,
@@ -81,6 +85,7 @@ export class PluginController {
 			description: plugin.description,
 			type: plugin.type,
 			status: this.registry.getStatus(name),
+			enabled: pluginState?.enabled ?? true,
 			isCore: metadata?.isCore || false,
 			dependencies: metadata?.dependencies || [],
 			config: plugin.config || {}
@@ -99,28 +104,8 @@ export class PluginController {
 	@Post(':name/enable')
 	@HttpCode(HttpStatus.OK)
 	async enablePlugin(@Param('name') name: string) {
-		const plugin = this.registry.get(name);
-
-		if (!plugin) {
-			throw new Error(`插件 ${name} 未找到`);
-		}
-
-		if (plugin.type === PluginType.SYSTEM) {
-			throw new Error(`系统插件 ${name} 始终启用，无需手动启用`);
-		}
-
-		const currentStatus = this.registry.getStatus(name);
-
-		if (currentStatus === PluginStatus.INITIALIZED) {
-			return {
-				success: true,
-				message: `插件 ${name} 已启用`,
-				status: 'enabled'
-			};
-		}
-
 		try {
-			await this.loader.loadPlugin(plugin, {});
+			await this.loader.enablePlugin(name);
 			return {
 				success: true,
 				message: `插件 ${name} 启用成功`,
@@ -143,28 +128,8 @@ export class PluginController {
 	@Post(':name/disable')
 	@HttpCode(HttpStatus.OK)
 	async disablePlugin(@Param('name') name: string) {
-		const plugin = this.registry.get(name);
-
-		if (!plugin) {
-			throw new Error(`插件 ${name} 未找到`);
-		}
-
-		if (plugin.type === PluginType.SYSTEM) {
-			throw new Error(`系统插件 ${name} 不能被禁用`);
-		}
-
-		const currentStatus = this.registry.getStatus(name);
-
-		if (currentStatus !== PluginStatus.INITIALIZED) {
-			return {
-				success: true,
-				message: `插件 ${name} 已禁用`,
-				status: 'disabled'
-			};
-		}
-
 		try {
-			await this.loader.unloadPlugin(name);
+			await this.loader.disablePlugin(name);
 			return {
 				success: true,
 				message: `插件 ${name} 禁用成功`,
@@ -186,12 +151,6 @@ export class PluginController {
 	@Post(':name/reload')
 	@HttpCode(HttpStatus.OK)
 	async reloadPlugin(@Param('name') name: string) {
-		const plugin = this.registry.get(name);
-
-		if (!plugin) {
-			throw new Error(`插件 ${name} 未找到`);
-		}
-
 		try {
 			await this.loader.reloadPlugin(name);
 			return {

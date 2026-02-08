@@ -1,19 +1,28 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { RequestContext } from '../context/request-context.service';
+import { PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
- * Tenant Context Guard
+ * 租户上下文守卫
  *
- * Ensures that the request contains a valid tenant context.
- * All protected routes should have a tenantId in the user payload.
+ * 确保请求包含有效的租户上下文
+ * 所有受保护的路由应该在 RequestContext 中包含 tenantId
  */
 @Injectable()
 export class TenantGuard implements CanActivate {
-	canActivate(context: ExecutionContext): boolean {
-		const request = context.switchToHttp().getRequest();
-		const user = request.user;
+	constructor(private readonly reflector: Reflector) {}
 
-		if (!user || !user.tenantId) {
-			throw new ForbiddenException('Tenant context is required');
+	canActivate(context: ExecutionContext): boolean {
+		const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC_KEY, [context.getHandler(), context.getClass()]);
+		if (isPublic) {
+			return true;
+		}
+
+		const tenantId = RequestContext.getCurrentTenantId();
+
+		if (!tenantId) {
+			throw new ForbiddenException('租户上下文缺失');
 		}
 
 		return true;

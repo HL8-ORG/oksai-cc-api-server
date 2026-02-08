@@ -153,7 +153,7 @@ services:
       interval: 1s
       timeout: 30s
     ports:
-      - '6379'
+      - '6379:6379'
     volumes:
       - ./.deploy/redis/data:/data
     networks:
@@ -169,7 +169,7 @@ services:
       interval: 1s
       timeout: 30s
     ports:
-      - '6380'
+      - '6380:6380'
     volumes:
       - ./.deploy/redis/jitsu_users_recognition/data:/data
       - ./.deploy/redis/jitsu_users_recognition/redis.conf:/usr/local/etc/redis/redis.conf

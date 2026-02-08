@@ -145,15 +145,19 @@ describe('VersionInterceptor', () => {
 });
 
 function createMockContext(headers?: Record<string, string>): ExecutionContext {
+	// 保证每次调用 switchToHttp().getRequest() 返回同一个 request 对象
+	// 否则拦截器内部写入的 res.setHeader 无法在测试断言处观测到
+	const request = {
+		headers: headers || {},
+		query: {},
+		res: {
+			setHeader: jest.fn()
+		}
+	};
+
 	return {
 		switchToHttp: () => ({
-			getRequest: () => ({
-				headers: headers || {},
-				query: {},
-				res: {
-					setHeader: jest.fn()
-				}
-			}),
+			getRequest: () => request,
 			getResponse: () => ({})
 		}),
 		getClass: () => ({}),

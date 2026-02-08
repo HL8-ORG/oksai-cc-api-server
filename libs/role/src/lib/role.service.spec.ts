@@ -65,7 +65,7 @@ describe('RoleService', () => {
 
 	beforeEach(async () => {
 		mockRole = createMockRole();
-		(mockRole.permissions.contains as jest.Mock).mockReturnValue(false);
+		((mockRole.permissions as any).contains as jest.Mock).mockReturnValue(false);
 
 		em = {
 			persist: jest.fn(),

@@ -173,7 +173,7 @@ describe('AuditService', () => {
 		it('should throw error when audit log not found', async () => {
 			auditLogRepo.findOne.mockResolvedValue(null);
 
-			await expect(service.findOne('non-existent-id')).rejects.toThrow('Audit log not found');
+			await expect(service.findOne('non-existent-id')).rejects.toThrow('未找到 ID 为 non-existent-id 的审计日志');
 		});
 	});
 

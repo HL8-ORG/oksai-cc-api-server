@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard, PUBLIC_KEY } from './auth.guard';
-import { verify } from 'jsonwebtoken';
+import { getJwtUtils } from '@oksai/core';
 
-jest.mock('jsonwebtoken');
+jest.mock('@oksai/core', () => ({
+	getJwtUtils: jest.fn()
+}));
 
 describe('AuthGuard', () => {
 	let guard: AuthGuard;
@@ -55,8 +57,10 @@ describe('AuthGuard', () => {
 				}
 			});
 			jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-			(verify as jest.Mock).mockImplementation(() => {
-				throw new Error('Invalid token');
+			(getJwtUtils as jest.Mock).mockReturnValue({
+				verifyAccessToken: jest.fn(() => {
+					throw new Error('Invalid token');
+				})
 			});
 
 			expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
@@ -72,7 +76,9 @@ describe('AuthGuard', () => {
 			const context = createMockExecutionContext(mockRequest);
 			jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
 			const mockPayload = { id: 'user-id', tenantId: 'tenant-1' };
-			(verify as jest.Mock).mockReturnValue(mockPayload);
+			(getJwtUtils as jest.Mock).mockReturnValue({
+				verifyAccessToken: jest.fn(() => mockPayload)
+			});
 
 			const result = guard.canActivate(context);
 

@@ -5,8 +5,8 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "tsc",
-		"typecheck": "tsc --noEmit",
+		"build": "tsc -p tsconfig.lib.json",
+		"typecheck": "tsc -p tsconfig.lib.json --noEmit",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage"

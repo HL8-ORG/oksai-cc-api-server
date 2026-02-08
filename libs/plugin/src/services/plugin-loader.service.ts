@@ -2,14 +2,21 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { IPlugin, PluginStatus, PluginType } from '../interfaces/plugin.interface';
 import { IPluginConfig, IPluginLoadOptions, IPluginUnloadOptions } from '../interfaces/plugin-config.interface';
+import {
+	IModulePlugin,
+	IObjectPlugin,
+	isModulePlugin,
+	isObjectPlugin,
+	IPluginState
+} from '../interfaces/plugin-semantic.interface';
 import { PluginRegistryService } from './plugin-registry.service';
-import { getPluginMetadata } from '../decorators/plugin.decorator';
 
 /**
  * 插件加载服务
  *
- * 负责插件的加载、初始化和卸载
- * 管理插件生命周期
+ * 派责插件的加载、初始化和卸载
+ * 支持模块插件和对象插件两种类型
+ * 通过状态标志实现热拔插（启用/禁用功能）
  */
 @Injectable()
 export class PluginLoaderService implements OnModuleDestroy {
@@ -17,6 +24,9 @@ export class PluginLoaderService implements OnModuleDestroy {
 
 	/** 模块引用 */
 	private moduleRef: ModuleRef | null = null;
+
+	/** 插件状态映射 */
+	private pluginStates = new Map<string, IPluginState>();
 
 	constructor(private readonly registry: PluginRegistryService) {}
 
@@ -47,10 +57,7 @@ export class PluginLoaderService implements OnModuleDestroy {
 			return;
 		}
 
-		// 加载系统插件
 		await this.loadSystemPlugins(config.systemPlugins, plugins);
-
-		// 加载功能插件
 		await this.loadFeaturePlugins(config.featurePlugins, plugins);
 
 		this.logger.log(`插件加载完成，共加载 ${plugins.length} 个插件`);
@@ -94,18 +101,21 @@ export class PluginLoaderService implements OnModuleDestroy {
 		featurePlugins: Record<string, { enabled: boolean; config?: Record<string, any> }>,
 		plugins: IPlugin[]
 	): Promise<void> {
-		const enabledPluginNames = Object.entries(featurePlugins)
-			.filter(([_, config]) => config.enabled)
-			.map(([name, config]) => ({ name, config }));
+		const entries = Object.entries(featurePlugins);
 
-		if (enabledPluginNames.length === 0) {
-			this.logger.log('没有启用的功能插件');
+		if (entries.length === 0) {
+			this.logger.log('没有配置功能插件');
 			return;
 		}
 
-		this.logger.log(`加载功能插件：${enabledPluginNames.map((p) => p.name).join(', ')}`);
+		const enabledPluginNames = entries.filter(([_, cfg]) => cfg.enabled).map(([name]) => name);
+		if (enabledPluginNames.length > 0) {
+			this.logger.log(`加载功能插件：${enabledPluginNames.join(', ')}`);
+		} else {
+			this.logger.log('没有启用的功能插件');
+		}
 
-		for (const { name, config } of enabledPluginNames) {
+		for (const [name, cfg] of entries) {
 			const plugin = plugins.find((p) => p.name === name);
 
 			if (!plugin) {
@@ -113,8 +123,21 @@ export class PluginLoaderService implements OnModuleDestroy {
 				continue;
 			}
 
+			// 未启用：仅更新状态，不执行加载。
+			if (!cfg.enabled) {
+				this.registry.updateStatus(name, PluginStatus.DISABLED);
+				this.pluginStates.set(name, {
+					name,
+					status: PluginStatus.DISABLED,
+					pluginType: isModulePlugin(plugin) ? 'module' : 'object',
+					enabled: false
+				});
+				continue;
+			}
+
 			try {
-				await this.loadPlugin(plugin, config);
+				// 仅透传插件自身配置（避免把 enabled/config 包装对象传给 initialize）。
+				await this.loadPlugin(plugin, cfg.config);
 				this.logger.log(`功能插件 ${name} 加载成功`);
 			} catch (error) {
 				this.logger.error(`功能插件 ${name} 加载失败`, error);
@@ -127,6 +150,7 @@ export class PluginLoaderService implements OnModuleDestroy {
 	 * 加载单个插件
 	 *
 	 * 加载并初始化单个插件
+	 * 支持模块插件和对象插件
 	 *
 	 * @param plugin - 插件实例
 	 * @param config - 插件配置（可选）
@@ -143,14 +167,123 @@ export class PluginLoaderService implements OnModuleDestroy {
 
 		this.registry.updateStatus(plugin.name, PluginStatus.LOADED);
 
-		if (plugin.initialize && config) {
-			await plugin.initialize(config);
+		if (isModulePlugin(plugin)) {
+			await this.loadModulePlugin(plugin as IModulePlugin, config, options);
+		} else if (isObjectPlugin(plugin)) {
+			await this.loadObjectPlugin(plugin as IObjectPlugin, config);
 		}
 
 		this.registry.updateStatus(plugin.name, PluginStatus.INITIALIZED);
+		this.pluginStates.set(plugin.name, {
+			name: plugin.name,
+			status: PluginStatus.INITIALIZED,
+			pluginType: isModulePlugin(plugin) ? 'module' : 'object',
+			enabled: true
+		});
 
-		if (plugin.onApplicationBootstrap && this.moduleRef) {
-			await plugin.onApplicationBootstrap(this.moduleRef);
+		// 插件生命周期钩子：优先注入 ModuleRef；若运行时尚未注入 ModuleRef，则以无参方式调用（便于单元测试与轻量插件）。
+		if ((plugin as any).onApplicationBootstrap) {
+			if (this.moduleRef) {
+				await (plugin as any).onApplicationBootstrap(this.moduleRef);
+			} else {
+				await (plugin as any).onApplicationBootstrap();
+			}
+		}
+
+		this.logger.log(`插件 ${plugin.name} 已加载`);
+	}
+
+	/**
+	 * 加载模块插件
+	 *
+	 * 初始化模块插件
+	 *
+	 * @param plugin - 模块插件实例
+	 * @param config - 插件配置
+	 * @param options - 加载选项
+	 * @returns Promise<void>
+	 */
+	private async loadModulePlugin(
+		plugin: IModulePlugin,
+		config?: Record<string, any>,
+		options?: IPluginLoadOptions
+	): Promise<void> {
+		this.logger.log(`加载模块插件 ${plugin.name}...`);
+
+		if ((plugin as any).initialize) {
+			// 统一初始化语义：即使没有显式配置，也会执行 initialize（由插件内部决定默认行为）。
+			await (plugin as any).initialize(config ?? {});
+		}
+	}
+
+	/**
+	 * 加载对象插件
+	 *
+	 * 初始化对象插件
+	 *
+	 * @param plugin - 对象插件实例
+	 * @param config - 插件配置
+	 * @returns Promise<void>
+	 */
+	private async loadObjectPlugin(plugin: IObjectPlugin, config?: Record<string, any>): Promise<void> {
+		this.logger.log(`加载对象插件 ${plugin.name}...`);
+
+		if (plugin.initialize) {
+			// 统一初始化语义：即使没有显式配置，也会执行 initialize（由插件内部决定默认行为）。
+			await plugin.initialize(config ?? {});
+		}
+
+		if (plugin.isEnabled !== undefined) {
+			(plugin as any).isEnabled = true;
+		}
+
+		this.logger.log(`对象插件 ${plugin.name} 已加载`);
+	}
+
+	/**
+	 * 卸载模块插件
+	 *
+	 * 销毁模块插件
+	 *
+	 * @param plugin - 模块插件实例
+	 * @param options - 卸载选项
+	 * @returns Promise<void>
+	 */
+	private async unloadModulePlugin(plugin: IModulePlugin, options?: IPluginUnloadOptions): Promise<void> {
+		this.logger.log(`卸载模块插件 ${plugin.name}...`);
+
+		// 插件生命周期钩子：优先注入 ModuleRef；若运行时尚未注入 ModuleRef，则以无参方式调用（便于单元测试与轻量插件）。
+		if ((plugin as any).onApplicationShutdown) {
+			if (this.moduleRef) {
+				await (plugin as any).onApplicationShutdown(this.moduleRef);
+			} else {
+				await (plugin as any).onApplicationShutdown();
+			}
+		}
+	}
+
+	/**
+	 * 卸载对象插件
+	 *
+	 * 销毁对象插件
+	 *
+	 * @param plugin - 对象插件实例
+	 * @returns Promise<void>
+	 */
+	private async unloadObjectPlugin(plugin: IObjectPlugin): Promise<void> {
+		this.logger.log(`卸载对象插件 ${plugin.name}...`);
+
+		// 对象插件同样支持应用关闭钩子（在无 ModuleRef 时以无参方式调用）。
+		if ((plugin as any).onApplicationShutdown) {
+			if (this.moduleRef) {
+				await (plugin as any).onApplicationShutdown(this.moduleRef);
+			} else {
+				await (plugin as any).onApplicationShutdown();
+			}
+		}
+
+		if (plugin.destroy) {
+			await plugin.destroy();
 		}
 	}
 
@@ -158,6 +291,7 @@ export class PluginLoaderService implements OnModuleDestroy {
 	 * 卸载插件
 	 *
 	 * 卸载并销毁指定的插件
+	 * 支持模块插件和对象插件
 	 *
 	 * @param name - 插件名称
 	 * @param options - 卸载选项（可选）
@@ -170,7 +304,6 @@ export class PluginLoaderService implements OnModuleDestroy {
 			throw new Error(`插件 ${name} 未注册`);
 		}
 
-		// Check dependencies
 		const dependents = this.getDependents(name);
 
 		if (dependents.length > 0 && !options?.force) {
@@ -179,15 +312,18 @@ export class PluginLoaderService implements OnModuleDestroy {
 
 		this.logger.log(`卸载插件 ${name}...`);
 
-		if (plugin.onApplicationShutdown && this.moduleRef) {
-			await plugin.onApplicationShutdown(this.moduleRef);
-		}
-
-		if (plugin.destroy) {
-			await plugin.destroy();
+		if (isModulePlugin(plugin)) {
+			await this.unloadModulePlugin(plugin as IModulePlugin, options);
+			// 模块插件的 destroy 由此处统一触发（对象插件在 unloadObjectPlugin 中已处理）。
+			if ((plugin as any).destroy) {
+				await (plugin as any).destroy();
+			}
+		} else if (isObjectPlugin(plugin)) {
+			await this.unloadObjectPlugin(plugin as IObjectPlugin);
 		}
 
 		this.registry.unregister(name);
+		this.pluginStates.delete(name);
 		this.logger.log(`插件 ${name} 已卸载`);
 	}
 
@@ -202,20 +338,268 @@ export class PluginLoaderService implements OnModuleDestroy {
 	async reloadPlugin(name: string): Promise<void> {
 		this.logger.log(`重新加载插件 ${name}...`);
 
-		await this.unloadPlugin(name, { force: true });
-		await this.loadPlugin(this.registry.get(name)!, undefined, { force: true });
+		const plugin = this.registry.get(name);
 
-		this.logger.log(`插件 ${name} 已重新加载`);
+		if (!plugin) {
+			throw new Error(`插件 ${name} 未注册`);
+		}
+
+		try {
+			// 重新加载语义：不移除注册信息，仅执行“关闭+销毁”后再强制加载，确保 initialize/onApplicationBootstrap 再次触发。
+			if (isModulePlugin(plugin)) {
+				await this.unloadModulePlugin(plugin as IModulePlugin, { force: true });
+				if ((plugin as any).destroy) {
+					await (plugin as any).destroy();
+				}
+			} else if (isObjectPlugin(plugin)) {
+				await this.unloadObjectPlugin(plugin as IObjectPlugin);
+			}
+
+			await this.loadPlugin(plugin, (plugin as any).config, { force: true });
+			this.logger.log(`插件 ${name} 已重新加载`);
+		} catch (error) {
+			this.logger.error(`重新加载插件 ${name} 失败`, error);
+			this.registry.updateStatus(name, PluginStatus.FAILED);
+		}
+	}
+
+	/**
+	 * 禁用插件
+	 *
+	 * 禁用指定的插件（仅对功能插件有效）
+	 *
+	 * 系统插件不能被禁用或卸载
+	 *
+	 * @param name - 插件名称
+	 * @returns Promise<void>
+	 */
+	async disablePlugin(name: string): Promise<void> {
+		const plugin = this.registry.get(name);
+
+		if (!plugin) {
+			throw new Error(`插件 ${name} 未注册`);
+		}
+
+		if (plugin.isProtected) {
+			throw new Error(`系统插件 ${name} 不能被禁用`);
+		}
+
+		const pluginState = this.pluginStates.get(name);
+
+		if (pluginState && pluginState.pluginType === 'module') {
+			await this.unloadModulePlugin(plugin as IModulePlugin);
+			this.pluginStates.set(name, {
+				...pluginState,
+				status: PluginStatus.DISABLED,
+				enabled: false
+			});
+		} else if (isObjectPlugin(plugin)) {
+			if ((plugin as IObjectPlugin).isEnabled !== undefined) {
+				(plugin as IObjectPlugin).isEnabled = false;
+			}
+		}
+
+		this.registry.updateStatus(name, PluginStatus.DISABLED);
+		this.logger.log(`插件 ${name} 已禁用`);
+	}
+
+	/**
+	 * 启用插件
+	 *
+	 * 启用指定的插件（仅对功能插件有效）
+	 *
+	 * 系统插件始终启用，无需手动启用
+	 *
+	 * @param name - 插件名称
+	 * @param config - 插件配置
+	 * @returns Promise<void>
+	 */
+	async enablePlugin(name: string, config?: Record<string, any>): Promise<void> {
+		const plugin = this.registry.get(name);
+
+		if (!plugin) {
+			throw new Error(`插件 ${name} 未注册`);
+		}
+
+		if (plugin.isProtected) {
+			throw new Error(`系统插件 ${name} 始终启用，无需手动启用`);
+		}
+
+		const pluginState = this.pluginStates.get(name);
+
+		if (pluginState && pluginState.enabled) {
+			this.logger.log(`插件 ${name} 已启用`);
+			return;
+		}
+
+		if (isModulePlugin(plugin)) {
+			await this.loadModulePlugin(plugin as IModulePlugin, config, { force: true });
+		} else if (isObjectPlugin(plugin)) {
+			if ((plugin as IObjectPlugin).isEnabled === false) {
+				(plugin as IObjectPlugin).isEnabled = true;
+			}
+
+			if ((plugin as IObjectPlugin).initialize && config) {
+				await (plugin as IObjectPlugin).initialize(config);
+			}
+		}
+
+		if (pluginState) {
+			this.pluginStates.set(name, {
+				...pluginState,
+				status: PluginStatus.INITIALIZED,
+				pluginType: isModulePlugin(plugin) ? 'module' : 'object',
+				enabled: true
+			});
+		}
+
+		this.registry.updateStatus(name, PluginStatus.INITIALIZED);
+		this.logger.log(`插件 ${name} 已启用`);
 	}
 
 	/**
 	 * 获取依赖此插件的其他插件
 	 *
+	 * 遍历所有插件的依赖关系，返回依赖此插件的插件名称列表
+	 * 支持显式依赖声明和自动依赖解析
+	 *
 	 * @param name - 插件名称
 	 * @returns 依赖此插件的插件名称数组
 	 */
-	private getDependents(name: string): string[] {
-		return [];
+	getDependents(name: string): string[] {
+		const allPlugins = this.registry.getAll();
+		const plugin = allPlugins.find((p) => p.name === name);
+
+		if (!plugin) {
+			return [];
+		}
+
+		const dependencies = plugin.dependencies || [];
+
+		if (dependencies.length === 0) {
+			return [];
+		}
+
+		const dependentPlugins: string[] = [];
+
+		for (const depName of dependencies) {
+			const depPlugin = allPlugins.find((p) => p.name === depName);
+			if (depPlugin) {
+				dependentPlugins.push(depName);
+			}
+		}
+
+		return dependentPlugins;
+	}
+
+	/**
+	 * 检查插件依赖冲突
+	 *
+	 * 检测插件系统中是否存在循环依赖
+	 * 例如：插件 A 依赖 B，B 依赖 A，形成循环依赖
+	 *
+	 * @returns 包含冲突信息的数组，如果没有冲突返回空数组
+	 */
+	checkConflicts(): { plugin: string; conflicts: string[]; hasCircularDependency: boolean }[] {
+		this.logger.debug('检查插件依赖冲突...');
+		const conflicts: { plugin: string; conflicts: string[]; hasCircularDependency: boolean }[] = [];
+		const plugins = this.registry.getAll();
+
+		for (const plugin of plugins) {
+			const dependencies = plugin.dependencies || [];
+
+			if (dependencies.length === 0) {
+				continue;
+			}
+
+			const missingDeps: string[] = [];
+			for (const depName of dependencies) {
+				const depPlugin = plugins.find((p) => p.name === depName);
+				if (!depPlugin) {
+					missingDeps.push(depName);
+				}
+			}
+
+			if (missingDeps.length > 0) {
+				conflicts.push({
+					plugin: plugin.name,
+					conflicts: missingDeps,
+					hasCircularDependency: false
+				});
+				this.logger.warn(`插件 ${plugin.name} 依赖以下插件不存在：${missingDeps.join(', ')}`);
+			}
+
+			const visited = new Set<string>();
+			const hasCircular = this.checkCircularDependencies(plugin.name, dependencies, new Set(), visited);
+
+			if (hasCircular) {
+				this.logger.error(`检测到循环依赖：${plugin.name}`);
+				conflicts.push({
+					plugin: plugin.name,
+					conflicts: [`${plugin.name} (循环依赖)`],
+					hasCircularDependency: true
+				});
+			}
+		}
+
+		return conflicts;
+	}
+
+	/**
+	 * 检查循环依赖（深度优先搜索）
+	 *
+	 * @param pluginName - 要检查的插件名称
+	 * @param dependencies - 插件依赖列表
+	 * @param recursionStack - 递归栈（用于检测循环）
+	 * @param visited - 已访问的插件集合
+	 * @returns 如果发现循环依赖返回 true
+	 */
+	private checkCircularDependencies(
+		pluginName: string,
+		dependencies: string[],
+		recursionStack: Set<string>,
+		visited: Set<string>
+	): boolean {
+		if (recursionStack.has(pluginName)) {
+			return true;
+		}
+
+		if (visited.has(pluginName)) {
+			return false;
+		}
+
+		visited.add(pluginName);
+		recursionStack.add(pluginName);
+
+		const allPlugins = this.registry.getAll();
+		for (const depName of dependencies) {
+			const plugin = allPlugins.find((p) => p.name === depName);
+			if (plugin && this.checkCircularDependencies(depName, plugin.dependencies || [], recursionStack, visited)) {
+				return true;
+			}
+		}
+
+		recursionStack.delete(pluginName);
+		return false;
+	}
+
+	/**
+	 * 获取插件状态
+	 *
+	 * @param name - 插件名称
+	 * @returns 插件状态或 undefined
+	 */
+	getPluginState(name: string): IPluginState | undefined {
+		return this.pluginStates.get(name);
+	}
+
+	/**
+	 * 获取所有插件状态
+	 *
+	 * @returns 插件状态映射
+	 */
+	getAllPluginStates(): Map<string, IPluginState> {
+		return new Map(this.pluginStates);
 	}
 
 	/**
@@ -226,14 +610,31 @@ export class PluginLoaderService implements OnModuleDestroy {
 	onModuleDestroy(): void {
 		this.logger.log('开始销毁所有插件...');
 
-		for (const plugin of this.registry.getAll()) {
-			if (plugin.destroy) {
+		const plugins = this.registry.getAll();
+
+		for (const plugin of plugins) {
+			const pluginState = this.pluginStates.get(plugin.name);
+
+			if (isModulePlugin(plugin) && pluginState?.pluginType === 'module') {
+				if ((plugin as any).onApplicationShutdown && this.moduleRef) {
+					try {
+						(plugin as any).onApplicationShutdown(this.moduleRef);
+					} catch (error) {
+						this.logger.error(`销毁模块插件 ${plugin.name} 失败`, error);
+					}
+				}
+			}
+
+			if ((plugin as any).destroy) {
 				try {
-					plugin.destroy();
+					(plugin as any).destroy();
 				} catch (error) {
 					this.logger.error(`销毁插件 ${plugin.name} 失败`, error);
 				}
 			}
 		}
+
+		this.pluginStates.clear();
+		this.logger.log('所有插件已销毁');
 	}
 }

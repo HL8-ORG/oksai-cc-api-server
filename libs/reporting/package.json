@@ -27,7 +27,7 @@
 	"scripts": {
 		"build": "tsc -p tsconfig.lib.json",
 		"dev": "tsc -p tsconfig.lib.json --watch",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsc -p tsconfig.lib.json --noEmit",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage"

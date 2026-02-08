@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, QueryUserDto, UpdateAvatarDto, UpdatePasswordDto } from './dto/user.dto';
 
@@ -17,7 +17,6 @@ export class UserController {
 	 * 在当前租户下创建新用户
 	 *
 	 * @param createUserDto - 用户创建数据
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 已创建的用户
 	 *
 	 * @example
@@ -27,15 +26,13 @@ export class UserController {
 	 *   "email": "user@example.com",
 	 *   "password": "Password123!",
 	 *   "firstName": "John",
-	 *   "lastName": "Doe",
-	 *   "tenantId": "tenant-123"
+	 *   "lastName": "Doe"
 	 * }
 	 * ```
 	 */
 	@Post()
-	async create(@Body() createUserDto: CreateUserDto, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.create(createUserDto, currentTenantId);
+	async create(@Body() createUserDto: CreateUserDto) {
+		return this.userService.create(createUserDto);
 	}
 
 	/**
@@ -44,7 +41,6 @@ export class UserController {
 	 * 在当前租户下分页查询用户列表，支持按角色、状态、关键词筛选
 	 *
 	 * @param query - 查询参数
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 包含用户列表和总数的响应
 	 *
 	 * @example
@@ -53,9 +49,8 @@ export class UserController {
 	 * ```
 	 */
 	@Get()
-	async findAll(@Query() query: QueryUserDto, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.findAll(query, currentTenantId);
+	async findAll(@Query() query: QueryUserDto) {
+		return this.userService.findAll(query);
 	}
 
 	/**
@@ -64,7 +59,6 @@ export class UserController {
 	 * 在当前租户下查找指定 ID 的用户
 	 *
 	 * @param id - 用户 ID
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 用户实体
 	 *
 	 * @example
@@ -73,9 +67,8 @@ export class UserController {
 	 * ```
 	 */
 	@Get(':id')
-	async findOne(@Param('id') id: string, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.findOne(id, currentTenantId);
+	async findOne(@Param('id') id: string) {
+		return this.userService.findOne(id);
 	}
 
 	/**
@@ -85,7 +78,6 @@ export class UserController {
 	 *
 	 * @param id - 用户 ID
 	 * @param updateUserDto - 更新数据
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 已更新的用户
 	 *
 	 * @example
@@ -98,19 +90,16 @@ export class UserController {
 	 * ```
 	 */
 	@Put(':id')
-	async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.update(id, updateUserDto, currentTenantId);
+	async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+		return this.userService.update(id, updateUserDto);
 	}
 
 	/**
 	 * 删除用户
 	 *
-	 * 删除指定用户
+	 * 从当前租户中删除指定用户
 	 *
 	 * @param id - 用户 ID
-	 * @param req - HTTP 请求对象（包含租户 ID）
-	 * @returns Promise<void> 无返回值
 	 *
 	 * @example
 	 * ```bash
@@ -118,9 +107,8 @@ export class UserController {
 	 * ```
 	 */
 	@Delete(':id')
-	async remove(@Param('id') id: string, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.remove(id, currentTenantId);
+	async remove(@Param('id') id: string) {
+		return this.userService.remove(id);
 	}
 
 	/**
@@ -130,21 +118,19 @@ export class UserController {
 	 *
 	 * @param id - 用户 ID
 	 * @param updateAvatarDto - 头像数据
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 已更新的用户
 	 *
 	 * @example
 	 * ```bash
-	 * POST /users/:id/avatar
+	 * PUT /users/:id/avatar
 	 * {
 	 *   "avatar": "https://example.com/avatar.jpg"
 	 * }
 	 * ```
 	 */
-	@Post(':id/avatar')
-	async updateAvatar(@Param('id') id: string, @Body() updateAvatarDto: UpdateAvatarDto, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.updateAvatar(id, updateAvatarDto, currentTenantId);
+	@Put(':id/avatar')
+	async updateAvatar(@Param('id') id: string, @Body() updateAvatarDto: UpdateAvatarDto) {
+		return this.userService.updateAvatar(id, updateAvatarDto);
 	}
 
 	/**
@@ -153,23 +139,20 @@ export class UserController {
 	 * 验证当前密码后更新为新密码
 	 *
 	 * @param id - 用户 ID
-	 * @param updatePasswordDto - 密码更新数据（当前密码和新密码）
-	 * @param req - HTTP 请求对象（包含租户 ID）
-	 * @returns Promise<void> 无返回值
+	 * @param updatePasswordDto - 密码更新数据
 	 *
 	 * @example
 	 * ```bash
-	 * POST /users/:id/password
+	 * PUT /users/:id/password
 	 * {
 	 *   "currentPassword": "OldPassword123!",
 	 *   "newPassword": "NewPassword456!"
 	 * }
 	 * ```
 	 */
-	@Post(':id/password')
-	async updatePassword(@Param('id') id: string, @Body() updatePasswordDto: UpdatePasswordDto, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.updatePassword(id, updatePasswordDto, currentTenantId);
+	@Put(':id/password')
+	async updatePassword(@Param('id') id: string, @Body() updatePasswordDto: UpdatePasswordDto) {
+		return this.userService.updatePassword(id, updatePasswordDto);
 	}
 
 	/**
@@ -178,18 +161,16 @@ export class UserController {
 	 * 将用户状态设置为非活跃
 	 *
 	 * @param id - 用户 ID
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 已停用的用户
 	 *
 	 * @example
 	 * ```bash
-	 * POST /users/:id/deactivate
+	 * PUT /users/:id/deactivate
 	 * ```
 	 */
-	@Post(':id/deactivate')
-	async deactivate(@Param('id') id: string, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.deactivate(id, currentTenantId);
+	@Put(':id/deactivate')
+	async deactivate(@Param('id') id: string) {
+		return this.userService.deactivate(id);
 	}
 
 	/**
@@ -198,17 +179,32 @@ export class UserController {
 	 * 将用户状态设置为活跃
 	 *
 	 * @param id - 用户 ID
-	 * @param req - HTTP 请求对象（包含租户 ID）
 	 * @returns 已激活的用户
 	 *
 	 * @example
 	 * ```bash
-	 * POST /users/:id/activate
+	 * PUT /users/:id/activate
 	 * ```
 	 */
-	@Post(':id/activate')
-	async activate(@Param('id') id: string, @Req() req: any) {
-		const currentTenantId = req.user?.tenantId || 'default';
-		return this.userService.activate(id, currentTenantId);
+	@Put(':id/activate')
+	async activate(@Param('id') id: string) {
+		return this.userService.activate(id);
+	}
+
+	/**
+	 * 更新用户最后登录时间
+	 *
+	 * 更新用户的最后登录时间和登录次数
+	 *
+	 * @param id - 用户 ID
+	 *
+	 * @example
+	 * ```bash
+	 * PUT /users/:id/last-login
+	 * ```
+	 */
+	@Put(':id/last-login')
+	async updateLastLogin(@Param('id') id: string) {
+		return this.userService.updateLastLogin(id);
 	}
 }

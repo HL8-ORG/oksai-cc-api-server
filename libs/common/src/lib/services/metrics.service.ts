@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-interface RequestMetric {
+/**
+ * 请求指标接口
+ */
+export interface RequestMetric {
 	path: string;
 	method: string;
 	statusCode: number;
@@ -10,7 +13,10 @@ interface RequestMetric {
 	userId?: string;
 }
 
-interface PerformanceSummary {
+/**
+ * 性能摘要接口
+ */
+export interface PerformanceSummary {
 	totalRequests: number;
 	averageResponseTime: number;
 	maxResponseTime: number;
@@ -19,11 +25,23 @@ interface PerformanceSummary {
 	errorRate: number;
 }
 
+/**
+ * 请求指标服务
+ *
+ * 记录 HTTP 请求的性能指标，包括：
+ * - 响应时间、状态码、持续时间
+ * - 请求量（每分钟、错误率）
+ * - 关联 ID（correlationId）、用户 ID（userId）
+ *
+ * 提供性能监控和查询功能
+ */
 @Injectable()
 export class MetricsService {
 	private readonly logger = new Logger('MetricsService');
 	private metrics: Map<string, RequestMetric[]> = new Map();
 	private readonly MAX_METRICS_PER_ROUTE = 1000;
+
+	constructor() {}
 
 	/**
 	 * 记录请求指标

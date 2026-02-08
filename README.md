@@ -40,6 +40,30 @@ PORT=3000
 NODE_ENV=development
 ```
 
+## 📚 架构文档
+
+详细的系统架构、模块设计、业务流程和部署方案请参考 UML 文档：
+
+-   **[系统架构](docs/uml/01-system-architecture.md)** - 整体架构、技术栈、模块层次
+-   **[模块依赖](docs/uml/02-module-dependencies.md)** - 模块间依赖关系、层次结构
+-   **[实体设计](docs/uml/03-entity-classes.md)** - 核心实体和关系
+-   **[认证流程](docs/uml/04-authentication-flow.md)** - 登录、注册、登出等认证流程
+-   **[多租户架构](docs/uml/05-multitenant-architecture.md)** - 租户隔离、识别和生命周期
+-   **[插件系统](docs/uml/06-plugin-architecture.md)** - 插件管理、加载和热拔插
+-   **[部署架构](docs/uml/07-deployment-architecture.md)** - 生产部署、监控体系和 CI/CD
+
+### 快速访问
+
+| 架构层级 | 查看文档                                                                  |
+| -------- | ------------------------------------------------------------------------- |
+| 整体架构 | [01-system-architecture.md](docs/uml/01-system-architecture.md)           |
+| 模块关系 | [02-module-dependencies.md](docs/uml/02-module-dependencies.md)           |
+| 实体设计 | [03-entity-classes.md](docs/uml/03-entity-classes.md)                     |
+| 业务流程 | [04-authentication-flow.md](docs/uml/04-authentication-flow.md)           |
+| 租户架构 | [05-multitenant-architecture.md](docs/uml/05-multitenant-architecture.md) |
+| 插件系统 | [06-plugin-architecture.md](docs/uml/06-plugin-architecture.md)           |
+| 部署方案 | [07-deployment-architecture.md](docs/uml/07-deployment-architecture.md)   |
+
 ## 🚀 快速开始
 
 ### 选项 1：使用现有数据库

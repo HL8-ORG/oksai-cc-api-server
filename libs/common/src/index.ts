@@ -7,3 +7,4 @@ export * from './lib/decorators';
 export * from './lib/services';
 export * from './lib/constants/jwt.constants';
 export * from './lib/constants/logger.constants';
+export * from './lib/types';

@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from '@oksai/core';
 import { HealthService } from './health.service';
 
 /**
@@ -6,6 +7,7 @@ import { HealthService } from './health.service';
  *
  * @description 提供应用健康状态检查端点
  */
+@Public()
 @Controller('health')
 export class HealthController {
 	constructor(private readonly healthService: HealthService) {}

@@ -3,6 +3,7 @@
  *
  * 支持 PostgreSQL（默认）、MongoDB 和 Better-SQLite
  */
+import { BetterSqliteDriver } from '@mikro-orm/better-sqlite';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { BaseEntity, Feature } from '@oksai/core';
 import { TenantBaseEntity } from '@oksai/tenant';
@@ -14,15 +15,19 @@ import { AuditLog } from '@oksai/audit';
 import { AnalyticsEvent, AnalyticsMetric, AnalyticsReport } from '@oksai/analytics';
 import { Report, ReportTemplate, ReportSchedule } from '@oksai/reporting';
 
-// 调试：输出数据库配置
-console.log('📊 Database Configuration:');
-console.log('  Host:', process.env.DATABASE_HOST || 'localhost');
-console.log('  Port:', process.env.DATABASE_PORT || '5432');
-console.log('  User:', process.env.DATABASE_USERNAME || 'postgres');
-console.log('  Password:', process.env.DATABASE_PASSWORD ? '***' : 'postgres (default)');
-console.log('  Database:', process.env.DATABASE_NAME || 'oksai');
+const isTestEnv = process.env.NODE_ENV === 'test';
 
-export default {
+// 调试：输出数据库配置（仅非测试环境）
+if (!isTestEnv) {
+	console.log('📊 Database Configuration:');
+	console.log('  Host:', process.env.DATABASE_HOST || 'localhost');
+	console.log('  Port:', process.env.DATABASE_PORT || '5432');
+	console.log('  User:', process.env.DATABASE_USERNAME || 'postgres');
+	console.log('  Password:', process.env.DATABASE_PASSWORD ? '***' : 'postgres (default)');
+	console.log('  Database:', process.env.DATABASE_NAME || 'oksai');
+}
+
+const baseConfig = {
 	// 实体类定义
 	entities: [
 		BaseEntity,
@@ -42,16 +47,6 @@ export default {
 		ReportTemplate,
 		ReportSchedule
 	],
-
-	// 数据库驱动配置（MikroORM v6 使用 driver 替代 type）
-	driver: PostgreSqlDriver,
-
-	// PostgreSQL 配置（默认）
-	host: process.env.DATABASE_HOST || 'localhost',
-	port: parseInt(process.env.DATABASE_PORT || '5432'),
-	user: process.env.DATABASE_USERNAME || 'postgres',
-	password: process.env.DATABASE_PASSWORD || 'postgres',
-	dbName: process.env.DATABASE_NAME || 'oksai',
 
 	// 基础目录配置
 	baseDir: process.env.BASE_DIR || process.cwd(),
@@ -78,3 +73,24 @@ export default {
 		max: parseInt(process.env.DB_POOL_MAX || '10')
 	}
 };
+
+export default isTestEnv
+	? {
+			...baseConfig,
+			// 测试环境使用 SQLite 内存库，避免依赖外部 PostgreSQL
+			driver: BetterSqliteDriver,
+			dbName: ':memory:',
+			allowGlobalContext: true,
+			debug: false
+		}
+	: {
+			...baseConfig,
+			// 数据库驱动配置（MikroORM v6 使用 driver 替代 type）
+			driver: PostgreSqlDriver,
+			// PostgreSQL 配置（默认）
+			host: process.env.DATABASE_HOST || 'localhost',
+			port: parseInt(process.env.DATABASE_PORT || '5432'),
+			user: process.env.DATABASE_USERNAME || 'postgres',
+			password: process.env.DATABASE_PASSWORD || 'postgres',
+			dbName: process.env.DATABASE_NAME || 'oksai'
+		};

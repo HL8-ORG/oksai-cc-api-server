@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from '@oksai/core';
 import { SocialAuthService } from './../social-auth.service';
 
 /**
@@ -26,6 +27,7 @@ export class GithubController {
 	 * ```
 	 */
 	@Get('/github')
+	@Public()
 	githubLogin() {
 		// 此方法由 AuthGuard('github') 处理实际的 OAuth 重定向
 	}
@@ -41,6 +43,7 @@ export class GithubController {
 	 * ```
 	 */
 	@Get('/github/callback')
+	@Public()
 	async githubLoginCallback(): Promise<void> {
 		// 实际实现由 AuthGuard 处理请求上下文并调用社交认证服务
 	}

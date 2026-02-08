@@ -4,6 +4,8 @@
 		"resolveJsonModule": true,
 		"typeRoots": ["node_modules/@types"],
 		"paths": {
+			"@nestjs/*": ["./node_modules/@nestjs/*"],
+			"@mikro-orm/*": ["./node_modules/@mikro-orm/*"],
 			"@oksai/auth": ["./libs/auth/src"],
 			"@oksai/common": ["./libs/common/src"],
 			"@oksai/config": ["./libs/config/src"],

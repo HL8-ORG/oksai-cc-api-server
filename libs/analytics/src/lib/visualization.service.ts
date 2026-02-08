@@ -230,20 +230,22 @@ export class VisualizationService {
 	 * @returns 任意
 	 */
 	private aggregateByTimeDimension(metrics: AnalyticsMetric[], timeDimension: string): any[] {
-		const grouped = new Map<string, number[]>();
+		const grouped = new Map<string, { values: number[]; timestamps: number[] }>();
 
 		metrics.forEach((metric) => {
 			const key = this.getTimeKey(metric.timestamp, timeDimension);
 			if (!grouped.has(key)) {
-				grouped.set(key, []);
+				grouped.set(key, { values: [], timestamps: [] });
 			}
-			grouped.get(key)!.push(metric.value as number);
+			grouped.get(key)!.values.push(metric.value as number);
+			grouped.get(key)!.timestamps.push(new Date(metric.timestamp).getTime());
 		});
 
-		const aggregated = Array.from(grouped.entries()).map(([label, values]) => ({
+		const aggregated = Array.from(grouped.entries()).map(([label, groupedValue]) => ({
 			label,
-			value: values.reduce((sum, v) => sum + v, 0) / values.length,
-			timestamp: new Date(label)
+			value: groupedValue.values.reduce((sum, v) => sum + v, 0) / groupedValue.values.length,
+			// 使用真实数据的时间戳作为排序与序列时间，避免周维度等无法解析的 label 导致 Invalid Date
+			timestamp: new Date(Math.min(...groupedValue.timestamps))
 		}));
 
 		aggregated.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());

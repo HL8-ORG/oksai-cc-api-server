@@ -43,10 +43,6 @@ export class CreateUserDto {
 	@IsEnum(['ADMIN', 'USER', 'GUEST'])
 	role?: 'ADMIN' | 'USER' | 'GUEST';
 
-	/** 所属租户 ID */
-	@IsString()
-	tenantId!: string;
-
 	/** 是否活跃（可选） */
 	@IsOptional()
 	@IsBoolean()
@@ -165,11 +161,6 @@ export class QueryUserDto {
 	@IsOptional()
 	@IsBoolean()
 	isActive?: boolean;
-
-	/** 租户 ID（可选） */
-	@IsOptional()
-	@IsString()
-	tenantId?: string;
 
 	/** 页码（可选，最小 1） */
 	@IsOptional()

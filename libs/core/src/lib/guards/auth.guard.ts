@@ -1,15 +1,16 @@
 import { Injectable, ExecutionContext, UnauthorizedException, CanActivate, Optional } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { verify } from 'jsonwebtoken';
 import { JwtBlacklistService } from '../jwt-blacklist.service';
+import { RequestContext } from '../context/request-context.service';
+import { getJwtUtils } from '../utils/jwt.utils';
 
 export const PUBLIC_KEY = 'isPublic';
 
 /**
- * Authentication Guard
+ * 认证守卫
  *
- * Validates JWT tokens and attaches user payload to request.
- * Routes can be marked as public using the @Public() decorator.
+ * 验证 JWT 令牌并将用户载荷附加到请求
+ * 路由可以使用 @Public() 装饰器标记为公开访问
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -43,9 +44,19 @@ export class AuthGuard implements CanActivate {
 		}
 
 		try {
-			const jwtSecret = process.env.JWT_SECRET || 'default-secret-key';
-			const payload = verify(token, jwtSecret);
+			// 使用统一的 JwtUtils（由 AuthModule.onModuleInit 初始化），避免密钥/算法配置分叉
+			const jwtUtils = getJwtUtils();
+			const payload = jwtUtils.verifyAccessToken(token) as any;
+
 			request.user = payload;
+
+			RequestContext.setCurrentUser({
+				id: payload.sub,
+				email: payload.email,
+				tenantId: payload.tenantId,
+				role: payload.role
+			});
+
 			return true;
 		} catch (error) {
 			throw new UnauthorizedException('无效或已过期的令牌');

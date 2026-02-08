@@ -1,4 +1,4 @@
-import * as expressSession from 'express-session';
+import expressSession = require('express-session');
 import { createClient } from 'redis';
 import RedisStore from 'connect-redis';
 

@@ -154,11 +154,12 @@ export interface IPluginMetadata {
 	defaultConfig?: Record<string, any>;
 
 	/**
-	 * 权限要求
+	 * 依赖列表
 	 *
-	 * 插件需要的权限列表
+	 * 插件依赖的其他插件名称列表
+	 * 用于依赖管理和冲突检测
 	 */
-	permissions?: string[];
+	dependencies?: string[];
 
 	/**
 	 * API 端点
@@ -335,6 +336,13 @@ export interface IPluginStatusInfo {
  * 所有插件必须实现此接口
  */
 export interface IPlugin extends ILifecycleHooks, IPluginMetadata {
+	/**
+	 * 插件类型（必需）
+	 *
+	 * 用于区分系统插件和功能插件
+	 */
+	readonly type: PluginType;
+
 	/**
 	 * 插件实例
 	 *

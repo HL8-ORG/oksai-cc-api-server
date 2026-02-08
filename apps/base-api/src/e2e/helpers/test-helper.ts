@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
 import { MikroORM } from '@mikro-orm/core';
@@ -14,6 +14,10 @@ export class TestHelper {
 		}).compile();
 
 		this.app = moduleFixture.createNestApplication();
+		// 与生产一致：统一 API 前缀
+		this.app.setGlobalPrefix('api');
+		// 测试环境启用输入校验：去除未知字段（避免客户端注入 tenantId 等敏感字段）
+		this.app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 		this.orm = moduleFixture.get<MikroORM>(MikroORM);
 
 		await this.orm.getSchemaGenerator().refreshDatabase();

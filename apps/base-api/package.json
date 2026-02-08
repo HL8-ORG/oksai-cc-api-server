@@ -10,7 +10,7 @@
 		"start:watch": "ts-node-dev --respawn src/main.ts",
 		"init-db": "ts-node src/main-init.ts",
 		"migrate": "ts-node src/migrate.ts",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsc -p tsconfig.app.json --noEmit",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",

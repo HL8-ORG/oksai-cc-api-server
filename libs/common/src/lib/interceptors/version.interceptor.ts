@@ -1,5 +1,7 @@
 import {
 	Injectable,
+	Inject,
+	Optional,
 	NestInterceptor,
 	ExecutionContext,
 	CallHandler,
@@ -20,6 +22,13 @@ interface VersionInterceptorOptions {
 	deprecatedVersions?: string[];
 }
 
+/**
+ * 版本拦截器选项注入 Token
+ *
+ * 用于通过 NestJS DI 向 {@link VersionInterceptor} 注入可选配置。
+ */
+export const VERSION_INTERCEPTOR_OPTIONS = 'VERSION_INTERCEPTOR_OPTIONS';
+
 @Injectable()
 export class VersionInterceptor implements NestInterceptor {
 	private readonly defaultVersion: string;
@@ -28,7 +37,10 @@ export class VersionInterceptor implements NestInterceptor {
 	private readonly versionPrefix: string;
 	private readonly deprecatedVersions: Set<string>;
 
-	constructor(private readonly reflector: Reflector, options?: VersionInterceptorOptions) {
+	constructor(
+		private readonly reflector: Reflector,
+		@Optional() @Inject(VERSION_INTERCEPTOR_OPTIONS) options?: VersionInterceptorOptions
+	) {
 		this.defaultVersion = options?.defaultVersion || 'v1';
 		this.versionHeader = options?.versionHeader || 'X-API-Version';
 		this.versionQueryKey = options?.versionQueryKey || 'version';

@@ -1,14 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { UserService } from './user.service';
 import { User, UserRole } from './entities/user.entity';
-import { EntityRepository, EntityManager } from '@mikro-orm/core';
-import { hashPassword, verifyPassword, validatePasswordStrength } from '@oksai/core';
+import { hashPassword, verifyPassword, validatePasswordStrength, RequestContext } from '@oksai/core';
+
+jest.mock('@mikro-orm/core', () => ({
+	...jest.requireActual('@mikro-orm/core'),
+	// 测试环境下使用 plain object 作为实体，wrap(user) 可能缺少 assign；这里用 Object.assign 模拟
+	wrap: (entity: any) => ({
+		assign: (data: any) => Object.assign(entity, data)
+	})
+}));
+
+jest.mock('@oksai/core', () => ({
+	...jest.requireActual('@oksai/core'),
+	hashPassword: jest.fn(),
+	verifyPassword: jest.fn(),
+	validatePasswordStrength: jest.fn()
+}));
 
 describe('UserService', () => {
 	let service: UserService;
 	let userRepo: any;
 	let em: any;
+	let tenantIdSpy: jest.SpyInstance;
 
 	beforeEach(async () => {
 		userRepo = {
@@ -27,18 +43,17 @@ describe('UserService', () => {
 
 		userRepo.getEntityManager.mockReturnValue(em);
 
-		jest.mock('@oksai/core', () => ({
-			...jest.requireActual('@oksai/core'),
-			hashPassword: jest.fn().mockResolvedValue('hashed_password'),
-			verifyPassword: jest.fn().mockResolvedValue(true),
-			validatePasswordStrength: jest.fn().mockReturnValue({ valid: true, errors: [] })
-		}));
+		// 默认租户上下文与密码相关依赖
+		tenantIdSpy = jest.spyOn(RequestContext, 'getCurrentTenantId').mockReturnValue('tenant123');
+		(hashPassword as jest.Mock).mockResolvedValue('hashed_password');
+		(verifyPassword as jest.Mock).mockResolvedValue(true);
+		(validatePasswordStrength as jest.Mock).mockReturnValue({ valid: true, errors: [] });
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				UserService,
 				{
-					provide: EntityRepository,
+					provide: getRepositoryToken(User),
 					useValue: userRepo
 				}
 			]
@@ -49,6 +64,7 @@ describe('UserService', () => {
 
 	afterEach(() => {
 		jest.clearAllMocks();
+		tenantIdSpy?.mockRestore();
 	});
 
 	it('should be defined', () => {
@@ -76,30 +92,31 @@ describe('UserService', () => {
 				password: 'SecurePass123!',
 				firstName: 'John',
 				lastName: 'Doe',
-				role: UserRole.USER,
-				tenantId: 'tenant123'
+				role: UserRole.USER
 			};
 
-			const result = await service.create(createUserDto, 'tenant123');
+			const result = await service.create(createUserDto);
 
 			expect(result).toBeDefined();
 			expect(result.email).toBe('new@example.com');
 			expect(result.role).toBe(UserRole.USER);
+			// 客户端传入 tenantId 不得覆盖服务端租户上下文
+			expect(userRepo.create).toHaveBeenCalledWith(expect.objectContaining({ tenantId: 'tenant123' }));
 			expect(em.persist).toHaveBeenCalledWith(createdUser);
 			expect(em.flush).toHaveBeenCalled();
 		});
 
-		it('should throw ForbiddenException when creating user in different tenant', async () => {
+		it('should throw ForbiddenException when tenant context is missing', async () => {
+			tenantIdSpy.mockReturnValue(undefined);
 			const createUserDto = {
 				email: 'new@example.com',
 				password: 'SecurePass123!',
 				firstName: 'John',
 				lastName: 'Doe',
-				role: UserRole.USER,
-				tenantId: 'different-tenant'
+				role: UserRole.USER
 			};
 
-			await expect(service.create(createUserDto, 'tenant123')).rejects.toThrow(ForbiddenException);
+			await expect(service.create(createUserDto)).rejects.toThrow(ForbiddenException);
 		});
 
 		it('should throw BadRequestException when email already exists in same tenant', async () => {
@@ -116,31 +133,26 @@ describe('UserService', () => {
 				password: 'SecurePass123!',
 				firstName: 'John',
 				lastName: 'Doe',
-				role: UserRole.USER,
-				tenantId: 'tenant123'
+				role: UserRole.USER
 			};
 
-			await expect(service.create(createUserDto, 'tenant123')).rejects.toThrow(BadRequestException);
+			await expect(service.create(createUserDto)).rejects.toThrow(BadRequestException);
 		});
 
 		it('should throw BadRequestException when password is weak', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
-			jest.mock('@oksai/core', () => ({
-				...jest.requireActual('@oksai/core'),
-				validatePasswordStrength: jest.fn().mockReturnValue({ valid: false, errors: ['密码太短'] })
-			}));
+			(validatePasswordStrength as jest.Mock).mockReturnValue({ valid: false, errors: ['密码太短'] });
 
 			const createUserDto = {
 				email: 'new@example.com',
 				password: '123',
 				firstName: 'John',
 				lastName: 'Doe',
-				role: UserRole.USER,
-				tenantId: 'tenant123'
+				role: UserRole.USER
 			};
 
-			await expect(service.create(createUserDto, 'tenant123')).rejects.toThrow(BadRequestException);
+			await expect(service.create(createUserDto)).rejects.toThrow(BadRequestException);
 		});
 	});
 
@@ -164,7 +176,7 @@ describe('UserService', () => {
 			userRepo.find.mockResolvedValue(mockUsers);
 			userRepo.findAndCount.mockResolvedValue([mockUsers, mockUsers.length]);
 
-			const result = await service.findAll({ tenantId: 'tenant123' });
+			const result = await service.findAll({});
 
 			expect(result.data).toHaveLength(2);
 			expect(result.total).toBe(2);
@@ -183,7 +195,7 @@ describe('UserService', () => {
 			userRepo.find.mockResolvedValue(mockUsers);
 			userRepo.findAndCount.mockResolvedValue([mockUsers, mockUsers.length]);
 
-			const result = await service.findAll({ tenantId: 'tenant123', role: 'ADMIN' });
+			const result = await service.findAll({ role: 'ADMIN' });
 
 			expect(result.data).toHaveLength(1);
 			expect(result.data[0].role).toBe(UserRole.ADMIN);
@@ -203,7 +215,7 @@ describe('UserService', () => {
 			userRepo.find.mockResolvedValue(mockUsers);
 			userRepo.findAndCount.mockResolvedValue([mockUsers, mockUsers.length]);
 
-			const result = await service.findAll({ tenantId: 'tenant123', isActive: true });
+			const result = await service.findAll({ isActive: true });
 
 			expect(result.data).toHaveLength(1);
 			expect(result.data[0].isActive).toBe(true);
@@ -224,7 +236,7 @@ describe('UserService', () => {
 			userRepo.find.mockResolvedValue(mockUsers);
 			userRepo.findAndCount.mockResolvedValue([mockUsers, mockUsers.length]);
 
-			const result = await service.findAll({ tenantId: 'tenant123', search: 'Search' });
+			const result = await service.findAll({ search: 'Search' });
 
 			expect(result.data).toHaveLength(1);
 		});
@@ -242,7 +254,7 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			const result = await service.findOne('user123', 'tenant123');
+			const result = await service.findOne('user123');
 
 			expect(result).toBeDefined();
 			expect(result.id).toBe('user123');
@@ -251,7 +263,7 @@ describe('UserService', () => {
 		it('should throw NotFoundException when user not found', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
-			await expect(service.findOne('nonexistent', 'tenant123')).rejects.toThrow(NotFoundException);
+			await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
 		});
 	});
 
@@ -270,7 +282,7 @@ describe('UserService', () => {
 
 			const updateUserDto = { firstName: 'New Name', lastName: 'New Doe' };
 
-			const result = await service.update('user123', updateUserDto, 'tenant123');
+			const result = await service.update('user123', updateUserDto);
 
 			expect(result.firstName).toBe('New Name');
 			expect(result.lastName).toBe('New Doe');
@@ -283,10 +295,10 @@ describe('UserService', () => {
 
 			const updateUserDto = { firstName: 'Updated Name' };
 
-			await expect(service.update('nonexistent', updateUserDto, 'tenant123')).rejects.toThrow(NotFoundException);
+			await expect(service.update('nonexistent', updateUserDto)).rejects.toThrow(NotFoundException);
 		});
 
-		it('should not allow updating email', async () => {
+		it('should throw BadRequestException when updating to an email that already exists in tenant', async () => {
 			const mockUser: User = {
 				id: 'user123',
 				email: 'original@example.com',
@@ -306,9 +318,7 @@ describe('UserService', () => {
 
 			const updateUserDto = { email: 'new@example.com' };
 
-			const result = await service.update('user123', updateUserDto, 'tenant123');
-
-			expect(result.email).toBe('original@example.com');
+			await expect(service.update('user123', updateUserDto)).rejects.toThrow(BadRequestException);
 		});
 	});
 
@@ -325,7 +335,7 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			await service.remove('user123', 'tenant123');
+			await service.remove('user123');
 
 			expect(em.remove).toHaveBeenCalledWith(mockUser);
 			expect(em.flush).toHaveBeenCalled();
@@ -334,7 +344,7 @@ describe('UserService', () => {
 		it('should throw NotFoundException when user not found', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
-			await expect(service.remove('nonexistent', 'tenant123')).rejects.toThrow(NotFoundException);
+			await expect(service.remove('nonexistent')).rejects.toThrow(NotFoundException);
 		});
 	});
 
@@ -354,7 +364,7 @@ describe('UserService', () => {
 
 			const updateAvatarDto = { avatar: 'https://example.com/new-avatar.jpg' };
 
-			const result = await service.updateAvatar('user123', updateAvatarDto, 'tenant123');
+			const result = await service.updateAvatar('user123', updateAvatarDto);
 
 			expect(result.avatar).toBe('https://example.com/new-avatar.jpg');
 			expect(em.persist).toHaveBeenCalled();
@@ -366,7 +376,7 @@ describe('UserService', () => {
 
 			const updateAvatarDto = { avatar: 'https://example.com/new-avatar.jpg' };
 
-			await expect(service.updateAvatar('nonexistent', updateAvatarDto, 'tenant123')).rejects.toThrow(
+			await expect(service.updateAvatar('nonexistent', updateAvatarDto)).rejects.toThrow(
 				NotFoundException
 			);
 		});
@@ -391,10 +401,11 @@ describe('UserService', () => {
 				newPassword: 'NewSecurePass456!'
 			};
 
-			const result = await service.updatePassword('user123', updatePasswordDto, 'tenant123');
+			await service.updatePassword('user123', updatePasswordDto);
 
 			expect(em.persist).toHaveBeenCalled();
 			expect(em.flush).toHaveBeenCalled();
+			expect(mockUser.password).toBe('hashed_password');
 		});
 
 		it('should throw BadRequestException when old password is incorrect', async () => {
@@ -410,19 +421,14 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			jest.mock('@oksai/core', () => ({
-				...jest.requireActual('@oksai/core'),
-				verifyPassword: jest.fn().mockResolvedValue(false)
-			}));
+			(verifyPassword as jest.Mock).mockResolvedValue(false);
 
 			const updatePasswordDto = {
 				currentPassword: 'wrong_old',
 				newPassword: 'NewPass123!'
 			};
 
-			await expect(service.updatePassword('user123', updatePasswordDto, 'tenant123')).rejects.toThrow(
-				BadRequestException
-			);
+			await expect(service.updatePassword('user123', updatePasswordDto)).rejects.toThrow(BadRequestException);
 		});
 
 		it('should throw BadRequestException when new password is weak', async () => {
@@ -438,19 +444,14 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			jest.mock('@oksai/core', () => ({
-				...jest.requireActual('@oksai/core'),
-				validatePasswordStrength: jest.fn().mockReturnValue({ valid: false, errors: ['密码太短'] })
-			}));
+			(validatePasswordStrength as jest.Mock).mockReturnValue({ valid: false, errors: ['密码太短'] });
 
 			const updatePasswordDto = {
 				currentPassword: 'old_password',
 				newPassword: '123'
 			};
 
-			await expect(service.updatePassword('user123', updatePasswordDto, 'tenant123')).rejects.toThrow(
-				BadRequestException
-			);
+			await expect(service.updatePassword('user123', updatePasswordDto)).rejects.toThrow(BadRequestException);
 		});
 	});
 
@@ -468,7 +469,7 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			const result = await service.deactivate('user123', 'tenant123');
+			const result = await service.deactivate('user123');
 
 			expect(result.isActive).toBe(false);
 			expect(em.persist).toHaveBeenCalled();
@@ -478,7 +479,7 @@ describe('UserService', () => {
 		it('should throw NotFoundException when user not found', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
-			await expect(service.deactivate('nonexistent', 'tenant123')).rejects.toThrow(NotFoundException);
+			await expect(service.deactivate('nonexistent')).rejects.toThrow(NotFoundException);
 		});
 	});
 
@@ -497,7 +498,7 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			const result = await service.activate('user123', 'tenant123');
+			const result = await service.activate('user123');
 
 			expect(result.isActive).toBe(true);
 			expect(em.persist).toHaveBeenCalled();
@@ -507,7 +508,7 @@ describe('UserService', () => {
 		it('should throw NotFoundException when user not found', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
-			await expect(service.activate('nonexistent', 'tenant123')).rejects.toThrow(NotFoundException);
+			await expect(service.activate('nonexistent')).rejects.toThrow(NotFoundException);
 		});
 	});
 
@@ -525,15 +526,11 @@ describe('UserService', () => {
 
 			userRepo.findOne.mockResolvedValue(mockUser);
 
-			await service.updateLastLogin('user123', 'tenant123');
+			await service.updateLastLogin('user123');
 
-			const updatedUser = {
-				...mockUser,
-				lastLoginAt: expect.any(Date),
-				loginCount: 6
-			};
-
-			expect(em.persist).toHaveBeenCalledWith(updatedUser);
+			expect(mockUser.lastLoginAt).toBeInstanceOf(Date);
+			expect(mockUser.loginCount).toBe(6);
+			expect(em.persist).toHaveBeenCalledWith(mockUser);
 			expect(em.flush).toHaveBeenCalled();
 		});
 	});

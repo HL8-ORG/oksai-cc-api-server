@@ -19,7 +19,7 @@
 	"private": true,
 	"type": "commonjs",
 	"scripts": {
-		"build": "npx rimraf build && npx tsc --project tsconfig.json",
+		"build": "npx rimraf build && npx tsc -p tsconfig.app.json --outDir build",
 		"build:prod": "pnpm nx build mcp-auth --configuration=production",
 		"build:dev": "pnpm nx build mcp-auth --configuration=development",
 		"start": "pnpm nx serve mcp-auth",

@@ -1,6 +1,6 @@
 import { defineConfig } from '@mikro-orm/better-sqlite';
 
-export default defineConfig({
+const mikroOrmTestConfig = defineConfig({
 	entities: [
 		'./../../libs/auth/dist/lib/entities/*.js',
 		'./../../libs/tenant/dist/lib/entities/*.js',
@@ -12,4 +12,13 @@ export default defineConfig({
 	dbName: ':memory:',
 	allowGlobalContext: true,
 	debug: true
+});
+
+export default mikroOrmTestConfig;
+
+describe('mikro-orm.config.test', () => {
+	it('应该导出 MikroORM 测试配置', () => {
+		expect(mikroOrmTestConfig).toBeDefined();
+		expect(mikroOrmTestConfig.dbName).toBe(':memory:');
+	});
 });

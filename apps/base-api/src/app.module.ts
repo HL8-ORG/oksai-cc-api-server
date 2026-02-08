@@ -1,6 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod, Provider } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { Reflector } from '@nestjs/core';
+import { APP_GUARD, Reflector } from '@nestjs/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from './config/mikro-orm.config';
 
@@ -8,7 +8,7 @@ import config from './config/mikro-orm.config';
 import { HealthModule } from './shared/health/health.module';
 
 // Core Module
-import { CoreModule } from '@oksai/core';
+import { CoreModule, AuthGuard, TenantGuard } from '@oksai/core';
 
 // Plugin Module
 import { PluginModule, PluginRegistryService } from '@oksai/plugin';
@@ -26,19 +26,9 @@ import { RoleModule } from '@oksai/role';
 import { AnalyticsModule } from '@oksai/analytics';
 import { ReportingModule } from '@oksai/reporting';
 
-// Plugin Bootstrap
-import { AuthPlugin } from '@oksai/auth';
-import { TenantPlugin } from '@oksai/tenant';
-import { UserPlugin } from '@oksai/user';
-import { AuditPlugin } from '@oksai/audit';
-import { OrganizationPlugin } from '@oksai/organization';
-import { RolePlugin } from '@oksai/role';
-import { AnalyticsPlugin } from '@oksai/analytics';
-import { ReportingPlugin } from '@oksai/reporting';
-
 // Middleware
 import { LoggerMiddleware } from '@oksai/common';
-import { RateLimitMiddleware } from '@oksai/common';
+import { RateLimitMiddleware, RATE_LIMIT_OPTIONS } from '@oksai/common';
 
 // Interceptors
 import { VersionInterceptor } from '@oksai/common';
@@ -48,13 +38,12 @@ import { MetricsService } from '@oksai/common';
 import { ErrorTrackingService } from '@oksai/common';
 import { RequestTracingService } from '@oksai/common';
 
-const rateLimitMiddlewareProvider: Provider = {
-	provide: RateLimitMiddleware,
-	useFactory: () => {
-		return new RateLimitMiddleware({
-			windowMs: 60000,
-			maxRequests: 100
-		});
+/** 限流配置提供者 */
+const rateLimitOptionsProvider: Provider = {
+	provide: RATE_LIMIT_OPTIONS,
+	useValue: {
+		windowMs: 60000,
+		maxRequests: 100
 	}
 };
 
@@ -68,6 +57,18 @@ const versionInterceptorProvider: Provider = {
 		});
 	},
 	inject: [Reflector]
+};
+
+/** 全局认证守卫（基于 @oksai/core，写入 RequestContext） */
+const globalAuthGuardProvider: Provider = {
+	provide: APP_GUARD,
+	useClass: AuthGuard
+};
+
+/** 全局租户守卫（基于 RequestContext；@Public() 路由会自动跳过） */
+const globalTenantGuardProvider: Provider = {
+	provide: APP_GUARD,
+	useClass: TenantGuard
 };
 
 @Module({
@@ -91,19 +92,14 @@ const versionInterceptorProvider: Provider = {
 		ReportingModule
 	],
 	providers: [
-		AuthPlugin,
-		TenantPlugin,
-		UserPlugin,
-		AuditPlugin,
-		OrganizationPlugin,
-		RolePlugin,
-		AnalyticsPlugin,
-		ReportingPlugin,
 		MetricsService,
 		ErrorTrackingService,
 		RequestTracingService,
+		globalAuthGuardProvider,
+		globalTenantGuardProvider,
 		versionInterceptorProvider,
-		rateLimitMiddlewareProvider
+		rateLimitOptionsProvider,
+		RateLimitMiddleware
 	]
 })
 export class AppModule implements NestModule {

@@ -8,21 +8,58 @@
  * - Guards: Authentication, Tenant Context, RBAC
  * - Decorators: @Public, @Roles
  * - Utils: Password hashing, JWT utilities
- * - Services: Email sending, Core Module: Exports all shared functionality
+ * - Services: Email sending
+ * - Request Context: Request-level context management
+ * - Middleware: Correlation ID, Request Context
+ * - Monitoring: Prometheus metrics
  */
 
+// Entities
 export * from './lib/entities';
-export * from './lib/guards';
-export * from './lib/decorators';
-export * from './lib/utils';
-export { JwtPayload, TokenPair, JwtUtils, initJwtUtils, getJwtUtils } from './lib/utils';
 export { CoreModule } from './lib/core.module';
-export { PUBLIC_KEY, ROLES_KEY } from './lib/decorators';
+
+// Guards
+export { AuthGuard, TenantGuard, RoleGuard } from './lib/guards';
+export { Public, Roles } from './lib/decorators';
+
+// Utils
+export {
+	hashPassword,
+	verifyPassword,
+	validatePasswordStrength,
+	initJwtUtils,
+	getJwtUtils,
+	JwtPayload
+} from './lib/utils';
+
+// Services
 export { MailService } from './lib/mail.service';
 export { TemplateEngineService } from './lib/template-engine.service';
 export { JwtBlacklistService } from './lib/jwt-blacklist.service';
 export { MailQueueService } from './lib/mail-queue.service';
 export { MailQueueProcessor } from './lib/mail-queue-processor.service';
 export { MailQueueMonitorService } from './lib/mail-queue-monitor.service';
+
+// Request Context
+export { RequestContext } from './lib/context/request-context.service';
+export { type IRequestContext, type IUser } from './lib/context/request-context.service';
+export {
+	RequestContextMiddleware,
+	type RequestContextMiddlewareConfig
+} from './lib/context/request-context.middleware';
+
+// Middleware
+export { CorrelationIdMiddleware } from './lib/middleware/correlation-id.middleware';
+
+// Controllers
+export { PrometheusController } from './lib/controllers/prometheus.controller';
+
+// Mail Templates
 export { generateResetPasswordEmail, generateWelcomeEmail } from './lib/mail-templates';
+
+// Interfaces
 export type { IMailOptions, IMailService } from './lib/interfaces/mail.interface';
+
+// Tenant Filters
+export { TenantFilterService } from './lib/filters/tenant-filter.service';
+export { TenantRepository } from './lib/repositories/tenant-repository.service';

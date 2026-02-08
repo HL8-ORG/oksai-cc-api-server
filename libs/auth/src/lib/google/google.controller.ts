@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from '@oksai/core';
 import { SocialAuthService } from './../social-auth.service';
 
 /**
@@ -26,6 +27,7 @@ export class GoogleController {
 	 * ```
 	 */
 	@Get('/google')
+	@Public()
 	googleLogin() {
 		// 此方法由 AuthGuard('google') 处理实际的 OAuth 重定向
 	}
@@ -41,6 +43,7 @@ export class GoogleController {
 	 * ```
 	 */
 	@Get('/google/callback')
+	@Public()
 	async googleLoginCallback(): Promise<void> {
 		// 实际实现由 AuthGuard 处理请求上下文并调用社交认证服务
 	}

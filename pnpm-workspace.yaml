@@ -4,6 +4,7 @@
 packages:
     # 原有 Gauzy 包（作为参考保留）
     - 'apps/*'
+    - '!apps/mcp-auth'
     - 'packages/*'
     - 'packages/plugins/*'
     - 'tools'

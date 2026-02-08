@@ -10,10 +10,6 @@ module.exports = {
 	coverageDirectory: './coverage',
 	coverageReporters: ['text', 'lcov', 'html'],
 	moduleFileExtensions: ['ts', 'js', 'json'],
-	moduleNameMapper: {
-		'^@nestjs/(.*)$': '<rootDir>/../../node_modules/@nestjs/$1',
-		'^@mikro-orm/(.*)$': '<rootDir>/../../node_modules/@mikro-orm/$1'
-	},
 	globals: {
 		'ts-jest': {
 			tsconfig: '<rootDir>/tsconfig.lib.json'

@@ -14,7 +14,10 @@
 			"@oksai/user": ["../../libs/user/src"],
 			"@oksai/organization": ["../../libs/organization/src"],
 			"@oksai/role": ["../../libs/role/src"],
-			"@oksai/audit": ["../../libs/audit/src"]
+			"@oksai/audit": ["../../libs/audit/src"],
+			"@oksai/bootstrap": ["../../libs/bootstrap/src"],
+			"@oksai/analytics": ["../../libs/analytics/src"],
+			"@oksai/reporting": ["../../libs/reporting/src"]
 		}
 	},
 	"include": ["src/**/*"],

@@ -1,38 +1,57 @@
-import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, NestMiddleware, HttpException, HttpStatus, Optional, Inject, OnModuleDestroy } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
-interface RateLimitOptions {
+/**
+ * 限流配置选项
+ */
+export interface RateLimitOptions {
+	/** 时间窗口（毫秒），默认 60000（1分钟） */
 	windowMs: number;
+	/** 时间窗口内最大请求数，默认 100 */
 	maxRequests: number;
+	/** 自定义请求键生成器 */
 	keyGenerator?: (req: Request) => string;
+	/** 是否跳过成功请求的计数 */
 	skipSuccessfulRequests?: boolean;
+	/** 是否跳过失败请求的计数 */
 	skipFailedRequests?: boolean;
 }
+
+/** 限流配置注入令牌 */
+export const RATE_LIMIT_OPTIONS = 'RATE_LIMIT_OPTIONS';
 
 interface RateLimitInfo {
 	count: number;
 	resetTime: number;
 }
 
+/**
+ * 请求限流中间件
+ *
+ * 基于内存的滑动窗口限流实现，支持自定义时间窗口、最大请求数和键生成策略
+ */
 @Injectable()
-export class RateLimitMiddleware implements NestMiddleware {
+export class RateLimitMiddleware implements NestMiddleware, OnModuleDestroy {
 	private readonly rateLimitStore = new Map<string, RateLimitInfo>();
 	private readonly windowMs: number;
 	private readonly maxRequests: number;
 	private readonly keyGenerator: (req: Request) => string;
 	private readonly skipSuccessfulRequests: boolean;
 	private readonly skipFailedRequests: boolean;
+	private readonly cleanupTimer: NodeJS.Timeout;
 
-	constructor(options?: Partial<RateLimitOptions>) {
+	constructor(@Optional() @Inject(RATE_LIMIT_OPTIONS) options?: Partial<RateLimitOptions>) {
 		this.windowMs = options?.windowMs || 60000;
 		this.maxRequests = options?.maxRequests || 100;
 		this.keyGenerator = options?.keyGenerator || this.defaultKeyGenerator;
 		this.skipSuccessfulRequests = options?.skipSuccessfulRequests || false;
 		this.skipFailedRequests = options?.skipFailedRequests || false;
 
-		setInterval(() => {
+		this.cleanupTimer = setInterval(() => {
 			this.cleanupExpiredEntries();
 		}, this.windowMs);
+		// 避免在测试环境中因未清理的 interval 导致 Jest 无法退出
+		this.cleanupTimer.unref?.();
 	}
 
 	/**
@@ -134,5 +153,14 @@ export class RateLimitMiddleware implements NestMiddleware {
 
 	public getRateLimitInfo(key: string): RateLimitInfo | undefined {
 		return this.rateLimitStore.get(key);
+	}
+
+	/**
+	 * 模块销毁钩子
+	 *
+	 * 清理内部定时器，避免资源泄露。
+	 */
+	onModuleDestroy(): void {
+		clearInterval(this.cleanupTimer);
 	}
 }

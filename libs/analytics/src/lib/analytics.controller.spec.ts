@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
+import { VisualizationService } from './visualization.service';
 import {
 	TrackEventDto,
 	QueryMetricsDto,
@@ -26,12 +27,23 @@ describe('AnalyticsController', () => {
 			deleteReport: jest.fn()
 		};
 
+		const mockVisualizationService = {
+			generateVisualization: jest.fn(),
+			generateTrendChart: jest.fn(),
+			generateComparisonChart: jest.fn(),
+			generateKpiDashboard: jest.fn()
+		};
+
 		const module: TestingModule = await Test.createTestingModule({
 			controllers: [AnalyticsController],
 			providers: [
 				{
 					provide: AnalyticsService,
 					useValue: mockService
+				},
+				{
+					provide: VisualizationService,
+					useValue: mockVisualizationService
 				}
 			]
 		}).compile();

@@ -109,13 +109,9 @@ describe('RateLimitMiddleware', () => {
 			});
 
 			middleware.use(req as Request, res as Response, next);
-
-			(res.send as jest.Mock).mockImplementation(function (body) {
-				this.statusCode = 200;
-				return body;
-			});
-
-			(res.send as jest.Mock).call(res, 'success');
+			(res as Response).statusCode = 200;
+			// 触发 middleware 包装后的 send，以便让计数回退
+			(res as Response).send('success');
 
 			expect(() => {
 				middleware.use(req as Request, res as Response, next);
@@ -132,13 +128,9 @@ describe('RateLimitMiddleware', () => {
 			});
 
 			middleware.use(req as Request, res as Response, next);
-
-			(res.send as jest.Mock).mockImplementation(function (body) {
-				this.statusCode = 400;
-				return body;
-			});
-
-			(res.send as jest.Mock).call(res, 'error');
+			(res as Response).statusCode = 400;
+			// 触发 middleware 包装后的 send，以便让计数回退
+			(res as Response).send('error');
 
 			expect(() => {
 				middleware.use(req as Request, res as Response, next);

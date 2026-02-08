@@ -1,13 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { VisualizationService } from './visualization.service';
-import { ChartConfigDto, TrendAnalysisDto } from './dto/visualization.dto';
+import { TrendAnalysisDto } from './dto/visualization.dto';
+import { AnalyticsMetric } from './entities/analytics.entity';
+import { AnalyticsService } from './analytics.service';
 
 describe('VisualizationService', () => {
 	let service: VisualizationService;
+	let analyticsService: { queryMetrics: jest.Mock; aggregateMetrics: jest.Mock };
 
 	beforeEach(async () => {
+		analyticsService = {
+			queryMetrics: jest.fn(),
+			aggregateMetrics: jest.fn()
+		};
+
+		// 默认返回：让 daily/hourly 等维度的趋势图有数据可聚合
+		analyticsService.queryMetrics.mockResolvedValue([
+			{ metricName: 'mock', value: 10, timestamp: new Date('2026-01-01T00:00:00.000Z') },
+			{ metricName: 'mock', value: 20, timestamp: new Date('2026-01-02T00:00:00.000Z') }
+		]);
+		analyticsService.aggregateMetrics.mockResolvedValue({ total: 30, avg: 15 });
+
 		const module = await Test.createTestingModule({
-			providers: [VisualizationService]
+			providers: [
+				VisualizationService,
+				{
+					provide: getRepositoryToken(AnalyticsMetric),
+					useValue: {
+						getEntityManager: jest.fn()
+					}
+				},
+				{
+					provide: AnalyticsService,
+					useValue: analyticsService
+				}
+			]
 		}).compile();
 
 		service = module.get(VisualizationService);

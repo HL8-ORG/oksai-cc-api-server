@@ -13,18 +13,27 @@
 
 ### 项目目标
 
-#### 第一阶段：SAAS 服务端框架的构建
+#### 第一阶段
 
-对 `qauzy-backup` 目录下的旧项目代码进行简化，内容包括：
+聚焦于 SAAS 服务端框架的构建以及 SAAS 平台的通用功能开发，包括：
 
--   删减不需要的第三方认证集成，包括：facebook、fiverr、keycloak、linkedin、twitter 等，保留 google、microsoft、github、auth0 等（已经完成）
--   简化 ORM 层，只使用 MikroORM，不再使用 TypeORM，移除 ORM 抽象层，不需要支持多 ORM
--   简化数据库模型，默认使用 PostgreSQL，后续增加 MongoDB、Better-SQLite
--   保留插件系统，实现插件分类管理：必备的系统插件和可选的业务插件，实现插件热拔插，用户可以根据自己的需求选择业务插件。
+-   对 `qauzy-backup` 目录下的旧项目代码进行简化，内容包括：
 
--   **注意**：新开发的代码组织结构应当保持与 `qauzy-backup` 目录下的旧项目代码组织结构一直，并优先使用可复用的旧代码，不要重复造轮子
+    -   删减不需要的第三方认证集成，包括：facebook、fiverr、keycloak、linkedin、twitter 等，保留 google、microsoft、github、auth0 等（已经完成）
+    -   简化 ORM 层，只使用 MikroORM，不再使用 TypeORM，移除 ORM 抽象层，不需要支持多 ORM
+    -   简化数据库模型，默认使用 PostgreSQL，后续增加 MongoDB、Better-SQLite
+    -   保留插件系统，实现插件分类管理：必备的系统插件和可选的业务插件，实现插件热拔插，用户可以根据自己的需求选择业务插件。
+-   构建 SAAS 服务的通用功能，包括：
+    -   身份认证与授权
+	-   多租户管理
+	-   权限管理
+	-   审计跟踪
+	-   系统配置
+	-   系统监控
+	-   系统日志
+    -   **注意**：新开发的代码组织结构应当保持与 `qauzy-backup` 目录下的旧项目代码组织结构一直，并优先使用可复用的旧代码，不要重复造轮子
 
-#### 第二阶段：SAAS 服务端应用的构建
+#### 第二阶段：SAAS 服务端应用的业务功能开发
 
 -   对齐 `qauzy-backup` 目录下的旧项目代码，构建一个多租户的 SAAS 服务端应用的构建（具体功能需求待定）
 

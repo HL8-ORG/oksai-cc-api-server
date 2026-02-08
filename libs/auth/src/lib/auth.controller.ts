@@ -2,6 +2,7 @@ import { Body, Controller, Post, HttpCode, HttpStatus, Request } from '@nestjs/c
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto, VerifyEmailDto } from './dto';
 import { LoginResponse, RefreshTokenResponse, VerifyEmailResponse } from './interfaces';
+import { Public } from '@oksai/core';
 
 /**
  * 认证控制器
@@ -30,6 +31,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('login')
+	@Public()
 	async login(@Body() credentials: LoginDto): Promise<LoginResponse> {
 		return this.authService.login(credentials);
 	}
@@ -54,6 +56,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('register')
+	@Public()
 	async register(@Body() credentials: RegisterDto): Promise<LoginResponse> {
 		return this.authService.register(credentials);
 	}
@@ -75,6 +78,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('refresh')
+	@Public()
 	@HttpCode(HttpStatus.OK)
 	async refresh(@Body() credentials: RefreshTokenDto): Promise<RefreshTokenResponse> {
 		return this.authService.refreshToken(credentials);
@@ -129,6 +133,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('forgot-password')
+	@Public()
 	async forgotPassword(@Body() credentials: ForgotPasswordDto) {
 		await this.authService.forgotPassword(credentials);
 	}
@@ -152,6 +157,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('reset-password')
+	@Public()
 	async resetPassword(@Body() credentials: ResetPasswordDto) {
 		await this.authService.resetPassword(credentials);
 	}
@@ -174,6 +180,7 @@ export class AuthController {
 	 * ```
 	 */
 	@Post('verify-email')
+	@Public()
 	async verifyEmail(@Body() credentials: VerifyEmailDto): Promise<VerifyEmailResponse> {
 		return this.authService.verifyEmail(credentials);
 	}
