@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod, Provider } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import config from './config/mikro-orm.config';
 
@@ -57,11 +58,23 @@ const rateLimitMiddlewareProvider: Provider = {
 	}
 };
 
+const versionInterceptorProvider: Provider = {
+	provide: VersionInterceptor,
+	useFactory: (reflector: Reflector) => {
+		return new VersionInterceptor(reflector, {
+			defaultVersion: 'v1',
+			versionHeader: 'X-API-Version',
+			versionQueryKey: 'version'
+		});
+	},
+	inject: [Reflector]
+};
+
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-			envFilePath: '.env'
+			envFilePath: `${process.cwd()}/.env`
 		}),
 		MikroOrmModule.forRoot(config),
 		CoreModule,
@@ -89,7 +102,7 @@ const rateLimitMiddlewareProvider: Provider = {
 		MetricsService,
 		ErrorTrackingService,
 		RequestTracingService,
-		VersionInterceptor,
+		versionInterceptorProvider,
 		rateLimitMiddlewareProvider
 	]
 })

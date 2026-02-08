@@ -81,7 +81,7 @@
 		"@opentelemetry/semantic-conventions": "catalog:",
 		"connect-redis": "catalog:",
 		"express": "catalog:",
-		"express-session": "catalog:",
+		"express-session": "1.18.0",
 		"helmet": "catalog:",
 		"redis": "catalog:"
 	}

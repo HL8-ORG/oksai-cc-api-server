@@ -1,5 +1,5 @@
-import { ManyToOne, Index } from '@mikro-orm/core';
-import { BaseEntity } from '@oksai/core';
+import { ManyToOne, Property } from '@mikro-orm/core';
+import { TenantBaseEntity } from '@oksai/tenant';
 import { Organization } from './organization.entity';
 
 /**
@@ -8,13 +8,7 @@ import { Organization } from './organization.entity';
  * 为需要租户和组织隔离的实体提供基类
  * 所有此类实体都会自动添加 tenantId 和 organizationId 字段
  */
-export abstract class TenantOrganizationBaseEntity extends BaseEntity {
-	/**
-	 * 租户 ID
-	 */
-	@Index()
-	tenantId?: string;
-
+export abstract class TenantOrganizationBaseEntity extends TenantBaseEntity {
 	/**
 	 * 组织 (外键)
 	 */
@@ -24,6 +18,5 @@ export abstract class TenantOrganizationBaseEntity extends BaseEntity {
 	/**
 	 * 组织 ID
 	 */
-	@Index()
 	organizationId?: string;
 }

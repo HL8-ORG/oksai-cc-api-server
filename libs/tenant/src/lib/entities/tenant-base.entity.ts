@@ -1,4 +1,4 @@
-import { ManyToOne, Index } from '@mikro-orm/core';
+import { ManyToOne } from '@mikro-orm/core';
 import { BaseEntity } from '@oksai/core';
 import { Tenant } from './tenant.entity';
 
@@ -18,6 +18,5 @@ export abstract class TenantBaseEntity extends BaseEntity {
 	/**
 	 * 租户 ID
 	 */
-	@Index()
 	tenantId?: string;
 }

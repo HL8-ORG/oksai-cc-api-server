@@ -3,30 +3,55 @@
  *
  * 支持 PostgreSQL（默认）、MongoDB 和 Better-SQLite
  */
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { BaseEntity, Feature } from '@oksai/core';
+import { TenantBaseEntity } from '@oksai/tenant';
+import { User } from '@oksai/user';
+import { Organization, FeatureOrganization } from '@oksai/organization';
+import { Role, Permission } from '@oksai/role';
+import { Tenant } from '@oksai/tenant';
+import { AuditLog } from '@oksai/audit';
+import { AnalyticsEvent, AnalyticsMetric, AnalyticsReport } from '@oksai/analytics';
+import { Report, ReportTemplate, ReportSchedule } from '@oksai/reporting';
+
+// 调试：输出数据库配置
+console.log('📊 Database Configuration:');
+console.log('  Host:', process.env.DATABASE_HOST || 'localhost');
+console.log('  Port:', process.env.DATABASE_PORT || '5432');
+console.log('  User:', process.env.DATABASE_USERNAME || 'postgres');
+console.log('  Password:', process.env.DATABASE_PASSWORD ? '***' : 'postgres (default)');
+console.log('  Database:', process.env.DATABASE_NAME || 'oksai');
+
 export default {
-	// 自动发现实体
+	// 实体类定义
 	entities: [
-		'libs/core/src/lib/entities/base.entity.js',
-		'libs/core/src/lib/entities/index.js',
-		'libs/tenant/src/lib/entities/*.entity.js',
-		'libs/user/src/lib/entities/*.entity.js',
-		'libs/organization/src/lib/entities/*.entity.js',
-		'libs/role/src/lib/entities/*.entity.js',
-		'libs/auth/src/lib/entities/*.entity.js',
-		'libs/audit/src/lib/entities/*.entity.js',
-		'libs/analytics/src/lib/entities/*.entity.js',
-		'libs/reporting/src/lib/entities/*.entity.js'
+		BaseEntity,
+		Feature,
+		Tenant,
+		User,
+		Role,
+		Permission,
+		Organization,
+		TenantBaseEntity,
+		FeatureOrganization,
+		AuditLog,
+		AnalyticsEvent,
+		AnalyticsMetric,
+		AnalyticsReport,
+		Report,
+		ReportTemplate,
+		ReportSchedule
 	],
 
-	// 数据库类型配置
-	type: (process.env.DB_TYPE as any) || 'postgresql',
+	// 数据库驱动配置（MikroORM v6 使用 driver 替代 type）
+	driver: PostgreSqlDriver,
 
 	// PostgreSQL 配置（默认）
-	host: process.env.DB_HOST || 'localhost',
-	port: parseInt(process.env.DB_PORT || '5432'),
-	user: process.env.DB_USER || 'postgres',
-	password: process.env.DB_PASSWORD || 'postgres',
-	dbName: process.env.DB_NAME || 'oksai',
+	host: process.env.DATABASE_HOST || 'localhost',
+	port: parseInt(process.env.DATABASE_PORT || '5432'),
+	user: process.env.DATABASE_USERNAME || 'postgres',
+	password: process.env.DATABASE_PASSWORD || 'postgres',
+	dbName: process.env.DATABASE_NAME || 'oksai',
 
 	// 基础目录配置
 	baseDir: process.env.BASE_DIR || process.cwd(),

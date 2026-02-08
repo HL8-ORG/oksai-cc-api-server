@@ -1,4 +1,16 @@
-import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, ManyToMany, ManyToOneOptions, OneToManyOptions, ManyToManyOptions, Enum, Index } from '@mikro-orm/core';
+import {
+	Entity,
+	PrimaryKey,
+	Property,
+	ManyToOne,
+	OneToMany,
+	ManyToMany,
+	ManyToOneOptions,
+	OneToManyOptions,
+	ManyToManyOptions,
+	Enum,
+	Index
+} from '@mikro-orm/core';
 import { BaseEntity } from '@oksai/core';
 
 /**
@@ -38,7 +50,6 @@ export enum AnalyticsReportType {
 @Index({ name: 'idx_analytics_report_type', properties: ['type'] })
 @Index({ name: 'idx_analytics_report_status', properties: ['status'] })
 @Index({ name: 'idx_analytics_report_tenant_id', properties: ['tenantId'] })
-@Index({ name: 'idx_analytics_report_created_by', properties: ['createdBy'] })
 @Index({ name: 'idx_analytics_report_generated_at', properties: ['generatedAt'] })
 export class AnalyticsReport extends BaseEntity {
 	/** 报表名称 */

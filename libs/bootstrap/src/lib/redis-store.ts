@@ -33,6 +33,57 @@ function createRedisClient(options: any) {
  *
  * @param app - Express 应用实例
  */
+// export async function configureRedisSession(app: any): Promise<void> {
+// 	const isProduction = process.env.NODE_ENV === 'production';
+// 	const secret = process.env.EXPRESS_SESSION_SECRET || 'default-secret-change-me';
+// 	let redisWorked = false;
+
+// 	console.log('REDIS_ENABLED: ', process.env.REDIS_ENABLED);
+
+// 	if (process.env.REDIS_ENABLED === 'true') {
+// 		try {
+// 			const { REDIS_URL, REDIS_HOST, REDIS_PORT, REDIS_USER, REDIS_PASSWORD, REDIS_TLS } = process.env;
+
+// 			const url =
+// 				REDIS_URL ||
+// 				(() => {
+// 					const redisProtocol = REDIS_TLS === 'true' ? 'rediss' : 'redis';
+// 					const auth = REDIS_USER && REDIS_PASSWORD ? `${REDIS_USER}:${REDIS_PASSWORD}@` : '';
+// 					return `${redisProtocol}://${auth}${REDIS_HOST}:${REDIS_PORT}`;
+// 				})();
+
+// 			console.log('REDIS_URL: ', url);
+
+// 			const redisClient = createClient({ url });
+
+// 			if (!redisWorked) {
+// 				await redisClient.connect();
+// 				redisWorked = true;
+// 			}
+
+// 			app.use(expressSession({
+// 				secret,
+// 				saveUninitialized: false,
+// 				resave: true,
+// 				store: new RedisStore({
+// 					client: redisClient,
+// 					prefix: 'sess:',
+// 					rollback: true,
+// 					secret
+// 				})
+// 			});
+
+// 			console.log('Redis Session Storage configured successfully');
+// 		} catch (error) {
+// 			console.error('Redis Session Storage Configuration error:', error.message);
+// 		}
+// }
+
+/**
+ * 配置会话存储，优先使用 Redis，否则使用内存存储
+ *
+ * @param app - Express 应用实例
+ */
 export async function configureRedisSession(app: any): Promise<void> {
 	const isProduction = process.env.NODE_ENV === 'production';
 	const secret = process.env.EXPRESS_SESSION_SECRET || 'default-secret-change-me';

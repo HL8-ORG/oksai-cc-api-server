@@ -76,12 +76,6 @@ export class Feature extends BaseEntity {
 	category?: string;
 
 	/**
-	 * 父功能 ID（用于层级关系）
-	 */
-	@Property({ nullable: true })
-	parentId?: string;
-
-	/**
 	 * 子功能
 	 */
 	@ManyToOne({ entity: () => Feature, nullable: true })

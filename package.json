@@ -229,6 +229,7 @@
 		"@swc/core": "~1.5.7",
 		"@swc/helpers": "~0.5.11",
 		"@types/bcrypt": "^5.0.2",
+		"@types/express-session": "^1.18.2",
 		"@types/google.maps": "^3.58.1",
 		"@types/jest": "29.5.14",
 		"@types/node": "catalog:",

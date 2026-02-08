@@ -10,7 +10,7 @@ import { isPlainObject } from './is-plain-object';
  * @param input - 要深度克隆的值，可以是原始类型、数组或对象
  * @returns 输入值的深拷贝
  */
-export function deepClone<T extends string | number | any[] | object>(input: T): T {
+export function deepClone<T>(input: T): T {
 	// 如果不是对象或为空，直接返回输入值
 	if (!isPlainObject(input) || isEmpty(input)) {
 		return input;
