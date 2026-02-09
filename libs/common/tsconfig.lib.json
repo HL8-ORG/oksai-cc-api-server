@@ -1,29 +1,38 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"compilerOptions": {
-		"module": "commonjs",
-		"declaration": true,
-		"removeComments": true,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "ES2022",
-		"sourceMap": true,
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"incremental": true,
-		"skipLibCheck": true,
-		"esModuleInterop": true,
-		"strict": false,
-		"strictNullChecks": false,
-		"strictBindCallApply": false,
-		"noImplicitThis": false,
-		"forceConsistentCasingInFileNames": true,
-		"noFallthroughCasesInSwitch": false,
-		"noPropertyAccessFromIndexSignature": false,
-		"noImplicitOverride": false,
-		"noImplicitReturns": false
-	},
-	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist", "test", "**/*spec.ts", "**/*.test.ts", "node_modules/prom-client"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "strictBindCallApply": false,
+    "noImplicitThis": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noImplicitOverride": false,
+    "noImplicitReturns": false
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*spec.ts",
+    "**/*.test.ts",
+    "node_modules/prom-client"
+  ]
 }

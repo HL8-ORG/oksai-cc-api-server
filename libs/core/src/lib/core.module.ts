@@ -45,8 +45,6 @@ import { PrometheusController } from './controllers/prometheus.controller';
 	],
 	controllers: [PrometheusController],
 	exports: [
-		// Controllers
-		PrometheusController,
 		// Guards
 		AuthGuard,
 		TenantGuard,

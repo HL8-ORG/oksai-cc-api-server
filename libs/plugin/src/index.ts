@@ -10,5 +10,8 @@ export * from './decorators/plugin.decorator';
 export * from './services/plugin-registry.service';
 export * from './services/plugin-loader.service';
 
+// Guards
+export * from './guards/plugin-status.guard';
+
 // Module
 export * from './plugin.module';

@@ -11,7 +11,7 @@ import { HealthModule } from './shared/health/health.module';
 import { CoreModule, AuthGuard, TenantGuard } from '@oksai/core';
 
 // Plugin Module
-import { PluginModule, PluginRegistryService } from '@oksai/plugin';
+import { PluginModule, PluginRegistryService, PluginStatusGuard } from '@oksai/plugin';
 
 // Bootstrap Module
 import { BootstrapModule } from '@oksai/bootstrap';
@@ -59,6 +59,15 @@ const versionInterceptorProvider: Provider = {
 	inject: [Reflector]
 };
 
+/** 全局插件状态守卫（检查插件是否启用） */
+const globalPluginStatusGuardProvider: Provider = {
+	provide: APP_GUARD,
+	useFactory: (reflector: Reflector, pluginRegistry: PluginRegistryService) => {
+		return new PluginStatusGuard(reflector, pluginRegistry);
+	},
+	inject: [Reflector, PluginRegistryService]
+};
+
 /** 全局认证守卫（基于 @oksai/core，写入 RequestContext） */
 const globalAuthGuardProvider: Provider = {
 	provide: APP_GUARD,
@@ -95,6 +104,7 @@ const globalTenantGuardProvider: Provider = {
 		MetricsService,
 		ErrorTrackingService,
 		RequestTracingService,
+		globalPluginStatusGuardProvider,
 		globalAuthGuardProvider,
 		globalTenantGuardProvider,
 		versionInterceptorProvider,

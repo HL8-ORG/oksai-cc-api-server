@@ -2,6 +2,7 @@ import { Module, Global } from '@nestjs/common';
 import { PluginRegistryService } from './services/plugin-registry.service';
 import { PluginLoaderService } from './services/plugin-loader.service';
 import { PluginController } from './controllers/plugin.controller';
+import { PluginStatusGuard } from './guards/plugin-status.guard';
 
 /**
  * 插件模块
@@ -11,8 +12,8 @@ import { PluginController } from './controllers/plugin.controller';
  */
 @Global()
 @Module({
-	providers: [PluginRegistryService, PluginLoaderService],
+	providers: [PluginRegistryService, PluginLoaderService, PluginStatusGuard],
 	controllers: [PluginController],
-	exports: [PluginRegistryService, PluginLoaderService]
+	exports: [PluginRegistryService, PluginLoaderService, PluginStatusGuard]
 })
 export class PluginModule {}

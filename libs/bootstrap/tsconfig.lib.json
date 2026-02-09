@@ -1,26 +1,46 @@
 {
-	"extends": "../../tsconfig.base.json",
-	"compilerOptions": {
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"composite": true,
-		"declaration": true,
-		"declarationMap": true,
-		"module": "commonjs",
-		"target": "ES2022",
-		"lib": ["es2020"],
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"strict": false,
-		"paths": {
-			"@nestjs/*": ["../../../node_modules/@nestjs/*"],
-			"@mikro-orm/*": ["../../../node_modules/@mikro-orm/*"],
-			"@oksai/*": ["../../../libs/*/src"],
-			"express": ["../../../node_modules/express"],
-			"helmet": ["../../../node_modules/helmet"]
-		}
-	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "dist", "test"],
-	"types": ["@types/express-session"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": [
+      "es2020"
+    ],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "paths": {
+      "@nestjs/*": [
+        "../../../node_modules/@nestjs/*"
+      ],
+      "@mikro-orm/*": [
+        "../../../node_modules/@mikro-orm/*"
+      ],
+      "@oksai/*": [
+        "../../../libs/*/src"
+      ],
+      "express": [
+        "../../../node_modules/express"
+      ],
+      "helmet": [
+        "../../../node_modules/helmet"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
+  ],
+  "types": [
+    "@types/express-session"
+  ]
 }

@@ -1,42 +1,41 @@
 {
-	"name": "@oksai/config",
-	"version": "0.1.0",
-	"description": "配置管理包",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"scripts": {
-		"build": "tsc -p tsconfig.lib.json",
-		"build:prod": "tsc -p tsconfig.lib.json",
-		"typecheck": "tsc -p tsconfig.lib.json --noEmit",
-		"test": "jest --passWithNoTests",
-		"lint": "eslint .",
-		"clean": "rimraf dist coverage"
-	},
-	"dependencies": {
-		"@oksai/constants": "workspace:*",
-		"@oksai/utils": "workspace:*",
-		"@oksai/contracts": "workspace:*",
-		"@nestjs/common": "catalog:",
-		"@nestjs/config": "catalog:",
-		"@mikro-orm/postgresql": "catalog:",
-		"@mikro-orm/core": "catalog:",
-		"@mikro-orm/nestjs": "catalog:",
-		"@mikro-orm/postgresql": "catalog:",
-		"@apollo/server": "catalog:",
-		"dotenv": "catalog:",
-		"tslib": "catalog:",
-		"@types/jest": "catalog:",
-		"@types/node": "catalog:",
-		"rimraf": "catalog:",
-		"ts-node": "catalog:",
-		"typescript": "catalog:"
-	},
-	"devDependencies": {
-		"@types/jest": "catalog:",
-		"@types/node": "catalog:",
-		"jest": "catalog:",
-		"rimraf": "catalog:",
-		"ts-node": "catalog:",
-		"typescript": "catalog:"
-	}
+  "name": "@oksai/config",
+  "version": "0.1.0",
+  "description": "配置管理包",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json --tsBuildInfoFile dist/tsconfig.lib.tsbuildinfo",
+    "build:prod": "tsc -p tsconfig.lib.json",
+    "typecheck": "tsc -p tsconfig.lib.json --noEmit",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint .",
+    "clean": "rimraf dist coverage"
+  },
+  "dependencies": {
+    "@oksai/constants": "workspace:*",
+    "@oksai/utils": "workspace:*",
+    "@oksai/contracts": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/config": "catalog:",
+    "@mikro-orm/postgresql": "catalog:",
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/nestjs": "catalog:",
+    "@apollo/server": "catalog:",
+    "dotenv": "catalog:",
+    "tslib": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "devDependencies": {
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "jest": "catalog:",
+    "rimraf": "catalog:",
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
+  }
 }

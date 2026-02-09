@@ -1,84 +1,84 @@
 {
-	"name": "@oksai/core",
-	"version": "0.1.0",
-	"description": "OKSAI Platform Core Library",
-	"author": {
-		"name": "OKSAI Platform Team",
-		"email": "team@oksai.io",
-		"url": "https://oksai.io"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/oksais/platform"
-	},
-	"bugs": {
-		"url": "https://github.com/oksais/platform/issues"
-	},
-	"homepage": "https://oksai.io",
-	"license": "AGPL-3.0",
-	"private": true,
-	"type": "commonjs",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"scripts": {
-		"build": "tsc -p tsconfig.lib.json",
-		"build:prod": "tsc -p tsconfig.lib.json",
-		"typecheck": "tsc --noEmit -p tsconfig.lib.json",
-		"test": "jest --passWithNoTests",
-		"lint": "eslint .",
-		"clean": "rimraf dist coverage"
-	},
-	"dependencies": {
-		"@mikro-orm/core": "catalog:",
-		"@mikro-orm/nestjs": "catalog:",
-		"@nestjs/axios": "catalog:",
-		"@nestjs/bullmq": "catalog:",
-		"@nestjs/common": "catalog:",
-		"@nestjs/config": "catalog:",
-		"@nestjs/core": "catalog:",
-		"@nestjs/schedule": "catalog:",
-		"@types/express": "catalog:",
-		"@types/jsonwebtoken": "^9.0.7",
-		"@types/node": "catalog:",
-		"@types/uuid": "^11.0.0",
-		"bcrypt": "^5.1.1",
-		"bcryptjs": "^3.0.2",
-		"bullmq": "catalog:",
-		"chalk": "catalog:",
-		"class-transformer": "catalog:",
-		"class-validator": "catalog:",
-		"handlebars": "catalog:",
-		"ioredis": "^5.4.1",
-		"jose": "^6.0.13",
-		"jsonwebtoken": "^9.0.2",
-		"nestjs-cls": "^6.2.0",
-		"nodemailer": "^6.9.14",
-		"rxjs": "catalog:",
-		"tslib": "catalog:",
-		"typescript": "catalog:",
-		"uuid": "^11.1.0"
-	},
-	"devDependencies": {
-		"@types/jest": "29.5.14",
-		"@types/node": "catalog:",
-		"typescript": "catalog:"
-	},
-	"keywords": [
-		"core",
-		"nestjs",
-		"typescript",
-		"common-module",
-		"shared-module",
-		"platform",
-		"modular",
-		"enterprise",
-		"open-source",
-		"agpl",
-		"oksais"
-	],
-	"engines": {
-		"node": ">=22",
-		"pnpm": ">=10.0.0"
-	},
-	"sideEffects": false
+  "name": "@oksai/core",
+  "version": "0.1.0",
+  "description": "OKSAI Platform Core Library",
+  "author": {
+    "name": "OKSAI Platform Team",
+    "email": "team@oksai.io",
+    "url": "https://oksai.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oksais/platform"
+  },
+  "bugs": {
+    "url": "https://github.com/oksais/platform/issues"
+  },
+  "homepage": "https://oksai.io",
+  "license": "AGPL-3.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json --tsBuildInfoFile dist/tsconfig.lib.tsbuildinfo",
+    "build:prod": "tsc -p tsconfig.lib.json",
+    "typecheck": "tsc --noEmit -p tsconfig.lib.json",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint .",
+    "clean": "rimraf dist coverage"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/nestjs": "catalog:",
+    "@nestjs/axios": "catalog:",
+    "@nestjs/bullmq": "catalog:",
+    "@nestjs/common": "catalog:",
+    "@nestjs/config": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/schedule": "catalog:",
+    "@types/express": "catalog:",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "catalog:",
+    "@types/uuid": "^11.0.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "catalog:",
+    "chalk": "catalog:",
+    "class-transformer": "catalog:",
+    "class-validator": "catalog:",
+    "handlebars": "catalog:",
+    "ioredis": "^5.4.1",
+    "jose": "^6.0.13",
+    "jsonwebtoken": "^9.0.2",
+    "nestjs-cls": "^6.2.0",
+    "nodemailer": "^6.9.14",
+    "rxjs": "catalog:",
+    "tslib": "catalog:",
+    "typescript": "catalog:",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.14",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "keywords": [
+    "core",
+    "nestjs",
+    "typescript",
+    "common-module",
+    "shared-module",
+    "platform",
+    "modular",
+    "enterprise",
+    "open-source",
+    "agpl",
+    "oksais"
+  ],
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10.0.0"
+  },
+  "sideEffects": false
 }
