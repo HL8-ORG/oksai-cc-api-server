@@ -14,7 +14,7 @@ import { PluginRegistryService } from './plugin-registry.service';
 /**
  * 插件加载服务
  *
- * 派责插件的加载、初始化和卸载
+ * 负责插件的加载、初始化和卸载
  * 支持模块插件和对象插件两种类型
  * 通过状态标志实现热拔插（启用/禁用功能）
  */
@@ -22,13 +22,18 @@ import { PluginRegistryService } from './plugin-registry.service';
 export class PluginLoaderService implements OnModuleDestroy {
 	private readonly logger = new Logger(PluginLoaderService.name);
 
-	/** 模块引用 */
-	private moduleRef: ModuleRef | null = null;
+	/** 模块引用（通过构造函数注入，可通过 setModuleRef 覆盖） */
+	private moduleRef: ModuleRef;
 
 	/** 插件状态映射 */
 	private pluginStates = new Map<string, IPluginState>();
 
-	constructor(private readonly registry: PluginRegistryService) {}
+	constructor(
+		private readonly registry: PluginRegistryService,
+		moduleRef: ModuleRef
+	) {
+		this.moduleRef = moduleRef;
+	}
 
 	/**
 	 * 设置模块引用

@@ -1,4 +1,4 @@
-import { defineConfig } from '@mikro-orm/better-sqlite';
+import { defineConfig } from '@mikro-orm/sqlite';
 
 const mikroOrmTestConfig = defineConfig({
 	entities: [

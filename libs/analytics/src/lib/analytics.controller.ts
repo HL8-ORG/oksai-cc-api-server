@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Delete, Query, Param, Body } from '@nestjs/common';
+import { Public } from '@oksai/core';
 import { AnalyticsService } from './analytics.service';
 import { VisualizationService } from './visualization.service';
 import {
@@ -17,12 +18,41 @@ import { VisualizationDto, TrendAnalysisDto, ComparisonAnalysisDto } from './dto
  *
  * 提供分析 API 端点
  */
-@Controller('api/analytics')
+@Controller('analytics')
 export class AnalyticsController {
 	constructor(
 		private readonly analyticsService: AnalyticsService,
 		private readonly visualizationService: VisualizationService
 	) {}
+
+	/**
+	 * 获取分析模块概览
+	 *
+	 * 返回分析模块可用的 API 端点列表
+	 *
+	 * @returns 分析模块信息及可用端点
+	 */
+	@Get()
+	@Public()
+	getOverview(): Record<string, any> {
+		return {
+			module: 'analytics',
+			description: '分析服务 API',
+			endpoints: [
+				{ method: 'POST', path: '/api/analytics/events', description: '记录分析事件' },
+				{ method: 'GET', path: '/api/analytics/metrics', description: '查询指标数据' },
+				{ method: 'GET', path: '/api/analytics/dashboard', description: '获取仪表板数据' },
+				{ method: 'POST', path: '/api/analytics/reports', description: '生成报表' },
+				{ method: 'GET', path: '/api/analytics/reports', description: '获取所有报表' },
+				{ method: 'GET', path: '/api/analytics/reports/:id', description: '获取报表详情' },
+				{ method: 'DELETE', path: '/api/analytics/reports/:id', description: '删除报表' },
+				{ method: 'POST', path: '/api/analytics/visualization', description: '生成可视化数据' },
+				{ method: 'POST', path: '/api/analytics/visualization/trend', description: '生成趋势图表' },
+				{ method: 'POST', path: '/api/analytics/visualization/comparison', description: '生成对比图表' },
+				{ method: 'POST', path: '/api/analytics/visualization/kpi', description: '生成 KPI 仪表板' }
+			]
+		};
+	}
 
 	/**
 	 * 记录分析事件

@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 import { AuthGuard, TenantGuard, RoleGuard } from './guards';
@@ -60,7 +60,8 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
 })
 export class CoreModule implements NestModule {
 	configure(consumer: MiddlewareConsumer): void {
-		consumer.apply(RequestContextMiddleware).forRoutes('*');
+		// NestJS v11 + Express v5 要求使用命名参数代替旧式通配符 *
+		consumer.apply(RequestContextMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL });
 	}
 }
 

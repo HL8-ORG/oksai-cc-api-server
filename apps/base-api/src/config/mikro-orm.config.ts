@@ -3,7 +3,6 @@
  *
  * 支持 PostgreSQL（默认）、MongoDB 和 Better-SQLite
  */
-import { BetterSqliteDriver } from '@mikro-orm/better-sqlite';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { BaseEntity, Feature } from '@oksai/core';
 import { TenantBaseEntity } from '@oksai/tenant';
@@ -77,12 +76,18 @@ const baseConfig = {
 export default isTestEnv
 	? {
 			...baseConfig,
-			// 测试环境使用 SQLite 内存库，避免依赖外部 PostgreSQL
-			driver: BetterSqliteDriver,
-			dbName: ':memory:',
+			// 测试环境使用 PostgreSQL in-memory 配置
+			// 注意：PostgreSQL 不支持真正的 in-memory 模式
+			// 这里使用 Docker 容器中的 PostgreSQL 或本地 PostgreSQL
+			driver: PostgreSqlDriver,
+			host: 'localhost',
+			port: 5432,
+			user: 'postgres',
+			password: 'postgres',
+			dbName: 'test_oksai',
 			allowGlobalContext: true,
 			debug: false
-		}
+	  }
 	: {
 			...baseConfig,
 			// 数据库驱动配置（MikroORM v6 使用 driver 替代 type）
@@ -93,4 +98,4 @@ export default isTestEnv
 			user: process.env.DATABASE_USERNAME || 'postgres',
 			password: process.env.DATABASE_PASSWORD || 'postgres',
 			dbName: process.env.DATABASE_NAME || 'oksai'
-		};
+	  };

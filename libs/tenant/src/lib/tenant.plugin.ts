@@ -107,11 +107,11 @@ export class TenantPlugin implements IPlugin {
 	 *
 	 * 初始化租户服务，确保默认租户存在
 	 */
-	async onApplicationBootstrap(_module: ModuleRef): Promise<void> {
+	async onApplicationBootstrap(module: ModuleRef): Promise<void> {
 		this.logEnabled && console.log('✓ Tenant Plugin initialized');
 
 		// 初始化租户服务
-		await this.ensureDefaultTenant();
+		await this.ensureDefaultTenant(module);
 	}
 
 	/**
@@ -130,33 +130,47 @@ export class TenantPlugin implements IPlugin {
 	 *
 	 * 确保默认租户存在
 	 */
-	async initialize(_config?: Record<string, any>): Promise<void> {
-		await this.ensureDefaultTenant();
+	async initialize(_config?: Record<string, any>, module?: ModuleRef): Promise<void> {
+		if (module) {
+			await this.ensureDefaultTenant(module);
+		}
 	}
 
 	/**
 	 * 确保默认租户存在
+	 *
+	 * 在应用启动阶段调用，需要 fork EntityManager 以避免全局上下文限制
 	 */
-	private async ensureDefaultTenant(): Promise<void> {
-		const tenantService = new (await import('./tenant.service')).TenantService({} as any);
+	private async ensureDefaultTenant(module: ModuleRef): Promise<void> {
+		const { MikroORM } = await import('@mikro-orm/core');
+		const { Tenant, TenantStatus, TenantType } = await import('./entities/tenant.entity');
 
 		try {
-			const defaultTenant = await tenantService.findBySlug('default');
+			const orm = module.get(MikroORM, { strict: false });
+			// 在应用启动阶段需要 fork EntityManager（全局上下文中不允许直接使用）
+			const em = orm.em.fork();
 
-			if (!defaultTenant) {
-				console.log('Creating default tenant...');
-				await tenantService.create({
-					name: 'Default Tenant',
-					slug: 'default',
-					status: 'ACTIVE',
-					type: 'ORGANIZATION',
-					allowSelfRegistration: true,
-					maxUsers: 100
-				});
-				console.log('Default tenant created');
+			try {
+				const defaultTenant = await em.findOne(Tenant, { slug: 'default' });
+
+				if (!defaultTenant) {
+					console.log('正在创建默认租户...');
+					const tenant = em.create(Tenant, {
+						name: 'Default Tenant',
+						slug: 'default',
+						status: TenantStatus.ACTIVE,
+						type: TenantType.ORGANIZATION,
+						allowSelfRegistration: true,
+						maxUsers: 100
+					});
+					await em.persistAndFlush(tenant);
+					console.log('默认租户已创建');
+				}
+			} catch (error) {
+				console.error('确保默认租户存在时出错:', error);
 			}
 		} catch (error) {
-			console.error('Failed to ensure default tenant', error);
+			console.error('从模块中获取 MikroORM 失败:', error);
 		}
 	}
 }

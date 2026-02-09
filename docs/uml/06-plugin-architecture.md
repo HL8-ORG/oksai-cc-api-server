@@ -4,50 +4,75 @@
 
 ```plantuml
 @startuml
-!define RECTANGLE class
+skinparam classAttributeIconSize 0
 
 package "插件系统核心" {
-    [PluginRegistryService] <<Service>>
-    [PluginLoaderService] <<Service>>
-    [IPlugin] <<Interface>>
-    [IPluginMetadata] <<Interface>>
-    [ILifecycleHooks] <<Interface>>
+    class PluginRegistryService <<Service>> {
+        + register(plugin: IPlugin): void
+        + get(name: string): IPlugin
+        + getAll(): IPlugin[]
+        + updateStatus(name: string, status: PluginStatus): void
+    }
+    class PluginLoaderService <<Service>> {
+        + loadPlugins(config): void
+        + enablePlugin(name: string): void
+        + disablePlugin(name: string): void
+    }
+    interface IPlugin <<Interface>> {
+        + name: string
+        + metadata: IPluginMetadata
+        + type: PluginType
+        + status: PluginStatus
+    }
+    interface IPluginMetadata <<Interface>> {
+        + name: string
+        + version: string
+        + description: string
+        + dependencies: string[]
+    }
+    interface ILifecycleHooks <<Interface>> {
+        + onApplicationBootstrap(moduleRef): void
+        + onApplicationShutdown(): void
+        + initialize(config?): void
+        + destroy(): void
+    }
 }
 
 package "插件类型" {
-    [IModulePlugin] <<Interface>>
-    [IObjectPlugin] <<Interface>>
-    [IPluginState] <<Interface>>
+    interface IModulePlugin <<Interface>> {
+        + getModule(): DynamicModule
+    }
+    interface IObjectPlugin <<Interface>> {
+        + getProviders(): Provider[]
+    }
+    interface IPluginState <<Interface>> {
+        + pluginName: string
+        + status: PluginStatus
+        + loadedAt: Date
+    }
 }
 
 package "系统插件" {
-    [AuthPlugin] <<Plugin>>
-    [TenantPlugin] <<Plugin>>
-    [UserPlugin] <<Plugin>>
-    [AuditPlugin] <<Plugin>>
-    [OrganizationPlugin] <<Plugin>>
-    [RolePlugin] <<Plugin>>
+    class AuthPlugin <<Plugin>>
+    class TenantPlugin <<Plugin>>
+    class UserPlugin <<Plugin>>
+    class AuditPlugin <<Plugin>>
+    class OrganizationPlugin <<Plugin>>
+    class RolePlugin <<Plugin>>
 }
 
 package "功能插件" {
-    [AnalyticsPlugin] <<Plugin>>
-    [ReportingPlugin] <<Plugin>>
-    [IntegrationPlugin] <<Plugin>>
+    class AnalyticsPlugin <<Plugin>>
+    class ReportingPlugin <<Plugin>>
+    class IntegrationPlugin <<Plugin>>
 }
 
-package "插件生命周期" {
-    [onApplicationBootstrap] <<Hook>>
-    [onApplicationShutdown] <<Hook>>
-    [initialize] <<Hook>>
-    [destroy] <<Hook>>
-}
-
-enum "PluginType" {
+enum PluginType {
     SYSTEM
     FEATURE
 }
 
-enum "PluginStatus" {
+enum PluginStatus {
     UNLOADED
     LOADED
     INITIALIZED
@@ -55,33 +80,28 @@ enum "PluginStatus" {
     FAILED
 }
 
-[IPlugin] <|.. [IModulePlugin]
-[IPlugin] <|.. [IObjectPlugin]
-[IPlugin] --> [IPluginMetadata] : has
-[IPlugin] --> [ILifecycleHooks] : implements
-[IPlugin] --> [PluginType] : uses
-[IPlugin] --> [PluginStatus] : has
+IPlugin <|.. IModulePlugin
+IPlugin <|.. IObjectPlugin
+IPlugin --> IPluginMetadata : has
+IPlugin --|> ILifecycleHooks : extends
+IPlugin --> PluginType : uses
+IPlugin --> PluginStatus : has
 
-[PluginRegistryService] o-- [IPlugin] : manages
-[PluginRegistryService] --> [IPluginState] : tracks
-[PluginLoaderService] --> [PluginRegistryService] : uses
-[PluginLoaderService] --> [IPlugin] : loads/unloads
+PluginRegistryService o-- IPlugin : manages
+PluginRegistryService --> IPluginState : tracks
+PluginLoaderService --> PluginRegistryService : uses
+PluginLoaderService --> IPlugin : loads/unloads
 
-[IPlugin] --> [onApplicationBootstrap] : implements
-[IPlugin] --> [onApplicationShutdown] : implements
-[Plugin] --> [initialize] : implements
-[Plugin] --> [destroy] : implements
+AuthPlugin ..|> IPlugin : implements
+TenantPlugin ..|> IPlugin : implements
+UserPlugin ..|> IPlugin : implements
+AuditPlugin ..|> IPlugin : implements
+OrganizationPlugin ..|> IPlugin : implements
+RolePlugin ..|> IPlugin : implements
 
-[AuthPlugin] ..|> [IPlugin] : implements
-[TenantPlugin] ..|> [IPlugin] : implements
-[UserPlugin] ..|> [IPlugin] : implements
-[AuditPlugin] ..|> [IPlugin] : implements
-[OrganizationPlugin] ..|> [IPlugin] : implements
-[RolePlugin] ..|> [IPlugin] : implements
-
-[AnalyticsPlugin] ..|> [IPlugin] : implements
-[ReportingPlugin] ..|> [IPlugin] : implements
-[IntegrationPlugin] ..|> [IPlugin] : implements
+AnalyticsPlugin ..|> IPlugin : implements
+ReportingPlugin ..|> IPlugin : implements
+IntegrationPlugin ..|> IPlugin : implements
 
 note right of PluginRegistryService
   插件注册表：

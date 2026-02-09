@@ -68,3 +68,77 @@ export class TestHelper {
 		return instance as T;
 	}
 }
+
+describe('TestHelper', () => {
+	describe('setup', () => {
+		it('应该成功初始化应用', async () => {
+			const app = await TestHelper.setup();
+			expect(app).toBeDefined();
+			expect(TestHelper.getApp()).toBeDefined();
+			expect(TestHelper.getOrm()).toBeDefined();
+			await TestHelper.teardown();
+		});
+	});
+
+	describe('teardown', () => {
+		it('应该成功清理应用资源', async () => {
+			await TestHelper.setup();
+			const app = TestHelper.getApp();
+			const orm = TestHelper.getOrm();
+			await TestHelper.teardown();
+
+			// 验证资源已清理
+			expect(() => TestHelper.getApp()).toThrow('测试应用未初始化，请先调用 setup()');
+			expect(() => TestHelper.getOrm()).toThrow('ORM 未初始化，请先调用 setup()');
+		});
+	});
+
+	describe('insertTestData', () => {
+		it('应该成功插入测试数据', async () => {
+			await TestHelper.setup();
+			const orm = TestHelper.getOrm();
+			const em = orm.em;
+
+			const testData = {
+				email: 'test@example.com',
+				password: 'password123',
+				firstName: 'Test',
+				lastName: 'User',
+				tenantId: 'test-tenant-id'
+			};
+			const user = await TestHelper.insertTestData('User', testData);
+
+			expect(user).toBeDefined();
+			expect(user.email).toBe('test@example.com');
+			expect(user.password).toBe('password123');
+
+			await TestHelper.teardown();
+		});
+	});
+
+	describe('cleanDatabase', () => {
+		it('应该成功清理数据库', async () => {
+			await TestHelper.setup();
+			const orm = TestHelper.getOrm();
+			const em = orm.em;
+
+			// 插入测试数据
+			await TestHelper.insertTestData('User', {
+				email: 'test2@example.com',
+				password: 'password456',
+				firstName: 'Test2',
+				lastName: 'User2',
+				tenantId: 'test-tenant-id'
+			});
+
+			// 清理数据库
+			await TestHelper.cleanDatabase();
+
+			// 验证数据库已清空
+			const count = await em.count('User');
+			expect(count).toBe(0);
+
+			await TestHelper.teardown();
+		});
+	});
+});

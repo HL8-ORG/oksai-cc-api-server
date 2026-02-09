@@ -10,6 +10,7 @@ import {
 	StreamableFile,
 	Header
 } from '@nestjs/common';
+import { Public } from '@oksai/core';
 import { Readable } from 'stream';
 import { ReportingService } from './reporting.service';
 import { GenerateReportDto, Report as ReportEntity } from './entities/reporting.entity';
@@ -19,9 +20,33 @@ import { GenerateReportDto, Report as ReportEntity } from './entities/reporting.
  *
  * 提供报表生成和导出功能的 API 端点
  */
-@Controller('api/reporting')
+@Controller('reporting')
 export class ReportingController {
 	constructor(private readonly reportingService: ReportingService) {}
+
+	/**
+	 * 获取报表模块概览
+	 *
+	 * 返回报表模块可用的 API 端点列表
+	 *
+	 * @returns 报表模块信息及可用端点
+	 */
+	@Get()
+	@Public()
+	getOverview(): Record<string, any> {
+		return {
+			module: 'reporting',
+			description: '报表服务 API',
+			endpoints: [
+				{ method: 'POST', path: '/api/reporting/reports', description: '生成报表' },
+				{ method: 'GET', path: '/api/reporting/reports', description: '获取报表列表' },
+				{ method: 'GET', path: '/api/reporting/reports/:id', description: '获取报表详情' },
+				{ method: 'GET', path: '/api/reporting/reports/:id/data', description: '获取报表数据' },
+				{ method: 'DELETE', path: '/api/reporting/reports/:id', description: '删除报表' },
+				{ method: 'GET', path: '/api/reporting/reports/:id/download', description: '下载报表文件' }
+			]
+		};
+	}
 
 	/**
 	 * 生成报表

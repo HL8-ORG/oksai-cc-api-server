@@ -106,11 +106,12 @@ export class AppModule implements NestModule {
 	constructor(private readonly registry: PluginRegistryService) {}
 
 	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(LoggerMiddleware).forRoutes('*');
+		// NestJS v11 + Express v5 要求使用命名参数代替旧式通配符 *
+		consumer.apply(LoggerMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL });
 
 		consumer
 			.apply(RateLimitMiddleware)
 			.exclude('/api/health')
-			.forRoutes({ path: '/api', method: RequestMethod.ALL });
+			.forRoutes({ path: '{*path}', method: RequestMethod.ALL });
 	}
 }

@@ -108,10 +108,8 @@ export class AuthPlugin implements IPlugin {
 	 *
 	 * 初始化认证服务，加载用户和权限数据
 	 */
-	async onApplicationBootstrap(module: ModuleRef): Promise<void> {
+	async onApplicationBootstrap(_module: ModuleRef): Promise<void> {
 		this.logEnabled && console.log('✓ Auth Plugin initialized');
-
-		const authModule = module.get(AuthModule);
 
 		// 初始化认证服务
 		// 这里可以添加认证服务的初始化逻辑

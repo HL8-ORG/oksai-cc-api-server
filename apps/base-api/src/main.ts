@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { MikroORM } from '@mikro-orm/core';
 import { AppModule } from './app.module';
 import { PluginRegistryService, PluginLoaderService } from '@oksai/plugin';
 import { configureRedisSession, setupSwagger, tracer } from '@oksai/bootstrap';
@@ -32,7 +31,6 @@ async function bootstrap() {
 
 	const registry = app.get(PluginRegistryService);
 	const loader = app.get(PluginLoaderService);
-	const orm = app.get(MikroORM);
 
 	// 创建系统插件实例
 	const plugins = [
@@ -61,8 +59,9 @@ async function bootstrap() {
 
 	await app.listen(3000);
 	console.log('🚀 应用已启动: http://localhost:3000/api');
-	console.log('📊 Analytics API: http://localhost:3000/api/analytics');
-	console.log('📈 Reporting API: http://localhost:3000/api/reporting');
+	console.log('❤️  健康检查: http://localhost:3000/api/health');
+	console.log('📊 分析服务: http://localhost:3000/api/analytics');
+	console.log('📈 报表服务: http://localhost:3000/api/reporting');
 }
 
 bootstrap();

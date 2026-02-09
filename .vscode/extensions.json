@@ -8,6 +8,7 @@
 		"firsttris.vscode-jest-runner",
 		"jebbs.plantuml",
 		"vscode-icons-team.vscode-icons",
-		"github.copilot"
+		"github.copilot",
+		"kuochunchang.goose-uml-vscode"
 	]
 }

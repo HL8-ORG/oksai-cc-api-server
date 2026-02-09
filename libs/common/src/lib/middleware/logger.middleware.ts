@@ -42,17 +42,19 @@ export class LoggerMiddleware implements NestMiddleware {
 
 		this.logger.log(`[${correlationId}] ${method} ${url} - IP: ${ip} - User-Agent: ${userAgent}`);
 
+		// 通过闭包捕获 logger 引用，避免 .bind(this) 破坏 res 的上下文
+		const logger = this.logger;
 		const originalSend = res.send;
-		res.send = function (body: any) {
+		res.send = function (this: Response, body: any) {
 			const responseTime = Date.now() - startTime;
 			const statusCode = res.statusCode;
 
-			this.logger.log(
+			logger.log(
 				`[${correlationId}] ${method} ${url} - 状态码: ${statusCode} - 响应时间: ${responseTime}ms`
 			);
 
 			return originalSend.call(this, body);
-		}.bind(this);
+		};
 
 		next();
 	}

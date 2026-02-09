@@ -35,12 +35,6 @@ export enum AnalyticsEventType {
  * 记录系统中的各种分析事件，用于数据追踪和用户行为分析
  */
 @Entity({ tableName: 'analytics_events' })
-@Index({ name: 'idx_analytics_event_type', properties: ['type'] })
-@Index({ name: 'idx_analytics_event_name', properties: ['name'] })
-@Index({ name: 'idx_analytics_event_user_id', properties: ['userId'] })
-@Index({ name: 'idx_analytics_event_tenant_id', properties: ['tenantId'] })
-@Index({ name: 'idx_analytics_event_timestamp', properties: ['timestamp'] })
-@Index({ name: 'idx_analytics_event_type_timestamp', properties: ['type', 'timestamp'] })
 export class AnalyticsEvent extends BaseEntity {
 	/** 事件类型 */
 	@Property()
@@ -53,7 +47,7 @@ export class AnalyticsEvent extends BaseEntity {
 
 	/** 事件属性（JSON 格式） */
 	@Property({ type: 'json', nullable: true })
-	properties?: Record<string, any>;
+	propertiesData?: Record<string, any>;
 
 	/** 用户 ID（可选） */
 	@Property({ index: true, nullable: true })

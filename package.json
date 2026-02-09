@@ -178,7 +178,8 @@
 		"turbo:lint": "pnpm turbo run lint",
 		"turbo:dev": "pnpm turbo run dev",
 		"turbo:clean": "pnpm turbo run clean",
-		"libs:fix": "pnpm dlx sherif@latest --fix"
+		"libs:fix": "pnpm dlx sherif@latest --fix",
+		"lsof-kill": "lsof -ti :3000 | xargs kill -9 2>/dev/null; sleep 1; echo '端口 3000 已清理'"
 	},
 	"config": {
 		"commitizen": {
@@ -306,7 +307,8 @@
 		},
 		"twing": {
 			"locutus": "2.0.30"
-		}
+		},
+		"@mikro-orm/libsql": "6.6.6"
 	},
 	"prettier": {
 		"printWidth": 120,

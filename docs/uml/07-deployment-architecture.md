@@ -4,119 +4,124 @@
 
 ```plantuml
 @startuml
-!define RECTANGLE class
+skinparam nodeBackgroundColor #F5F5F5
+skinparam databaseBackgroundColor #E8F5E9
 
-package "客户端层" {
-    [Web 应用] <<Frontend>>
-    [移动应用] <<Mobile>>
+' === 客户端层 ===
+node "Web 应用" as web <<Frontend>>
+node "移动应用" as mobile <<Mobile>>
+
+' === 负载均衡层 ===
+node "Nginx Ingress" as nginx <<Load Balancer>>
+
+' === 应用层 ===
+package "应用层（3 实例）" {
+    node "base-api (Instance 1)" as app1 <<App>> {
+        component [AuthModule] as auth1
+        component [TenantModule] as tenant1
+        component [UserModule] as user1
+    }
+    node "base-api (Instance 2)" as app2 <<App>> {
+        component [AuthModule] as auth2
+        component [TenantModule] as tenant2
+        component [UserModule] as user2
+    }
+    node "base-api (Instance 3)" as app3 <<App>> {
+        component [AuthModule] as auth3
+        component [TenantModule] as tenant3
+        component [UserModule] as user3
+    }
 }
 
-package "负载均衡层" {
-    [Nginx Ingress] <<Load Balancer>>
-}
-
-package "应用层" {
-    [base-api\n(Instance 1)] <<App>> {
-        [AuthModule]
-        [TenantModule]
-        [UserModule]
-    }
-    [base-api\n(Instance 2)] <<App>> {
-        [AuthModule]
-        [TenantModule]
-        [UserModule]
-    }
-    [base-api\n(Instance 3)] <<App>> {
-        [AuthModule]
-        [TenantModule]
-        [UserModule]
-    }
-}
-
+' === 数据层 ===
 package "数据层" {
-    [PostgreSQL\n(Primary)] <<Database>> {
-        [Tenant Database]
-        [User Database]
-        [Role Database]
+    database "PostgreSQL (Primary)" as pg {
+        component [Tenant Database] as pgTenant
+        component [User Database] as pgUser
+        component [Role Database] as pgRole
     }
-    [Redis Cluster] <<Cache>> {
-        [Redis Master]
-        [Redis Slave 1]
-        [Redis Slave 2]
+    database "Redis Cluster" as redis {
+        component [Redis Master] as redisMaster
+        component [Redis Slave 1] as redisSlave1
+        component [Redis Slave 2] as redisSlave2
     }
-    [OpenSearch Cluster] <<Search>> {
-        [OpenSearch Node 1]
-        [OpenSearch Node 2]
-        [OpenSearch Node 3]
+    database "OpenSearch Cluster" as opensearch {
+        component [Node 1] as os1
+        component [Node 2] as os2
+        component [Node 3] as os3
     }
 }
 
+' === 分析层 ===
 package "分析层" {
-    [Jitsu Analytics] <<Analytics>>
-    [Cube OLAP] <<OLAP>>
+    node "Jitsu Analytics" as jitsu <<Analytics>>
+    node "Cube OLAP" as cube <<OLAP>>
 }
 
+' === 存储层 ===
 package "存储层" {
-    [MinIO Gateway] <<Storage>> {
-        [MinIO Server 1]
-        [MinIO Server 2]
+    storage "MinIO Gateway" as minio <<Storage>> {
+        component [MinIO Server 1] as minio1
+        component [MinIO Server 2] as minio2
     }
 }
 
+' === 监控层 ===
 package "监控层" {
-    [Prometheus Server] <<Monitoring>>
-    [Grafana Dashboard] <<Dashboard>>
+    node "Prometheus Server" as prometheus <<Monitoring>>
+    node "Grafana Dashboard" as grafana <<Dashboard>>
 }
 
-package "外部服务" {
-    [SMTP Server] <<Email>>
-    [CDN Service] <<CDN>>
+' === 外部服务 ===
+cloud "外部服务" {
+    node "SMTP Server" as smtp <<Email>>
+    node "CDN Service" as cdn <<CDN>>
 }
 
-[Web 应用] --> [Nginx Ingress] : HTTPS
-[移动应用] --> [Nginx Ingress] : HTTPS
+' === 关系 ===
+web --> nginx : HTTPS
+mobile --> nginx : HTTPS
 
-[Nginx Ingress] --> [base-api\n(Instance 1)] : 负载均衡
-[Nginx Ingress] --> [base-api\n(Instance 2)] : 负载均衡
-[Nginx Ingress] --> [base-api\n(Instance 3)] : 负载均衡
+nginx --> app1 : 负载均衡
+nginx --> app2 : 负载均衡
+nginx --> app3 : 负载均衡
 
-[base-api\n(Instance 1)] --> [PostgreSQL\n(Primary)] : 数据访问
-[base-api\n(Instance 2)] --> [PostgreSQL\n(Primary)] : 数据访问
-[base-api\n(Instance 3)] --> [PostgreSQL\n(Primary)] : 数据访问
+app1 --> pg : 数据访问
+app2 --> pg : 数据访问
+app3 --> pg : 数据访问
 
-[base-api\n(Instance 1)] --> [Redis Cluster] : 缓存/会话
-[base-api\n(Instance 2)] --> [Redis Cluster] : 缓存/会话
-[base-api\n(Instance 3)] --> [Redis Cluster] : 缓存/会话
+app1 --> redis : 缓存/会话
+app2 --> redis : 缓存/会话
+app3 --> redis : 缓存/会话
 
-[base-api\n(Instance 1)] --> [OpenSearch Cluster] : 日志搜索
-[base-api\n(Instance 2)] --> [OpenSearch Cluster] : 日志搜索
-[base-api\n(Instance 3)] --> [OpenSearch Cluster] : 日志搜索
+app1 --> opensearch : 日志搜索
+app2 --> opensearch : 日志搜索
+app3 --> opensearch : 日志搜索
 
-[base-api\n(Instance 1)] --> [Jitsu Analytics] : 事件追踪
-[base-api\n(Instance 2)] --> [Jitsu Analytics] : 事件追踪
-[base-api\n(Instance 3)] --> [Jitsu Analytics] : 事件追踪
+app1 --> jitsu : 事件追踪
+app2 --> jitsu : 事件追踪
+app3 --> jitsu : 事件追踪
 
-[base-api\n(Instance 1)] --> [Cube OLAP] : 数据分析
-[base-api\n(Instance 2)] --> [Cube OLAP] : 数据分析
-[base-api\n(Instance 3)] --> [Cube OLAP] : 数据分析
+app1 --> cube : 数据分析
+app2 --> cube : 数据分析
+app3 --> cube : 数据分析
 
-[base-api\n(Instance 1)] --> [MinIO Gateway] : 文件存储
-[base-api\n(Instance 2)] --> [MinIO Gateway] : 文件存储
-[base-api\n(Instance 3)] --> [MinIO Gateway] : 文件存储
+app1 --> minio : 文件存储
+app2 --> minio : 文件存储
+app3 --> minio : 文件存储
 
-[base-api\n(Instance 1)] --> [SMTP Server] : 邮件发送
-[base-api\n(Instance 2)] --> [SMTP Server] : 邮件发送
-[base-api\n(Instance 3)] --> [SMTP Server] : 邮件发送
+app1 --> smtp : 邮件发送
+app2 --> smtp : 邮件发送
+app3 --> smtp : 邮件发送
 
-[base-api\n(Instance 1)] --> [Prometheus Server] : 指标暴露
-[base-api\n(Instance 2)] --> [Prometheus Server] : 指标暴露
-[base-api\n(Instance 3)] --> [Prometheus Server] : 指标暴露
+app1 --> prometheus : 指标暴露
+app2 --> prometheus : 指标暴露
+app3 --> prometheus : 指标暴露
 
-[Prometheus Server] --> [Grafana Dashboard] : 监控数据
+prometheus --> grafana : 监控数据
+minio --> cdn : 静态资源分发
 
-[MinIO Gateway] --> [CDN Service] : 静态资源分发
-
-note right of base-api\n(Instance 1)
+note right of app1
   应用实例：
   - NestJS + Node.js
   - PM2 进程管理
@@ -124,7 +129,7 @@ note right of base-api\n(Instance 1)
   - 共享数据层
 end note
 
-note right of PostgreSQL\n(Primary)
+note right of pg
   数据库配置：
   - PostgreSQL 14+
   - 主从复制（读写分离）
@@ -132,7 +137,7 @@ note right of PostgreSQL\n(Primary)
   - 定期备份
 end note
 
-note right of Redis Cluster
+note right of redis
   缓存配置：
   - Redis 6+
   - 主从架构
@@ -147,74 +152,69 @@ end note
 
 ```plantuml
 @startuml
-database "Docker 网络" {
-    network "overlay" {
-        [base-api Network]
-        [Database Network]
-        [Monitoring Network]
+skinparam nodeBackgroundColor #F5F5F5
+
+node "Docker Compose" as compose {
+    package "应用网络 (App Network)" as appNet {
+        node "Nginx" as nginx <<1 replica>>
+        node "base-api" as api <<3 replicas>>
+    }
+
+    package "数据网络 (Database Network)" as dbNet {
+        database "PostgreSQL" as pg <<1 primary + 2 replicas>>
+        database "Redis" as redis <<1 master + 2 slaves>>
+        database "OpenSearch" as os <<3 nodes>>
+    }
+
+    package "分析网络 (Analytics Network)" as analyticsNet {
+        node "Jitsu" as jitsu <<1 instance>>
+        node "Cube" as cube <<1 instance>>
+    }
+
+    package "存储网络 (Storage Network)" as storageNet {
+        storage "MinIO" as minio <<4 servers>>
+    }
+
+    package "监控网络 (Monitoring Network)" as monNet {
+        node "Prometheus" as prometheus <<1 instance>>
+        node "Grafana" as grafana <<1 instance>>
     }
 }
 
-participant "Docker Compose" as compose
-participant "Docker Swarm" as swarm
+node "Docker Swarm" as swarm
 
-note right of compose
+' === 网络连接关系 ===
+nginx --> api : 反向代理
+api --> pg : 数据访问
+api --> redis : 缓存/会话
+api --> os : 日志搜索
+api --> jitsu : 事件追踪
+api --> cube : 数据分析
+api --> minio : 文件存储
+api --> prometheus : 指标暴露
+prometheus --> grafana : 监控数据
+
+' === Swarm 编排 ===
+swarm --> api : 部署 (replicated)
+swarm --> pg : 部署 (replicated)
+swarm --> nginx : 部署 (global)
+swarm --> prometheus : 部署 (global)
+
+note bottom of compose
   服务容器：
-
-  **应用服务**:
-  - base-api: 3 replicas
-  - Nginx: 1 replica
-
-  **数据服务**:
-  - PostgreSQL: 1 primary, 2 replicas
-  - Redis: 1 master, 2 slaves
-  - OpenSearch: 3 nodes
-
-  **分析服务**:
-  - Jitsu: 1 instance
-  - Cube: 1 instance
-
-  **存储服务**:
-  - MinIO: 4 servers
-
-  **监控服务**:
-  - Prometheus: 1 instance
-  - Grafana: 1 instance
+  **应用服务**: base-api × 3, Nginx × 1
+  **数据服务**: PostgreSQL (1+2), Redis (1+2), OpenSearch × 3
+  **分析服务**: Jitsu × 1, Cube × 1
+  **存储服务**: MinIO × 4
+  **监控服务**: Prometheus × 1, Grafana × 1
 end note
 
-compose --> [base-api Network] : overlay
-compose --> [Database Network] : overlay
-compose --> [Monitoring Network] : overlay
-
-[base-api Network] --> [base-api\n(Container)] : 连接
-[Database Network] --> [PostgreSQL\n(Container)] : 连接
-[Database Network] --> [Redis\n(Container)] : 连接
-
-[Monitoring Network] --> [Prometheus\n(Container)] : 连接
-[Monitoring Network] --> [Grafana\n(Container)] : 连接
-
-swarm --> [base-api\n(Service)] : 部署
-swarm --> [PostgreSQL\n(Service)] : 部署
-
-note right of swarm
+note bottom of swarm
   Docker Swarm 配置：
-
-  **服务模式**:
-  - Replicated mode: base-api, PostgreSQL
-  - Global mode: Nginx, Prometheus
-
-  **网络**:
-  - Overlay network for service communication
-  - Internal network for database access
-
-  **存储**:
-  - Volume mounts for data persistence
-  - Separate volumes for each service
-
-  **健康检查**:
-  - HTTP health check for base-api
-  - TCP check for PostgreSQL, Redis
-  - Command check for OpenSearch
+  **服务模式**: Replicated (base-api, PostgreSQL) / Global (Nginx, Prometheus)
+  **网络**: Overlay (服务间通信) + Internal (数据库访问)
+  **存储**: Volume mounts (数据持久化)
+  **健康检查**: HTTP (base-api) / TCP (PostgreSQL, Redis) / CMD (OpenSearch)
 end note
 
 @enduml
@@ -318,55 +318,54 @@ end
 
 ```plantuml
 @startuml
-!define RECTANGLE class
 
 package "监控数据采集" {
-    [MetricsService] <<Service>>
-    [ErrorTrackingService] <<Service>>
-    [RequestTracingService] <<Service>>
-    [Prometheus Controller] <<Controller>>
+    component [MetricsService] as metrics <<Service>>
+    component [ErrorTrackingService] as errorTracking <<Service>>
+    component [RequestTracingService] as requestTracing <<Service>>
+    component [PrometheusController] as promController <<Controller>>
 }
 
 package "应用层" {
-    [AuthModule] <<Module>>
-    [TenantModule] <<Module>>
-    [UserModule] <<Module>>
-    [Business Modules] <<Module>>
+    component [AuthModule] as authMod <<Module>>
+    component [TenantModule] as tenantMod <<Module>>
+    component [UserModule] as userMod <<Module>>
+    component [BusinessModules] as bizMod <<Module>>
 }
 
 package "监控存储" {
-    [Prometheus TSDB] <<Database>>
+    database [PrometheusTSDB] as tsdb <<Database>>
 }
 
 package "可视化层" {
-    [Grafana] <<Dashboard>>
-    [AlertManager] <<Alerting>>
+    component [Grafana] as grafana <<Dashboard>>
+    component [AlertManager] as alertMgr <<Alerting>>
 }
 
-[MetricsService] --> [AuthModule] : 收集指标
-[MetricsService] --> [TenantModule] : 收集指标
-[MetricsService] --> [UserModule] : 收集指标
-[MetricsService] --> [Business Modules] : 收集指标
+metrics --> authMod : 收集指标
+metrics --> tenantMod : 收集指标
+metrics --> userMod : 收集指标
+metrics --> bizMod : 收集指标
 
-[ErrorTrackingService] --> [AuthModule] : 追踪错误
-[ErrorTrackingService] --> [TenantModule] : 追踪错误
-[ErrorTrackingService] --> [UserModule] : 追踪错误
-[ErrorTrackingService] --> [Business Modules] : 追踪错误
+errorTracking --> authMod : 追踪错误
+errorTracking --> tenantMod : 追踪错误
+errorTracking --> userMod : 追踪错误
+errorTracking --> bizMod : 追踪错误
 
-[RequestTracingService] --> [AuthModule] : 追踪请求
-[RequestTracingService] --> [TenantModule] : 追踪请求
-[RequestTracingService] --> [UserModule] : 追踪请求
-[RequestTracingService] --> [Business Modules] : 追踪请求
+requestTracing --> authMod : 追踪请求
+requestTracing --> tenantMod : 追踪请求
+requestTracing --> userMod : 追踪请求
+requestTracing --> bizMod : 追踪请求
 
-[Prometheus Controller] --> [MetricsService] : 拉取指标
-[Prometheus Controller] --> [ErrorTrackingService] : 拉取错误
-[Prometheus Controller] --> [RequestTracingService] : 拉取追踪
+promController --> metrics : 拉取指标
+promController --> errorTracking : 拉取错误
+promController --> requestTracing : 拉取追踪
 
-[Prometheus Controller] --> [Prometheus TSDB] : 存储时间序列数据
-[Prometheus TSDB] --> [Grafana] : 提供数据
-[Prometheus TSDB] --> [AlertManager] : 触发告警
+promController --> tsdb : 存储时间序列数据
+tsdb --> grafana : 提供数据
+tsdb --> alertMgr : 触发告警
 
-note right of MetricsService
+note right of metrics
   指标收集内容：
 
   **请求指标**:
@@ -387,7 +386,7 @@ note right of MetricsService
   - 网络流量
 end note
 
-note right of ErrorTrackingService
+note right of errorTracking
   错误追踪内容：
 
   **错误分类**:
@@ -401,7 +400,7 @@ note right of ErrorTrackingService
   - 错误分布
 end note
 
-note right of AlertManager
+note right of alertMgr
   告警规则：
 
   **应用告警**:
@@ -409,7 +408,7 @@ note right of AlertManager
   - 响应时间 P95 > 1s
   - 活跃实例数 < 3
 
-  **系统告警**：
+  **系统告警**:
   - CPU > 80%
   - 内存 > 85%
   - 磁盘 > 90%

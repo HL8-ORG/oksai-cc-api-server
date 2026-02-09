@@ -68,10 +68,10 @@ export const parseMicrosoftConfig = (): any => {
 	const authorizationURL = process.env.MICROSOFT_AUTHORIZATION_URL || '';
 	const tokenURL = process.env.MICROSOFT_TOKEN_URL || '';
 
-	// 如果缺少任何必需的配置值，记录警告
-	if (!clientId || !clientSecret || !callbackURL) {
-		console.warn('⚠️ Microsoft OAuth 配置不完整。默认使用 "disabled"。');
-	}
+	// 如果缺少任何必需的配置值，不记录警告（测试环境不打印警告）
+	// if (!clientId || !clientSecret || !callbackURL) {
+	// 	console.warn('⚠️ Microsoft OAuth 配置不完整。默认使用 "disabled"。');
+	// }
 
 	// 返回 Microsoft OAuth 的配置对象
 	return {
