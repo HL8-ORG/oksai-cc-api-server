@@ -1,6 +1,4 @@
-# MCP 服务器启动流程序列图
-
-```mermaid
+%% MCP 服务器启动流程序列图
 sequenceDiagram
     actor User as 用户
     participant McpServer as McpServer
@@ -17,4 +15,3 @@ sequenceDiagram
     McpServer->>McpServer: isStarted = true
     McpServer-->>User: started
     deactivate McpServer
-```

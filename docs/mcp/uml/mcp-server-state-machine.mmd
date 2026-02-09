@@ -1,6 +1,4 @@
-# McpServer 状态机
-
-```mermaid
+%% McpServer 状态机
 stateDiagram-v2
     [*] --> Stopped: 启动失败
     [*] --> Initializing: 调用 start()
@@ -18,4 +16,3 @@ stateDiagram-v2
 
     Restarting --> Running: 重启成功
     Running --> Running: 重启后回到运行状态
-```

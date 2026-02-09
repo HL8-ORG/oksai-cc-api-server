@@ -1,6 +1,4 @@
-# 部署架构图
-
-```mermaid
+%% 部署架构图
 graph TB
     subgraph "客户端层"
         UserClient[用户客户端]
@@ -40,4 +38,3 @@ graph TB
     OAuthAuthServer --> StdioMcpServer: 返回 JWKS
     OAuthAuthServer --> HttpMcpServer: 返回 JWKS
     OAuthAuthServer --> WebSocketMcpServer: 返回 JWKS
-```

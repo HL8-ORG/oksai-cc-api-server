@@ -1,6 +1,4 @@
-# 认证管理组件图
-
-```mermaid
+%% 认证管理组件图
 classDiagram
     class AuthManager {
         <<单例模式>>
@@ -11,11 +9,9 @@ classDiagram
         + logout(): Promise~void~
         + getAuthStatus(): AuthStatus
 
-        # 认证状态管理
         + setAuthState(userId: string, tenantId?: string, organizationId?: string): void
         + clearAuthState(): void
 
-        # 用户信息
         + getUserId(): string | null
         + getTenantId(): string | null
         + getOrganizationId(): string | null
@@ -30,4 +26,3 @@ classDiagram
     }
 
     AuthManager --> AuthStatus: 返回
-```

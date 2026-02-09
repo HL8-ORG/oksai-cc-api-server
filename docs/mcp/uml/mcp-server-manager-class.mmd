@@ -1,6 +1,4 @@
-# McpServerManager 类图
-
-```mermaid
+%% McpServerManager 类图
 classDiagram
     class McpServerManager {
         - servers: Map~string, ServerInstance~
@@ -20,7 +18,6 @@ classDiagram
         + setPrimaryServer(serverId: string): boolean
         + getPrimaryServerId(): string | null
         + getPrimaryServer(): McpServer | null
-        + getStats(): { total: number, running: number, stopped: number, primaryServerId: string | null }
+        + getStats(): McpServerStats
         + cleanup(): Promise~void~
     }
-```

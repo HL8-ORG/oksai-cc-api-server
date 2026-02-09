@@ -1,6 +1,4 @@
-# 测试架构图
-
-```mermaid
+%% 测试架构图
 graph TB
     subgraph "McpServer Tests"
         McpServerSpec[McpServerSpec]
@@ -43,4 +41,3 @@ graph TB
     McpServerIntegrationSpec --> SessionIntegrationSpec: 依赖
     OAuthIntegrationSpec --> AuthControllerSpec: 依赖
     McpServerIntegrationSpec --> TransportIntegrationSpec: 依赖
-```

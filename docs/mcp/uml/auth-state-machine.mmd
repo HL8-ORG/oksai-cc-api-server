@@ -1,6 +1,4 @@
-# 认证状态机
-
-```mermaid
+%% 认证状态机
 stateDiagram-v2
     [*] --> Unauthenticated: 未认证
 
@@ -11,4 +9,3 @@ stateDiagram-v2
     Authenticated --> Failed: 认证失败
 
     Failed --> Unauthenticated: 清理失败后重试
-```

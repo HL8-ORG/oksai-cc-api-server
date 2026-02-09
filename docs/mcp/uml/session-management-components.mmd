@@ -1,6 +1,4 @@
-# 会话管理组件图
-
-```mermaid
+%% 会话管理组件图
 classDiagram
     class SessionManager {
         - storage: SessionStorage
@@ -52,7 +50,7 @@ classDiagram
 
         - serialize(session: Session): string
         - deserialize(json: string): Session
-        - ~async~ loadAllSessions(): Promise~Map~string, Session~~
+        - loadAllSessions(): Promise~Map~string, Session~~
     }
 
     class Session {
@@ -68,4 +66,3 @@ classDiagram
     SessionManager --> SessionStorage: 使用
     SessionStorage <|-- MemoryStorage: 实现
     SessionStorage <|-- RedisStorage: 实现
-```

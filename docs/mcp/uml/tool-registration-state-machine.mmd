@@ -1,6 +1,4 @@
-# 工具注册状态机
-
-```mermaid
+%% 工具注册状态机
 stateDiagram-v2
     [*] --> Unregistered: 工具未注册
     Unregistered --> Registered: 调用 registerTool()
@@ -15,4 +13,3 @@ stateDiagram-v2
     Completed --> Active: 可以再次调用
 
     Failed --> Active: 重试执行
-```
