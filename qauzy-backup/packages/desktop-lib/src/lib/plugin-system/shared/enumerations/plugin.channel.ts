@@ -1,0 +1,19 @@
+export enum PluginChannel {
+	LOAD = 'plugins::load',
+	INITIALIZE = 'plugins::initialize',
+	DISPOSE = 'plugins::dispose',
+	DOWNLOAD = 'plugin::download',
+	ACTIVATE = 'plugin::activate',
+	DEACTIVATE = 'plugin::deactivate',
+	UNINSTALL = 'plugin::uninstall',
+	STATUS = 'plugin::status',
+	COMPLETE_INSTALLATION = 'plugin::complete::installation'
+}
+
+export enum PluginHandlerChannel {
+	CHECK = 'plugins::check',
+	GET_ALL = 'plugins::getAll',
+	GET_ONE = 'plugins::getOne',
+	LAZY_LOADER = 'plugins::lazy-loader',
+	GET_OS = 'plugins::get-os'
+}

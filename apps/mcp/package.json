@@ -1,0 +1,34 @@
+{
+	"name": "@oksai/mcp",
+	"version": "0.1.0",
+	"description": "MCP 服务器入口应用，支持 Stdio/HTTP/WebSocket 三种传输层",
+	"author": {
+		"name": "OKSAI Team",
+		"email": "team@oksai.com",
+		"url": "https://github.com/oksai/oksai-platform"
+	},
+	"homepage": "https://github.com/oksai/oksai-platform",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oksai/oksai-platform.git",
+		"directory": "apps/mcp"
+	},
+	"bugs": {
+		"url": "https://github.com/oksai/oksai-platform/issues"
+	},
+	"license": "AGPL-3.0",
+	"private": true,
+	"type": "commonjs",
+	"main": "dist/apps/mcp/src/index.js",
+	"types": "dist/apps/mcp/src/index.d.ts",
+	"scripts": {
+		"build": "rimraf dist && tsc -p tsconfig.app.json",
+		"build:watch": "tsc -p tsconfig.app.json --watch",
+		"start": "ts-node src/index.ts",
+		"start:dev": "tsx watch src/index.ts",
+		"start:prod": "node dist/apps/mcp/src/index.js"
+	},
+	"dependencies": {
+		"@oksai/mcp-server": "workspace:*"
+	}
+}

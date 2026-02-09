@@ -1,0 +1,17 @@
+<div class="rating">
+  @for (star of stars; track star; let i = $index) {
+    <div class="rating-star">
+      <span
+        class="ion rating-star-icon"
+			[ngClass]="{
+				'ion-md-star': highlight(i),
+				selected: highlight(i),
+				'ion-md-star-outline': !highlight(i)
+			}"
+        (click)="starSelect(i + 1)"
+        (mouseenter)="starMouseEnter(i)"
+        (mouseleave)="starMouseLeave()"
+      ></span>
+    </div>
+  }
+</div>

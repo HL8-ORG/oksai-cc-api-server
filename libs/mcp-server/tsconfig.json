@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022"],
+		"module": "commonjs",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true
+	},
+	"files": [],
+	"include": [],
+	"references": [
+		{
+			"path": "./tsconfig.lib.json"
+		}
+	]
+}

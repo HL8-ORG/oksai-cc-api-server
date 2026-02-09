@@ -1,0 +1,64 @@
+{
+	"name": "@gauzy/ui-auth",
+	"version": "0.1.0",
+	"description": "A UI module for authentication in the Ever Gauzy Platform, providing reusable components and services for managing user authentication.",
+	"author": {
+		"name": "Ever Co. LTD",
+		"email": "ever@ever.co",
+		"url": "https://ever.co"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ever-co/ever-gauzy",
+		"directory": "packages/ui-auth"
+	},
+	"bugs": {
+		"url": "https://github.com/ever-co/ever-gauzy/issues"
+	},
+	"homepage": "https://ever.co",
+	"license": "AGPL-3.0",
+	"private": true,
+	"scripts": {
+		"lib:build": "yarn nx build ui-auth --configuration=development",
+		"lib:build:prod": "yarn nx build ui-auth --configuration=production",
+		"lib:watch": "yarn nx build ui-auth --watch --configuration=development"
+	},
+	"peerDependencies": {
+		"@angular/common": "^20.2.4",
+		"@angular/core": "^20.2.4"
+	},
+	"dependencies": {
+		"@angular/forms": "^20.2.4",
+		"@angular/router": "^20.2.4",
+		"@gauzy/contracts": "^0.1.0",
+		"@gauzy/ui-config": "^0.1.0",
+		"@gauzy/ui-core": "^0.1.0",
+		"@nebular/auth": "^16.0.0",
+		"@nebular/theme": "^16.0.0",
+		"@ngneat/until-destroy": "^10.0.0",
+		"@ngx-translate/core": "^16.0.4",
+		"@ng-select/ng-select": "^20.7.0",
+		"ngx-cookie-service": "^20.1.1",
+		"ngx-permissions": "^19.0.0",
+		"rxjs": "^7.8.2",
+		"tslib": "^2.6.2"
+	},
+	"devDependencies": {
+		"@types/jest": "29.5.14",
+		"@types/node": "^24.10.0",
+		"jest-preset-angular": "14.6.2"
+	},
+	"keywords": [
+		"angular",
+		"ui",
+		"authentication",
+		"auth",
+		"gauzy",
+		"ever-co"
+	],
+	"engines": {
+		"node": ">=22",
+		"yarn": ">=1.22"
+	},
+	"sideEffects": false
+}

@@ -35,7 +35,16 @@
 	-   API文档
     -   **注意**：新开发的代码组织结构应当保持与 `qauzy-backup` 目录下的旧项目代码组织结构一直，并优先使用可复用的旧代码，不要重复造轮子。
 
-#### 第二阶段：SAAS 服务端应用的业务功能开发
+#### 第二阶段：构建 MCP 服务端框架
+
+参考 `qauzy-backup` 目录下的旧项目代码，构建针对`@oksai/platform`项目的 MCP 服务端框架，包括：
+	-	`qauzy-backup/apps/mcp`
+	-	`qauzy-backup/apps/mcp-auth`
+	-	`qauzy-backup/packages/mcp-server`
+
+**注意**：本阶段的目标是构建框架，后续将渐进式开发完整的 MCP 服务端应用的业务功能。
+
+#### 第三阶段：SAAS 服务端应用的业务功能开发
 
 -   对齐 `qauzy-backup` 目录下的旧项目代码，构建一个多租户的 SAAS 服务端应用的构建（具体功能需求待定）
 
