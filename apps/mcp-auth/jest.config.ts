@@ -1,9 +1,14 @@
-export default {
-	displayName: 'mcp-auth',
+import type { Config } from 'jest';
+
+const config: Config = {
+	preset: 'ts-jest',
 	testEnvironment: 'node',
-	transform: {
-		'^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }]
-	},
-	moduleFileExtensions: ['ts', 'js', 'html'],
-	coverageDirectory: '../../coverage/apps/mcp-auth'
+	roots: ['<rootDir>/src'],
+	testMatch: ['**/*.spec.ts', '**/*.e2e-spec.ts'],
+	collectCoverageFrom: ['src/**/*.(t|j)s', '!src/**/*.spec.ts', '!src/**/*.e2e-spec.ts'],
+	moduleNameMapper: {
+		'^@/(.*)$': '<rootDir>/src/$1'
+	}
 };
+
+export default config;

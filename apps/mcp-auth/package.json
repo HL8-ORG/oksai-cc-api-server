@@ -1,44 +1,28 @@
 {
 	"name": "@oksai/mcp-auth",
 	"version": "0.1.0",
-	"description": "MCP Authorization Server for Ever Gauzy Platform used as Identity Server",
-	"author": {
-		"name": "Ever Co. LTD",
-		"email": "ever@ever.co",
-		"url": "https://ever.co"
-	},
-	"homepage": "https://gauzy.co",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/ever-co/ever-gauzy.git"
-	},
-	"bugs": {
-		"url": "https://github.com/ever-co/ever-gauzy/issues"
-	},
+	"description": "OAuth 2.0 授权服务器，为 MCP 服务端提供 JWT 令牌和 JWKS 支持",
 	"license": "AGPL-3.0",
 	"private": true,
 	"type": "commonjs",
+	"main": "dist/src/main.js",
 	"scripts": {
-		"build": "npx rimraf build && npx tsc -p tsconfig.app.json --outDir build",
-		"build:prod": "pnpm nx build mcp-auth --configuration=production",
-		"build:dev": "pnpm nx build mcp-auth --configuration=development",
-		"start": "pnpm nx serve mcp-auth",
-		"test": "pnpm build && node build/main.js --test",
-		"dev": "pnpm nest start --watch",
-		"start:prod": "node dist/apps/api/main.js",
-		"lint": "eslint .",
-		"clean": "rimraf dist coverage"
+		"build": "rimraf dist && tsc -p tsconfig.app.json",
+		"start": "ts-node src/main.ts",
+		"start:dev": "tsx watch src/main.ts"
 	},
 	"dependencies": {
-		"@oksai/auth": "workspace:*",
-		"@oksai/contracts": "workspace:*",
-		"@oksai/core": "workspace:*",
-		"@nestjs/typeorm": "catalog:",
-		"typeorm": "catalog:"
+		"@nestjs/common": "catalog:",
+		"@nestjs/core": "catalog:",
+		"@nestjs/platform-express": "catalog:",
+		"bcryptjs": "^3.0.3",
+		"express": "^5.2.1",
+		"jsonwebtoken": "^9.0.3"
 	},
 	"devDependencies": {
-		"@types/node": "catalog:",
-		"rimraf": "catalog:",
-		"typescript": "catalog:"
+		"@types/jest": "catalog:",
+		"@types/jsonwebtoken": "^9.0.10",
+		"jest": "catalog:",
+		"ts-jest": "catalog:"
 	}
 }

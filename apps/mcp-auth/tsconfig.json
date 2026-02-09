@@ -1,24 +1,23 @@
 {
-	"compilerOptions": {
-		"target": "es2022",
-		"useDefineForClassFields": false,
-		"forceConsistentCasingInFileNames": true,
-		"strict": false,
-		"noImplicitOverride": false,
-		"noPropertyAccessFromIndexSignature": false,
-		"noImplicitReturns": false,
-		"noFallthroughCasesInSwitch": false,
-		"types": ["node"]
-	},
 	"extends": "../../tsconfig.base.json",
-	"files": [],
-	"include": [],
-	"references": [
-		{
-			"path": "./tsconfig.app.json"
-		},
-		{
-			"path": "./tsconfig.spec.json"
-		}
-	]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "commonjs",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "../../../dist/apps/mcp-auth/src",
+		"rootDir": "src",
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }
