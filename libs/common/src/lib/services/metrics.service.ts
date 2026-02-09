@@ -1,6 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 /**
+ * 指标服务接口
+ */
+export interface IMetricsService {
+	getPerformanceSummary(method: string, path: string): PerformanceSummary | null;
+	getAllPerformanceSummaries(): Map<string, PerformanceSummary>;
+	getSlowRequests(threshold?: number): RequestMetric[];
+	getErrorRequests(): RequestMetric[];
+}
+
+/**
  * 请求指标接口
  */
 export interface RequestMetric {
@@ -36,7 +46,7 @@ export interface PerformanceSummary {
  * 提供性能监控和查询功能
  */
 @Injectable()
-export class MetricsService {
+export class MetricsService implements IMetricsService {
 	private readonly logger = new Logger('MetricsService');
 	private metrics: Map<string, RequestMetric[]> = new Map();
 	private readonly MAX_METRICS_PER_ROUTE = 1000;

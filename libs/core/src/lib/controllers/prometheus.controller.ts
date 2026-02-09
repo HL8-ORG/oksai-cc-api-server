@@ -1,13 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { Logger, Injectable } from '@nestjs/common';
 
-interface IMetricsService {
-	getPerformanceSummary(method: string, path: string): PerformanceSummary | null;
-	getAllPerformanceSummaries(): Map<string, PerformanceSummary>;
-	getSlowRequests(threshold?: number): RequestMetric[];
-	getErrorRequests(): RequestMetric[];
-}
-
 interface RequestMetric {
 	path: string;
 	method: string;
@@ -76,7 +69,7 @@ interface PrometheusErrorRequestsResponse {
 export class PrometheusController {
 	private readonly logger = new Logger(PrometheusController.name);
 
-	constructor(private readonly metricsService: IMetricsService) {}
+	constructor(private readonly metricsService: any) {}
 
 	/**
 	 * 健康检查端点

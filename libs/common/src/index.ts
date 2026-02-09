@@ -2,7 +2,8 @@ export * from './lib/utils/password.utils';
 export * from './lib/utils/jwt.utils';
 export * from './lib/middleware';
 export * from './lib/interceptors';
-export * from './lib/guards';
+// 注意：所有守卫已迁移至 @oksai/core 包
+// 请从 @oksai/core 导入需要的守卫
 export * from './lib/decorators';
 export * from './lib/services';
 export * from './lib/constants/jwt.constants';

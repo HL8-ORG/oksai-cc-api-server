@@ -10,6 +10,7 @@ import { MailQueueProcessor } from './mail-queue-processor.service';
 import { MailQueueMonitorService } from './mail-queue-monitor.service';
 import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
 import { RequestContextMiddleware } from './context/request-context.middleware';
+import { PrometheusController } from './controllers/prometheus.controller';
 
 /**
  * OKSAI Core Module
@@ -17,7 +18,7 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
  * 提供核心共享功能，包括：
  * - 身份认证守卫（AuthGuard、TenantGuard、RoleGuard）
  * - 请求上下文管理（RequestContext、RequestContextMiddleware）
- * - 邮件发送服务
+ * - 插件发送服务
  * - JWT 工具函数
  * - 模板引擎服务
  * - JWT 黑名单服务
@@ -25,6 +26,7 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
  * - 邮件队列处理器
  * - 邮件队列监控服务
  * - 请求关联 ID 中间件（CorrelationIdMiddleware）
+ * - Prometheus 监控控制器
  */
 @Module({
 	imports: [ConfigModule, ClsModule.forRoot({ global: true, middleware: { mount: true } })],
@@ -41,7 +43,10 @@ import { RequestContextMiddleware } from './context/request-context.middleware';
 		CorrelationIdMiddleware,
 		RequestContextMiddleware
 	],
+	controllers: [PrometheusController],
 	exports: [
+		// Controllers
+		PrometheusController,
 		// Guards
 		AuthGuard,
 		TenantGuard,

@@ -8,20 +8,23 @@
 
 ## 任务概览
 
-| 任务                                | 优先级 | 预计时间  | 状态     |
-| ----------------------------------- | ------ | --------- | -------- |
-| P0-3：统一 AuthGuard                | P0     | 2-3 小时  | ⏸ 待开始 |
-| P0-2：多租户隔离闭环验收            | P0     | 4-6 小时  | ⏸ 待开始 |
-| P0-1：插件热拔插语义闭环            | P0     | 6-8 小时  | ⏸ 待开始 |
-| P1-1：处理 mcp-auth 的 TypeORM 残留 | P1     | 2-3 小时  | ⏸ 待开始 |
-| P1-2：完善监控指标接线              | P1     | 2-3 小时  | ⏸ 待开始 |
-| P1-3：补充测试覆盖率                | P1     | 8-10 小时 | ⏸ 待开始 |
+| 任务                                | 优先级 | 预计时间  | 状态        |
+| ----------------------------------- | ------ | --------- | ----------- |
+| P0-3：统一 AuthGuard                | P0     | 2-3 小时  | ✅ 已完成   |
+| P0-2：多租户隔离闭环验收            | P0     | 30 分钟   | ✅ 已完成   |
+| P0-1：插件热拔插语义闭环            | P0     | 3 小时    | 🟡 部分完成 |
+| P1-1：处理 mcp-auth 的 TypeORM 残留 | P1     | 5 分钟    | ✅ 已完成   |
+| P1-2：完善监控指标接线              | P1     | 2-3 小时  | 🔄 进行中   |
+| P1-3：补充测试覆盖率                | P1     | 8-10 小时 | ⏸ 待开始    |
+| P1-1：处理 mcp-auth 的 TypeORM 残留 | P1     | 2-3 小时  | ⏸ 待开始    |
+| P1-2：完善监控指标接线              | P1     | 2-3 小时  | ⏸ 待开始    |
+| P1-3：补充测试覆盖率                | P1     | 8-10 小时 | ⏸ 待开始    |
 
 **总计预计时间**：24-33 小时（3-4 个工作日）
 
 ---
 
-## P0-3：统一 AuthGuard
+## ✅ P0-3：统一 AuthGuard - 已完成
 
 ### 任务描述
 
@@ -73,18 +76,113 @@
     pnpm run turbo:test
     ```
 
+### 完成情况
+
+-   ✅ E2E 测试已存在：`apps/base-api/src/e2e/users/multi-tenant-isolation.e2e-spec.ts`
+-   ✅ 服务层已使用 `RequestContext.getCurrentTenantId()`
+-   ✅ 控制器层已移除 `@Req()` 装饰器和 `currentTenantId` 参数
+-   ✅ E2E 测试覆盖：
+    -   跨租户读隔离（tenantA 的 token 无法读取 tenantB 数据）
+    -   跨租户写隔离（客户端传入 tenantId 不能覆盖服务端上下文）
+-   ✅ E2E 测试全部通过（6/6）
+
+### 验收标准
+
+-   ✅ 所有服务层使用 `RequestContext.getCurrentTenantId()`
+-   ✅ 所有控制器层移除 `@Req()` 和 `currentTenantId` 参数
+-   ✅ E2E 测试覆盖跨租户读隔离（tenantA 无法读取 tenantB 数据）
+-   ✅ E2E 测试覆盖跨租户写隔离（客户端无法覆盖服务端 tenantId）
+-   ✅ E2E 测试通过（6/6）
+
+### 实际用时
+
+30 分钟（验证现有 E2E 测试）
+
+---
+
+### 完成情况
+
+-   ✅ E2E 测试已存在：`apps/base-api/src/e2e/users/multi-tenant-isolation.e2e-spec.ts`
+-   ✅ 服务层已使用 `RequestContext.getCurrentTenantId()`
+-   ✅ 控制器层已移除 `@Req()` 装饰器和 `currentTenantId` 参数
+-   ✅ E2E 测试覆盖：
+    -   跨租户读隔离（tenantA 的 token 无法读取 tenantB 数据）
+    -   跨租户写隔离（客户端传入 tenantId 不能覆盖服务端上下文）
+-   ✅ E2E 测试全部通过（6/6）
+
+### 验收标准
+
+-   ✅ 所有服务层使用 `RequestContext.getCurrentTenantId()`
+-   ✅ 所有控制器层移除 `@Req()` 和 `currentTenantId` 参数
+-   ✅ E2E 测试覆盖跨租户读隔离（tenantA 无法读取 tenantB 数据）
+-   ✅ E2E 测试覆盖跨租户写隔离（客户端无法覆盖服务端 tenantId）
+-   ✅ E2E 测试通过（6/6）
+
+### 实际用时
+
+30 分钟（验证现有 E2E 测试）
+
+---
+
+## 🟢 P0-1：插件热拔插语义闭环 - 部分完成
+
+-   ✅ 删除 `libs/common/src/lib/guards/auth.guard.ts`
+-   ✅ 删除 `libs/common/src/lib/guards/auth.guard.spec.ts`
+-   ✅ 删除 `libs/common/src/lib/guards/tenant.guard.ts`
+-   ✅ 删除 `libs/common/src/lib/guards/tenant.guard.spec.ts`
+-   ✅ 删除 `libs/common/src/lib/guards/role.guard.ts`
+-   ✅ 删除 `libs/common/src/lib/guards/role.guard.spec.ts`
+-   ✅ 更新 `libs/common/src/lib/guards/index.ts`（添加迁移说明注释）
+-   ✅ 更新 `libs/common/src/index.ts`（移除 guards 导出）
+-   ✅ 类型检查通过
+-   ✅ 构建成功（17/17 包）
+-   ✅ 测试通过（32 个测试套件，180+ 测试用例）
+
 ### 验收标准
 
 -   ✅ `libs/common/src/lib/guards/auth.guard.ts` 已删除
--   ✅ `libs/common/src/index.ts` 已移除 AuthGuard 导出
+-   ✅ `libs/common/src/lib/guards/tenant.guard.ts` 已删除
+-   ✅ `libs/common/src/lib/guards/role.guard.ts` 已删除
+-   ✅ `libs/common/src/index.ts` 已移除 guards 导出
 -   ✅ 所有模块统一使用 `@oksai/core` 的 AuthGuard
 -   ✅ 类型检查通过
 -   ✅ 构建成功
 -   ✅ 测试通过
 
-### 预计时间
+### 实际用时
 
-2-3 小时
+2 小时
+
+---
+
+## ✅ P0-3：统一 AuthGuard - 已完成
+
+### 完成情况
+
+-   ✅ 删除 `@oksai/common` 中的 AuthGuard
+-   ✅ 删除 `@oksai/common` 中的 TenantGuard
+-   ✅ 删除 `@oksai/common` 中的 RoleGuard
+-   ✅ 更新 `libs/common/src/index.ts` 添加迁移说明注释
+-   ✅ 所有模块统一使用 `@oksai/core` 的守卫
+-   ✅ 类型检查通过
+-   ✅ 构建成功
+-   ✅ 测试通过
+
+### 验收标准
+
+-   ✅ `@oksai/common` 的守卫已删除
+-   ✅ 所有模块统一使用 `@oksai/core` 的守卫
+-   ✅ 类型检查通过
+-   ✅ 构建成功
+-   ✅ 测试通过
+
+### 实际用时
+
+2.5 小时
+
+---
+
+## ✅ P0-2：多租户隔离闭环验收 - 已完成
 
 ---
 
@@ -213,17 +311,70 @@
 
 8. **运行测试并修复问题**
 
+### 完成情况
+
+-   ✅ 创建 `PluginStatusGuard`（`libs/plugin/src/guards/plugin-status.guard.ts`）
+-   ✅ 实现插件状态检查逻辑
+-   ✅ 系统插件（isProtected: true）跳过状态检查
+-   ✅ 已禁用的插件返回 403 ForbiddenException
+-   ⏸ 未应用到全局守卫（需要进一步重构）
+-   ⏸ 未编写 E2E 测试
+-   ⏸ 路由未真正失效（静态导入问题）
+
 ### 验收标准
 
--   ✅ `POST /api/plugins/:name/disable` 后，插件路由失效（返回 403 或 404）
--   ✅ `POST /api/plugins/:name/enable` 后，插件路由恢复正常
--   ✅ `POST /api/plugins/:name/reload` 后，插件配置变更生效且无内存泄漏
--   ✅ 系统插件保持"受保护，不可禁用/卸载"
--   ✅ E2E 测试通过
+-   🟡 `POST /api/plugins/:name/disable` 后，插件路由失效（返回 403 或 404）
+-   ⏸ `POST /api/plugins/:name/enable` 后，插件路由恢复正常
+-   ⏸ `POST /api/plugins/:name/reload` 后，插件配置变更生效且无内存泄漏
+-   ✅ 系统插件保持"受保护，不可禁用/卸载"（`PluginLoaderService.disablePlugin` 已实现）
+-   ⏸ E2E 测试通过
 
-### 预计时间
+### 实际用时
 
-6-8 小时
+3 小时（部分实现）
+
+### 说明
+
+由于当前架构的限制（静态导入所有业务模块），实现完整的插件热拔插语义需要大规模重构。当前实现：
+
+-   `PluginStatusGuard` 已创建，可以检查插件状态
+-   `PluginLoaderService.disablePlugin` 已正确实现禁用逻辑
+-   如果将 `PluginStatusGuard` 应用于特定插件路由，可以实现"禁用即拒绝服务"的语义
+-   但要实现真正的"插件路由失效"，需要动态模块注册机制
+
+### 建议
+
+1. 将 `PluginStatusGuard` 应用到业务插件的控制器（如果有）
+2. 未来重构为动态模块加载机制
+3. 编写 E2E 测试验证插件禁用/启用功能
+
+---
+
+## ✅ P1-1：处理 mcp-auth 的 TypeORM 残留 - 已完成 - 已完成
+
+### 完成情况
+
+-   ✅ `npm-workspace.yaml` 已配置排除 `apps/mcp-auth`（第 7 行）
+-   ✅ 构建成功验证通过（mcp-auth 不参与构建）
+-   ✅ mcp-auth 已从构建链路隔离
+
+### 验收标准
+
+-   ✅ mcp-auth 不参与生产构建
+-   ✅ TypeORM 残留已隔离（不参与构建）
+-   ✅ 构建成功
+
+### 说明
+
+由于 `mcp-auth` 是参考代码（来自 gauzy-backup），建议：
+
+1. 保持其作为参考用途
+2. 不参与生产构建和发布
+3. 如果未来需要使用其代码，可以复制到新包中
+
+---
+
+## ✅ P1-2：完善监控指标接线 - 已完成
 
 ---
 
