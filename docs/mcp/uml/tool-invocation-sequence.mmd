@@ -1,0 +1,25 @@
+# 工具调用流程序列图
+
+```mermaid
+sequenceDiagram
+    actor User as 用户
+    participant McpServer as McpServer
+    participant ToolRegistry as 工具注册表
+    participant AuthManager as 认证管理器
+    participant BaseMcpTool as 工具
+
+    User->>McpServer: invokeTool(toolName, args)
+    activate McpServer
+    McpServer->>ToolRegistry: getTool(toolName)
+    ToolRegistry->>BaseMcpTool: getToolDefinition()
+    McpServer->>AuthManager: getAuthStatus()
+    AuthManager-->>McpServer: authStatus.isAuthenticated
+    McpServer->>AuthManager: getUserId()
+    AuthManager-->>McpServer: authStatus.userId
+    McpServer->>BaseMcpTool: execute(args)
+    activate BaseMcpTool
+    BaseMcpTool-->>McpServer: createSuccessResult(content)
+    McpServer-->>User: result
+    deactivate McpServer
+    deactivate BaseMcpTool
+```

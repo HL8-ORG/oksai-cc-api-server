@@ -1,0 +1,14 @@
+# 认证状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unauthenticated: 未认证
+
+    Unauthenticated --> Authenticated: 调用 setAuthState()
+
+    Authenticated --> Unauthenticated: 调用 clearAuthState()
+
+    Authenticated --> Failed: 认证失败
+
+    Failed --> Unauthenticated: 清理失败后重试
+```

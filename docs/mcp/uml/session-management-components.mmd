@@ -1,0 +1,71 @@
+# 会话管理组件图
+
+```mermaid
+classDiagram
+    class SessionManager {
+        - storage: SessionStorage
+        - ttl: number
+        - enableRedis: boolean
+        - redisConfig?: RedisConfig
+
+        + createSession(userId?: string, organizationId?: string, tenantId?: string, data?: Record~string, unknown~): Promise~Session~
+        + findSession(id: string): Promise~Session | null~
+        + updateSession(id: string, data: Partial~Record~string, unknown~~): Promise~void~
+        + deleteSession(id: string): Promise~void~
+        + getSessionStats(): Promise~SessionStats~
+        + cleanup(): Promise~void~
+    }
+
+    class SessionStorage {
+        <<接口>>
+        + createSession(session: Omit~Session~)
+        + findSession(id: string): Promise~Session | null~
+        + updateSession(id: string, data: Partial~Session~): Promise~void~
+        + deleteSession(id: string): Promise~void~
+        + getAllSessions(): Promise~Session[]~
+        + cleanup(): Promise~void~
+    }
+
+    class MemoryStorage {
+        + implements SessionStorage
+        - sessions: Map~string, Session~
+
+        + createSession(session: Omit~Session~): Promise~Session~
+        + findSession(id: string): Promise~Session | null~
+        + updateSession(id: string, data: Partial~Session~): Promise~void~
+        + deleteSession(id: string): Promise~void~
+        + getAllSessions(): Promise~Session[]~
+        + cleanup(): Promise~void~
+    }
+
+    class RedisStorage {
+        + implements SessionStorage
+        - client: Redis
+        - prefix: string
+
+        + createSession(session: Omit~Session~): Promise~Session~
+        + findSession(id: string): Promise~Session | null~
+        + updateSession(id: string, data: Partial~Session~): Promise~void~
+        + deleteSession(id: string): Promise~void~
+        + getAllSessions(): Promise~Session[]~
+        + cleanup(): Promise~void~
+
+        - serialize(session: Session): string
+        - deserialize(json: string): Session
+        - ~async~ loadAllSessions(): Promise~Map~string, Session~~
+    }
+
+    class Session {
+        id: string
+        userId: string | null
+        organizationId: string | null
+        tenantId: string | null
+        createdAt: Date
+        lastAccessedAt: Date
+        data: Record~string, unknown~
+    }
+
+    SessionManager --> SessionStorage: 使用
+    SessionStorage <|-- MemoryStorage: 实现
+    SessionStorage <|-- RedisStorage: 实现
+```

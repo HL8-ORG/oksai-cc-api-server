@@ -1,0 +1,15 @@
+# 传输层状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Disconnected: 初始状态
+    Disconnected --> Connecting: 连接中
+
+    Connecting --> Connected: 连接成功
+    Connecting --> Disconnected: 连接失败
+
+    Connected --> Disconnected: 连接断开
+    Connected --> Disconnecting: 断开中
+
+    Disconnecting --> Disconnected: 断开完成
+```

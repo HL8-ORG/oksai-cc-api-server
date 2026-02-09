@@ -1,0 +1,27 @@
+# McpServer 类图
+
+```mermaid
+classDiagram
+    class McpServer {
+        - server: Server
+        - transport: TransportResult
+        - toolRegistry: ToolRegistry
+        - sessionManager: SessionManager
+        - authManager: AuthManager
+        - config: McpServerConfig
+        - logger: Logger
+        - sessionId: string | null
+        - isStarted: boolean
+        - primaryServerId: string | null
+
+        + McpServer(config: McpServerConfig, sessionId?: string)
+        + start(transportType?: TransportType): Promise~boolean~
+        + stop(): Promise~void~
+        + registerTool(tool: BaseMcpTool): void
+        + registerTools(tools: BaseMcpTool[]): void
+        + invokeTool(name: string, args: Record~string, unknown~): Promise~McpServer~
+        + getStatus(): Promise~McpServerStatus~
+        + listTools(): McpToolDefinition[]
+        + cleanup(): Promise~void~
+    }
+```

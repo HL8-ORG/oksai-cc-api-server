@@ -1,0 +1,13 @@
+# 会话生命周期状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: 创建会话
+
+    Active --> Inactive: 会话过期
+    Active --> Deleted: 会话被删除
+
+    Inactive --> [*]: 清理
+
+    Deleted --> [*]: 清理
+```

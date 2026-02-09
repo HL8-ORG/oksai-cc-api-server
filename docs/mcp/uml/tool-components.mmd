@@ -1,0 +1,39 @@
+# 工具层组件图
+
+```mermaid
+classDiagram
+    class BaseMcpTool {
+        <<工具基类>>
+        # 工具名称
+        name: string
+
+        # 工具描述
+        description: string
+
+        # 工具定义
+        ~abstract~ getToolDefinition(): McpToolDefinition
+
+        # 工具执行
+        ~abstract~ execute(args: Record~string, unknown~): Promise~McpToolResult~
+
+        # 创建工具结果
+        + createSuccessResult(content: unknown): McpToolResult
+        + createErrorResult(message: string): McpServerResult
+    }
+
+    class ToolRegistry {
+        - tools: Map~string, BaseMcpTool~
+        - mcpServer: Server
+
+        + registerTool(tool: BaseMcpTool): void
+        + getTool(name: string): BaseMcpTool | null
+        + getAllTools(): BaseMcpTool[]
+        + getToolCount(): number
+        + invokeTool(name: string, args: Record~string, unknown~): Promise~McpToolResult~
+
+        - setMcpServer(server: Server): void
+        + getMcpServer(): Server
+    }
+
+    BaseMcpTool <|-- ToolRegistry: 注册到
+```

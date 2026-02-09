@@ -1,0 +1,46 @@
+# 测试架构图
+
+```mermaid
+graph TB
+    subgraph "McpServer Tests"
+        McpServerSpec[McpServerSpec]
+        McpServerManagerSpec[McpServerManagerSpec]
+        BaseMcpToolSpec[BaseMcpToolSpec]
+        ToolRegistrySpec[ToolRegistrySpec]
+        SessionManagerSpec[SessionManagerSpec]
+        AuthManagerSpec[AuthManagerSpec]
+        SessionStorageSpec[SessionStorageSpec]
+        RedisStorageSpec[RedisStorageSpec]
+        TransportFactorySpec[TransportFactorySpec]
+    end
+
+    subgraph "AuthManager Tests"
+        AuthManagerSpec2[AuthManagerSpec]
+        JwtServiceSpec[JwtServiceSpec]
+        JwksServiceSpec[JwksServiceSpec]
+        OAuthControllerSpec[OAuthControllerSpec]
+        AuthControllerSpec[AuthControllerSpec]
+        OAuthE2eSpec[OAuthE2eSpec]
+    end
+
+    subgraph "集成测试"
+        McpServerIntegrationSpec[McpServerIntegrationSpec]
+        OAuthIntegrationSpec[OAuthIntegrationSpec]
+        SessionIntegrationSpec[SessionIntegrationSpec]
+        TransportIntegrationSpec[TransportIntegrationSpec]
+    end
+
+    McpServerSpec --> ToolRegistrySpec: 依赖
+    McpServerSpec --> SessionManagerSpec: 依赖
+    McpServerSpec --> AuthManagerSpec: 依赖
+    McpServerSpec --> TransportFactorySpec: 依赖
+    McpServerManagerSpec --> McpServerSpec: 依赖
+
+    OAuthControllerSpec --> JwksServiceSpec: 依赖
+    OAuthControllerSpec --> JwtServiceSpec: 依赖
+    OAuthControllerSpec --> AuthControllerSpec: 依赖
+
+    McpServerIntegrationSpec --> SessionIntegrationSpec: 依赖
+    OAuthIntegrationSpec --> AuthControllerSpec: 依赖
+    McpServerIntegrationSpec --> TransportIntegrationSpec: 依赖
+```

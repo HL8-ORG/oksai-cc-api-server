@@ -1,0 +1,42 @@
+# 传输层组件图
+
+```mermaid
+classDiagram
+    class TransportFactory {
+        + createTransportFromEnv(server: Server, transportType: TransportType): Promise~TransportResult~
+        + shutdownTransport(transport: TransportResult): Promise~void~
+    }
+
+    class TransportResult {
+        type: TransportType
+        transport: StdioServerTransport | HttpServerTransport | WebSocketServerTransport
+        url?: string
+        config: TransportConfig
+    }
+
+    class StdioServerTransport {
+        <<传输层>>
+        connect(): Promise~void~
+        disconnect(): Promise~void~
+        send(message: string): Promise~void~
+    }
+
+    class HttpServerTransport {
+        <<传输层>>
+        connect(): Promise~void~
+        disconnect(): Promise~void~
+        send(message: string): Promise~void~
+    }
+
+    class WebSocketServerTransport {
+        <<传输层>>
+        connect(): Promise~void~
+        disconnect(): Promise~void~
+        send(message: string): Promise~void~
+    }
+
+    TransportFactory --> TransportResult: 创建
+    TransportResult --> StdioServerTransport: 可能包含
+    TransportResult --> HttpServerTransport: 可能包含
+    TransportResult --> WebSocketServerTransport: 可能包含
+```

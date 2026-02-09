@@ -1,0 +1,43 @@
+# 部署架构图
+
+```mermaid
+graph TB
+    subgraph "客户端层"
+        UserClient[用户客户端]
+        McpClient[MCP 客户端]
+        WebClient[Web 客户端]
+        WebSocketClient[WebSocket 客户端]
+    end
+
+    subgraph "MCP 服务端"
+        StdioMcpServer[Stdio MCP 服务器]
+        HttpMcpServer[HTTP MCP 服务器]
+        WebSocketMcpServer[WebSocket MCP 服务器]
+        McpServerManager[MCP 服务器管理器]
+    end
+
+    subgraph "基础设施"
+        OAuthAuthServer[OAuth 授权服务器]
+        SessionStorageRedis[Redis 会话存储]
+    end
+
+    UserClient --> StdioMcpServer: 使用 Stdio 协议
+    WebClient --> HttpMcpServer: 使用 HTTP 协议
+    WebSocketClient --> WebSocketMcpServer: 使用 WebSocket 协议
+
+    McpServerManager --> StdioMcpServer: 管理 Stdio 服务器
+    McpServerManager --> HttpMcpServer: 管理 HTTP 服务器
+    McpServerManager --> WebSocketMcpServer: 管理 WebSocket 服务器
+
+    StdioMcpServer --> SessionStorageRedis: 存储会话
+    HttpMcpServer --> SessionStorageRedis: 存储会话
+    WebSocketMcpServer --> SessionStorageRedis: 存储会话
+
+    StdioMcpServer --> OAuthAuthServer: 验证令牌
+    HttpMcpServer --> OAuthAuthServer: 验证令牌
+    WebSocketMcpServer --> OAuthAuthServer: 验证令牌
+
+    OAuthAuthServer --> StdioMcpServer: 返回 JWKS
+    OAuthAuthServer --> HttpMcpServer: 返回 JWKS
+    OAuthAuthServer --> WebSocketMcpServer: 返回 JWKS
+```

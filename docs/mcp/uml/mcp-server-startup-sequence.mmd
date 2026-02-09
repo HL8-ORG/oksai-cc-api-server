@@ -1,0 +1,20 @@
+# MCP 服务器启动流程序列图
+
+```mermaid
+sequenceDiagram
+    actor User as 用户
+    participant McpServer as McpServer
+    participant Transport as 传输层
+    participant ToolRegistry as 工具注册表
+    participant SessionManager as 会话管理器
+
+    User->>McpServer: start(TransportType.STDIO)
+    activate McpServer
+    McpServer->>Transport: connect()
+    Transport-->>McpServer: connected
+    McpServer->>ToolRegistry: setMcpServer(server)
+    McpServer->>SessionManager: setMcpServer(manager)
+    McpServer->>McpServer: isStarted = true
+    McpServer-->>User: started
+    deactivate McpServer
+```

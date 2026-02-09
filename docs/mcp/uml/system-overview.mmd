@@ -1,0 +1,52 @@
+# 系统概览图
+
+```mermaid
+classDiagram
+    class McpServer {
+        <<依赖>> Server
+        <<依赖>> BaseMcpTool
+        <<依赖>> AuthManager
+        <<依赖>> SessionManager
+        <<依赖>> TransportFactory
+        - mcpServerManager
+        - server: Server
+        - authManager: AuthManager
+        - sessionManager: SessionManager
+    }
+
+    class AuthManager {
+        <<单例模式>>
+        manageAuthState(userId, tenantId, organizationId)
+    }
+
+    class SessionManager {
+        <<管理>>
+        createSession(userId, organizationId, tenantId, data)
+        findSession(id)
+        updateSession(id, data)
+        deleteSession(id)
+        getSessionStats()
+        cleanup()
+    }
+
+    class ToolRegistry {
+        <<注册>>
+        registerTool(tool: BaseMcpTool): void
+        getTool(name: string): BaseMcpTool | null
+        getAllTools(): BaseMcpTool[]
+        getToolCount(): number
+        invokeTool(name: string, args: Record~string, unknown~): Promise~McpToolResult~
+    }
+
+    class TransportFactory {
+        <<工厂模式>>
+        createTransportFromEnv(server: Server, transportType: TransportType): Promise~TransportResult~
+        shutdownTransport(transport: TransportResult): Promise~void~
+        getTransportTypeFromEnv(): TransportType
+    }
+
+    McpServer --> AuthManager: 依赖
+    McpServer --> SessionManager: 依赖
+    McpServer --> ToolRegistry: 依赖
+    McpServer --> TransportFactory: 依赖
+```

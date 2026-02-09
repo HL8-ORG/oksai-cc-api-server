@@ -1,0 +1,18 @@
+# 工具注册状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unregistered: 工具未注册
+    Unregistered --> Registered: 调用 registerTool()
+    Unregistered --> DuplicateError: 重复注册同名工具
+
+    Registered --> Active: 调用 invokeTool()
+
+    Active --> Executing: 工具执行中
+    Active --> Failed: 工具执行失败
+
+    Executing --> Completed: 工具执行成功
+    Completed --> Active: 可以再次调用
+
+    Failed --> Active: 重试执行
+```

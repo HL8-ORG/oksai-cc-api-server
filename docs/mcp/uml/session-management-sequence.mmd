@@ -1,0 +1,25 @@
+# 会话管理流程序列图
+
+```mermaid
+sequenceDiagram
+    actor User as 用户
+    participant McpServer as McpServer
+    participant SessionManager as 会话管理器
+    participant MemoryStorage as 内存存储
+
+    User->>McpServer: invokeTool(toolName, args)
+    activate McpServer
+    McpServer->>SessionManager: findSession(sessionId)
+    SessionManager->>MemoryStorage: findSession(id)
+    MemoryStorage-->>SessionManager: session object
+    SessionManager->>MemoryStorage: updateSession(id, { lastAccessedAt })
+    SessionManager-->>McpServer: session object
+    McpServer->>BaseMcpTool: execute(args)
+    activate BaseMcpTool
+    McpServer->>SessionManager: updateSession(id, { lastAccessedAt })
+    SessionManager->>MemoryStorage: updateSession(id, data)
+    MemoryStorage-->>SessionManager: updated session object
+    McpServer-->>User: result
+    deactivate McpServer
+    deactivate BaseMcpTool
+```

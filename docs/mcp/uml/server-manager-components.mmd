@@ -1,0 +1,49 @@
+# 服务器管理器组件图
+
+```mermaid
+classDiagram
+    class McpServerManager {
+        - servers: Map~string, ServerInstance~
+        - primaryServerId: string | null
+        - logger: Logger
+
+        # 服务器生命周期管理
+        + start(config: McpServerConfig, serverId?: string, transportType?: TransportType): Promise~boolean~
+        + stop(serverId?: string): Promise~boolean~
+        + restart(serverId?: string): Promise~boolean~
+        + removeServer(serverId: string): Promise~boolean~
+
+        # 查询方法
+        + getStatus(serverId?: string): Promise~McpServerStatus | null~
+        + getServer(serverId?: string): McpServer | null
+        + getServerIds(): string[]
+        + getAllStatus(): Promise~Map~string, McpServerStatus~~
+
+        # 统计方法
+        + getStats(): {
+            total: number
+            running: number
+            stopped: number
+            primaryServerId: string | null
+        }
+
+        # 主服务器管理
+        + setPrimaryServer(serverId: string): boolean
+        + getPrimaryServerId(): string | null
+        + getPrimaryServer(): McpServer | null
+
+        # 清理方法
+        + stopAll(): Promise~number~
+        + cleanup(): Promise~void~
+    }
+
+    class ServerInstance {
+        id: string
+        server: McpServer
+        config: McpServerConfig
+        createdAt: Date
+        lastStartedAt?: Date
+    }
+
+    McpServerManager --> ServerInstance: 管理
+```

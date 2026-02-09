@@ -1,0 +1,26 @@
+# McpServerManager 类图
+
+```mermaid
+classDiagram
+    class McpServerManager {
+        - servers: Map~string, ServerInstance~
+        - primaryServerId: string | null
+        - logger: Logger
+
+        + McpServerManager()
+        + start(config: McpServerConfig, serverId?: string, transportType?: TransportType): Promise~boolean~
+        + stop(serverId?: string): Promise~boolean~
+        + restart(serverId?: string): Promise~boolean~
+        + getStatus(serverId?: string): Promise~McpServerStatus | null~
+        + getServer(serverId?: string): McpServer | null
+        + getServerIds(): string[]
+        + getAllStatus(): Promise~Map~string, McpServerStatus~~
+        + removeServer(serverId: string): Promise~boolean~
+        + stopAll(): Promise~number~
+        + setPrimaryServer(serverId: string): boolean
+        + getPrimaryServerId(): string | null
+        + getPrimaryServer(): McpServer | null
+        + getStats(): { total: number, running: number, stopped: number, primaryServerId: string | null }
+        + cleanup(): Promise~void~
+    }
+```

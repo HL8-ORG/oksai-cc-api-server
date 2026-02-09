@@ -1,0 +1,21 @@
+# McpServer 状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Stopped: 启动失败
+    [*] --> Initializing: 调用 start()
+
+    Initializing --> Running: 传输层连接成功
+    Initializing --> Stopped: 启动失败
+
+    Running --> Stopping: 调用 stop()
+    Running --> Stopped: 发生错误
+    Running --> Restarting: 调用 restart()
+
+    Restarting --> Stopped: 重启失败
+
+    Stopping --> [*]: 停止完成
+
+    Restarting --> Running: 重启成功
+    Running --> Running: 重启后回到运行状态
+```

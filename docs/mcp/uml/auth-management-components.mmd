@@ -1,0 +1,33 @@
+# 认证管理组件图
+
+```mermaid
+classDiagram
+    class AuthManager {
+        <<单例模式>>
+        - instance: AuthManager
+
+        + getInstance(): AuthManager
+        + login(): Promise~boolean~
+        + logout(): Promise~void~
+        + getAuthStatus(): AuthStatus
+
+        # 认证状态管理
+        + setAuthState(userId: string, tenantId?: string, organizationId?: string): void
+        + clearAuthState(): void
+
+        # 用户信息
+        + getUserId(): string | null
+        + getTenantId(): string | null
+        + getOrganizationId(): string | null
+    }
+
+    class AuthStatus {
+        <<接口>>
+        isAuthenticated: boolean
+        userId: string | null
+        tenantId: string | null
+        organizationId: string | null
+    }
+
+    AuthManager --> AuthStatus: 返回
+```
