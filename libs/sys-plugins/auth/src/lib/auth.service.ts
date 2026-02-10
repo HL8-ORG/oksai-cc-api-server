@@ -3,6 +3,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, wrap, EntityManager } from '@mikro-orm/core';
 import { User, UserRole } from './entities/user.entity';
 import { OAuthAccount, OAuthProvider } from './entities/oauth-account.entity';
+import { LoginHistory, LoginStatus } from './entities/login-history.entity';
 import {
 	LoginDto,
 	RegisterDto,
@@ -26,6 +27,13 @@ import {
 	JwtBlacklistService
 } from '@oksai/core';
 
+interface LoginHistoryContext {
+	ipAddress?: string;
+	userAgent?: string;
+	deviceType?: string;
+	location?: string;
+}
+
 @Injectable()
 export class AuthService {
 	private readonly logger = new Logger(AuthService.name);
@@ -35,6 +43,8 @@ export class AuthService {
 		private readonly userRepo: EntityRepository<User>,
 		@InjectRepository(OAuthAccount)
 		private readonly oauthAccountRepo: EntityRepository<OAuthAccount>,
+		@InjectRepository(LoginHistory)
+		private readonly loginHistoryRepo: EntityRepository<LoginHistory>,
 		private readonly mailQueueService: MailQueueService,
 		private readonly templateEngine: TemplateEngineService,
 		private readonly jwtBlacklistService: JwtBlacklistService
@@ -42,6 +52,38 @@ export class AuthService {
 
 	private get em(): EntityManager {
 		return this.userRepo.getEntityManager();
+	}
+
+	/**
+	 * 记录登录历史
+	 *
+	 * @param userId - 用户 ID
+	 * @param loginMethod - 登录方式
+	 * @param status - 登录状态
+	 * @param context - 登录上下文（IP 地址、用户代理等）
+	 * @param remark - 备注
+	 */
+	private async recordLoginHistory(
+		userId: string,
+		loginMethod: string,
+		status: LoginStatus,
+		context?: LoginHistoryContext,
+		remark?: string
+	): Promise<void> {
+		const loginHistory = this.loginHistoryRepo.create({
+			userId,
+			loginMethod,
+			status,
+			ipAddress: context?.ipAddress,
+			userAgent: context?.userAgent,
+			deviceType: context?.deviceType,
+			location: context?.location,
+			remark,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		});
+
+		this.em.persist(loginHistory);
 	}
 
 	/**
@@ -72,6 +114,8 @@ export class AuthService {
 		const isValidPassword = await verifyPassword(credentials.password, user.password);
 
 		if (!isValidPassword) {
+			await this.recordLoginHistory(user.id, 'password', LoginStatus.FAILED, {}, '密码错误');
+			await this.em.flush();
 			throw new UnauthorizedException('用户名或密码错误');
 		}
 
@@ -84,6 +128,14 @@ export class AuthService {
 		};
 
 		const tokens = jwtUtils.generateTokenPair(payload);
+
+		await this.recordLoginHistory(user.id, 'password', LoginStatus.SUCCESS);
+
+		user.lastLoginAt = new Date();
+		user.loginCount = (user.loginCount || 0) + 1;
+		this.em.persist(user);
+
+		await this.em.flush();
 
 		return {
 			accessToken: tokens.accessToken,
@@ -555,7 +607,9 @@ export class AuthService {
 			userId,
 			provider: OAuthProvider[provider],
 			providerId: credentials.providerId,
-			isPrimary: credentials.isPrimary || false
+			isPrimary: credentials.isPrimary || false,
+			createdAt: new Date(),
+			updatedAt: new Date()
 		});
 
 		this.em.persist(oauthAccount);

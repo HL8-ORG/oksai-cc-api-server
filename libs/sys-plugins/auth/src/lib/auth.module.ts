@@ -5,7 +5,9 @@ import { AuthController } from './auth.controller';
 import { SocialAuthService } from './social-auth.service';
 import { UnifiedOAuthCallbackService } from './unified-oauth-callback.service';
 import { UnifiedOAuthCallbackController } from './unified-oauth-callback.controller';
-import { User, OAuthAccount, LoginHistory } from './entities/index';
+import { PermissionsService } from './permissions.service';
+import { PermissionsController } from './permissions.controller';
+import { User, OAuthAccount, LoginHistory, Role, Permission } from './entities/index';
 import { initJwtUtils } from '@oksai/core';
 import { CoreModule } from '@oksai/core';
 import { GoogleStrategy } from './google';
@@ -15,20 +17,22 @@ import { MicrosoftStrategy } from './microsoft';
 import { MicrosoftController } from './microsoft';
 
 @Module({
-	imports: [MikroOrmModule.forFeature([User, OAuthAccount, LoginHistory]), CoreModule],
+	imports: [MikroOrmModule.forFeature([User, OAuthAccount, LoginHistory, Role, Permission]), CoreModule],
 	providers: [
 		AuthService,
 		SocialAuthService,
+		PermissionsService,
 		GoogleStrategy,
 		GithubStrategy,
 		Auth0Strategy,
 		MicrosoftStrategy,
 		UnifiedOAuthCallbackService
 	],
-	controllers: [AuthController, MicrosoftController, UnifiedOAuthCallbackController],
+	controllers: [AuthController, MicrosoftController, UnifiedOAuthCallbackController, PermissionsController],
 	exports: [
 		AuthService,
 		SocialAuthService,
+		PermissionsService,
 		GoogleStrategy,
 		GithubStrategy,
 		Auth0Strategy,

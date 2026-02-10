@@ -3,6 +3,7 @@ import { SocialAuthService, IOAuthRequestContext, IOAuthResponse } from './socia
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { User, UserRole } from './entities/user.entity';
+import { LoginHistory } from './entities/login-history.entity';
 import { JwtPayload, getJwtUtils, hashPassword } from '@oksai/core';
 
 jest.mock('@oksai/core', () => ({
@@ -14,6 +15,7 @@ jest.mock('@oksai/core', () => ({
 describe('SocialAuthService', () => {
 	let service: SocialAuthService;
 	let userRepo: jest.Mocked<EntityRepository<User>>;
+	let loginHistoryRepo: jest.Mocked<EntityRepository<LoginHistory>>;
 	let em: jest.Mocked<EntityManager>;
 	let mockJwtUtils: any;
 
@@ -26,12 +28,18 @@ describe('SocialAuthService', () => {
 			getEntityManager: jest.fn()
 		} as any;
 
+		loginHistoryRepo = {
+			create: jest.fn(),
+			getEntityManager: jest.fn()
+		} as any;
+
 		em = {
 			persist: jest.fn(),
 			flush: jest.fn()
 		} as any;
 
 		userRepo.getEntityManager.mockReturnValue(em);
+		loginHistoryRepo.getEntityManager.mockReturnValue(em);
 
 		mockJwtUtils = {
 			generateTokenPair: jest.fn().mockReturnValue({
@@ -49,6 +57,10 @@ describe('SocialAuthService', () => {
 				{
 					provide: getRepositoryToken(User),
 					useValue: userRepo
+				},
+				{
+					provide: getRepositoryToken(LoginHistory),
+					useValue: loginHistoryRepo
 				}
 			]
 		}).compile();

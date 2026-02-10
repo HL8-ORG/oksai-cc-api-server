@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { User, UserRole } from './entities/user.entity';
+import { LoginHistory, LoginStatus } from './entities/login-history.entity';
 import { JwtPayload, getJwtUtils } from '@oksai/core';
 import { createOAuthUser } from './oauth-user-helper';
 
@@ -40,11 +41,32 @@ export interface IOAuthResponse {
 export class SocialAuthService {
 	constructor(
 		@InjectRepository(User)
-		private readonly userRepo: EntityRepository<User>
+		private readonly userRepo: EntityRepository<User>,
+		@InjectRepository(LoginHistory)
+		private readonly loginHistoryRepo: EntityRepository<LoginHistory>
 	) {}
 
 	private get em(): EntityManager {
 		return this.userRepo.getEntityManager();
+	}
+
+	/**
+	 * 记录登录历史
+	 *
+	 * @param userId - 用户 ID
+	 * @param loginMethod - 登录方式
+	 * @param status - 登录状态
+	 */
+	private async recordLoginHistory(userId: string, loginMethod: string, status: LoginStatus): Promise<void> {
+		const loginHistory = this.loginHistoryRepo.create({
+			userId,
+			loginMethod,
+			status,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		});
+
+		this.em.persist(loginHistory);
 	}
 
 	/**
@@ -107,6 +129,13 @@ export class SocialAuthService {
 		};
 
 		const tokens = jwtUtils.generateTokenPair(payload);
+
+		await this.recordLoginHistory(dbUser.id, 'oauth', LoginStatus.SUCCESS);
+
+		dbUser.lastLoginAt = new Date();
+		dbUser.loginCount = (dbUser.loginCount || 0) + 1;
+		this.em.persist(dbUser);
+		await this.em.flush();
 
 		return {
 			success: true,

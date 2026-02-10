@@ -3,6 +3,7 @@ import { UnauthorizedException, ConflictException, BadRequestException } from '@
 import { AuthService } from './auth.service';
 import { User, UserRole } from './entities/user.entity';
 import { OAuthAccount } from './entities/oauth-account.entity';
+import { LoginHistory } from './entities/login-history.entity';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import {
 	hashPassword,
@@ -30,6 +31,7 @@ describe('AuthService', () => {
 	let service: AuthService;
 	let userRepo: any;
 	let oauthAccountRepo: any;
+	let loginHistoryRepo: any;
 	let em: any;
 	let mockJwtUtils: any;
 
@@ -50,6 +52,11 @@ describe('AuthService', () => {
 			getEntityManager: jest.fn()
 		};
 
+		loginHistoryRepo = {
+			create: jest.fn(),
+			getEntityManager: jest.fn()
+		};
+
 		em = {
 			persist: jest.fn(),
 			flush: jest.fn(),
@@ -58,6 +65,7 @@ describe('AuthService', () => {
 
 		userRepo.getEntityManager.mockReturnValue(em);
 		oauthAccountRepo.getEntityManager.mockReturnValue(em);
+		loginHistoryRepo.getEntityManager.mockReturnValue(em);
 
 		mockJwtUtils = {
 			generateTokenPair: jest.fn().mockReturnValue({
@@ -83,6 +91,10 @@ describe('AuthService', () => {
 				{
 					provide: getRepositoryToken(OAuthAccount),
 					useValue: oauthAccountRepo
+				},
+				{
+					provide: getRepositoryToken(LoginHistory),
+					useValue: loginHistoryRepo
 				},
 				{
 					provide: MailQueueService,

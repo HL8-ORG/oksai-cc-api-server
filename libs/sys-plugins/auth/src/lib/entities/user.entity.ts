@@ -13,6 +13,7 @@ import {
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
 import { BaseEntity } from '@oksai/core';
+import { Role } from './role.entity';
 
 /**
  * 用户角色枚举
@@ -56,6 +57,10 @@ export class User extends BaseEntity {
 	/** 用户角色（可选） */
 	@Property({ nullable: true })
 	role?: UserRole;
+
+	/** 用户角色列表（多对多关系） */
+	@ManyToMany(() => Role, (role) => role.users, { owner: true })
+	roles: Role[] = [];
 
 	/** 是否活跃（默认：true） */
 	@Property({ default: true })

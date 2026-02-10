@@ -91,6 +91,8 @@ ormlogs.log
 /export
 /import
 /apps/api/*.tsbuildinfo
+*.tsbuildinfo
+!**/dist/*.tsbuildinfo
 
 megalinter-reports/
 

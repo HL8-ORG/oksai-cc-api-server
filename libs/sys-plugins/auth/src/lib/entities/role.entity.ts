@@ -12,16 +12,13 @@ import {
 	Index
 } from '@mikro-orm/core';
 import { randomUUID } from 'crypto';
+import { Permission } from './permissions.entity';
+import { User } from './user.entity';
 
 /**
  * 角色实体
  *
  * 定义系统角色
- *
- * @property id - 角色唯一标识
- * @property code - 角色代码（唯一）
- * @property name - 角色名称
- * @property description - 角色描述
  */
 @Entity()
 export class Role {
@@ -36,4 +33,16 @@ export class Role {
 
 	@Property({ nullable: true })
 	description?: string;
+
+	@ManyToMany(() => Permission, (permission) => permission.roles, { owner: true })
+	permissions: Permission[] = [];
+
+	@ManyToMany(() => User, (user) => user.roles, { owner: true })
+	users: User[] = [];
+
+	@Property({ nullable: false })
+	createdAt!: Date;
+
+	@Property({ nullable: false })
+	updatedAt!: Date;
 }
