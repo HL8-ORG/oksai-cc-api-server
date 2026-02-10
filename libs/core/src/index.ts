@@ -52,7 +52,8 @@ export {
 export { CorrelationIdMiddleware } from './lib/middleware/correlation-id.middleware';
 
 // Controllers
-export { PrometheusController } from './lib/controllers/prometheus.controller';
+// TODO: PrometheusController 尚未完成依赖注入配置，暂不导出
+// export { PrometheusController } from './lib/controllers/prometheus.controller';
 
 // Mail Templates
 export { generateResetPasswordEmail, generateWelcomeEmail } from './lib/mail-templates';

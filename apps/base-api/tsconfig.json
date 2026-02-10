@@ -10,14 +10,14 @@
 			"@oksai/config": ["../../libs/config/src"],
 			"@oksai/database": ["../../libs/database/src"],
 			"@oksai/auth": ["../../libs/auth/src"],
-			"@oksai/tenant": ["../../libs/tenant/src"],
-			"@oksai/user": ["../../libs/user/src"],
-			"@oksai/organization": ["../../libs/organization/src"],
-			"@oksai/role": ["../../libs/role/src"],
+			"@oksai/tenant": ["../../libs/sys-plugins/tenant/src"],
+			"@oksai/user": ["../../libs/sys-plugins/user/src"],
+			"@oksai/organization": ["../../libs/sys-plugins/organization/src"],
+			"@oksai/role": ["../../libs/sys-plugins/role/src"],
 			"@oksai/audit": ["../../libs/audit/src"],
 			"@oksai/bootstrap": ["../../libs/bootstrap/src"],
 			"@oksai/analytics": ["../../libs/analytics/src"],
-			"@oksai/reporting": ["../../libs/reporting/src"]
+			"@oksai/reporting": ["../../libs/sys-plugins/reporting/src"]
 		}
 	},
 	"include": ["src/**/*"],

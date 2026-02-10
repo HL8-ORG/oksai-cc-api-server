@@ -1,8 +1,14 @@
 {
 	"preset": "ts-jest",
 	"testEnvironment": "node",
-	"roots": ["<rootDir>/src"],
-	"testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts", "**/?(*.)+(e2e-spec).ts"],
+	"roots": [
+		"<rootDir>/src"
+	],
+	"testMatch": [
+		"**/__tests__/**/*.ts",
+		"**/?(*.)+(spec|test).ts",
+		"**/?(*.)+(e2e-spec).ts"
+	],
 	"transform": {
 		"^.+\\.ts$": "ts-jest"
 	},
@@ -15,10 +21,19 @@
 		"!src/e2e/**/*.e2e-spec.ts"
 	],
 	"coverageDirectory": "coverage",
-	"coverageReporters": ["text", "lcov", "html"],
+	"coverageReporters": [
+		"text",
+		"lcov",
+		"html"
+	],
 	"moduleNameMapper": {
+		"^@oksai/(tenant|user|organization|role|audit|auth|analytics|reporting)$": "<rootDir>/../../libs/sys-plugins/$1/src",
 		"^@oksai/(.*)$": "<rootDir>/../../libs/$1/src"
 	},
-	"moduleFileExtensions": ["ts", "js", "json"],
+	"moduleFileExtensions": [
+		"ts",
+		"js",
+		"json"
+	],
 	"verbose": true
 }

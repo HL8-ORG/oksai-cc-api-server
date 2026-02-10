@@ -5,11 +5,10 @@
  */
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { BaseEntity, Feature } from '@oksai/core';
-import { TenantBaseEntity } from '@oksai/tenant';
+import { TenantBaseEntity, Tenant } from '@oksai/tenant';
 import { User } from '@oksai/user';
 import { Organization, FeatureOrganization } from '@oksai/organization';
 import { Role, Permission } from '@oksai/role';
-import { Tenant } from '@oksai/tenant';
 import { AuditLog } from '@oksai/audit';
 import { AnalyticsEvent, AnalyticsMetric, AnalyticsReport } from '@oksai/analytics';
 import { Report, ReportTemplate, ReportSchedule } from '@oksai/reporting';

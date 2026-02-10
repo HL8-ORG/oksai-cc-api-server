@@ -3,10 +3,21 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PluginRegistryService } from '@oksai/plugin';
+import { AuthPlugin } from '@oksai/auth';
+import { TenantPlugin } from '@oksai/tenant';
+import { UserPlugin } from '@oksai/user';
+import { AuditPlugin } from '@oksai/audit';
+import { OrganizationPlugin } from '@oksai/organization';
+import { RolePlugin } from '@oksai/role';
+import { AnalyticsPlugin } from '@oksai/analytics';
+import { ReportingPlugin } from '@oksai/reporting';
+import { Tenant, TenantStatus } from '@oksai/tenant';
 
 export class TestHelper {
 	private static app: INestApplication;
 	private static orm: MikroORM;
+	private static defaultTenantId: string | null = null;
 
 	static async setup() {
 		const moduleFixture = await Test.createTestingModule({
@@ -14,13 +25,43 @@ export class TestHelper {
 		}).compile();
 
 		this.app = moduleFixture.createNestApplication();
-		// 与生产一致：统一 API 前缀
 		this.app.setGlobalPrefix('api');
-		// 测试环境启用输入校验：去除未知字段（避免客户端注入 tenantId 等敏感字段）
 		this.app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 		this.orm = moduleFixture.get<MikroORM>(MikroORM);
 
+		const registry = moduleFixture.get(PluginRegistryService);
+		const plugins = [
+			new AuthPlugin(),
+			new TenantPlugin(),
+			new UserPlugin(),
+			new AuditPlugin(),
+			new OrganizationPlugin(),
+			new RolePlugin(),
+			new AnalyticsPlugin(),
+			new ReportingPlugin()
+		];
+		for (const plugin of plugins) {
+			registry.register(plugin);
+		}
+
 		await this.orm.getSchemaGenerator().refreshDatabase();
+
+		const em = this.orm.em;
+		const existingDefaultTenant = await em.findOne(Tenant, { slug: 'default' });
+		if (!existingDefaultTenant) {
+			const defaultTenant = em.create(Tenant, {
+				name: '默认租户',
+				slug: 'default',
+				status: TenantStatus.ACTIVE,
+				allowSelfRegistration: true,
+				maxUsers: 0
+			});
+			em.persist(defaultTenant);
+			await em.flush();
+			this.defaultTenantId = defaultTenant.id;
+		} else {
+			this.defaultTenantId = existingDefaultTenant.id;
+		}
 
 		await this.app.init();
 

@@ -6,18 +6,141 @@ settings:
 
 catalogs:
   default:
+    '@apollo/server':
+      specifier: ^4.12.0
+      version: 4.13.0
+    '@honeycombio/opentelemetry-node':
+      specifier: ^0.7.2
+      version: 0.7.2
+    '@mikro-orm/core':
+      specifier: ^6.6.5
+      version: 6.6.6
+    '@mikro-orm/nestjs':
+      specifier: ^6.1.1
+      version: 6.1.1
+    '@mikro-orm/postgresql':
+      specifier: ^6.6.5
+      version: 6.6.6
+    '@nestjs/axios':
+      specifier: ^4.0.1
+      version: 4.0.1
+    '@nestjs/bullmq':
+      specifier: ^11.0.4
+      version: 11.0.4
     '@nestjs/common':
       specifier: ^11.1.12
       version: 11.1.13
+    '@nestjs/config':
+      specifier: ^4.0.2
+      version: 4.0.3
     '@nestjs/core':
       specifier: ^11.1.12
       version: 11.1.13
+    '@nestjs/mapped-types':
+      specifier: ^2.1.0
+      version: 2.1.0
+    '@nestjs/passport':
+      specifier: ^11.0.5
+      version: 11.0.5
     '@nestjs/platform-express':
       specifier: ^11.1.12
       version: 11.1.13
+    '@nestjs/schedule':
+      specifier: ^5.0.1
+      version: 5.0.1
+    '@nestjs/swagger':
+      specifier: ^11.2.5
+      version: 11.2.6
+    '@nestjs/terminus':
+      specifier: ^11.0.0
+      version: 11.0.0
+    '@opentelemetry/auto-instrumentations-node':
+      specifier: ^0.52.0
+      version: 0.52.1
+    '@opentelemetry/exporter-trace-otlp-grpc':
+      specifier: ^0.57.0
+      version: 0.57.2
+    '@opentelemetry/exporter-trace-otlp-http':
+      specifier: ^0.57.0
+      version: 0.57.2
+    '@opentelemetry/exporter-zipkin':
+      specifier: ^1.26.0
+      version: 1.30.1
+    '@opentelemetry/instrumentation-express':
+      specifier: ^0.46.0
+      version: 0.46.0
+    '@opentelemetry/instrumentation-http':
+      specifier: ^0.56.0
+      version: 0.56.0
+    '@opentelemetry/instrumentation-mysql2':
+      specifier: ^0.41.0
+      version: 0.41.0
+    '@opentelemetry/instrumentation-nestjs-core':
+      specifier: ^0.39.0
+      version: 0.39.0
+    '@opentelemetry/instrumentation-pg':
+      specifier: ^0.48.0
+      version: 0.48.0
+    '@opentelemetry/instrumentation-redis':
+      specifier: ^0.42.0
+      version: 0.42.0
+    '@opentelemetry/sdk-trace-base':
+      specifier: ^1.26.0
+      version: 1.30.1
+    '@opentelemetry/semantic-conventions':
+      specifier: ^1.27.0
+      version: 1.39.0
     '@types/jest':
       specifier: ^29.5.14
       version: 29.5.14
+    '@types/node':
+      specifier: ^24.10.0
+      version: 24.10.12
+    '@types/passport-auth0':
+      specifier: ^1.0.9
+      version: 1.0.9
+    '@types/passport-github2':
+      specifier: ^1.2.9
+      version: 1.2.9
+    '@types/passport-google-oauth20':
+      specifier: ^2.0.16
+      version: 2.0.17
+    '@types/passport-microsoft':
+      specifier: ^2.1.1
+      version: 2.1.1
+    bullmq:
+      specifier: ^5.26.2
+      version: 5.67.3
+    chalk:
+      specifier: ^4.1.0
+      version: 4.1.2
+    class-transformer:
+      specifier: ^0.5.1
+      version: 0.5.1
+    class-validator:
+      specifier: ^0.14.2
+      version: 0.14.3
+    connect-redis:
+      specifier: ^7.1.0
+      version: 7.1.1
+    express:
+      specifier: ^5.2.1
+      version: 5.2.1
+    handlebars:
+      specifier: ^4.7.8
+      version: 4.7.8
+    helmet:
+      specifier: ^8.1.0
+      version: 8.1.0
+    redis:
+      specifier: ^5.10.0
+      version: 5.10.0
+    reflect-metadata:
+      specifier: ^0.2.2
+      version: 0.2.2
+    tslib:
+      specifier: ^2.3.0
+      version: 2.8.1
 
 overrides:
   '@grpc/grpc-js': ^1.7.3
@@ -298,13 +421,13 @@ importers:
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)(@nestjs/platform-express@11.1.13)
       '@oksai/analytics':
         specifier: workspace:*
-        version: link:../../libs/analytics
+        version: link:../../libs/sys-plugins/analytics
       '@oksai/audit':
         specifier: workspace:*
-        version: link:../../libs/audit
+        version: link:../../libs/sys-plugins/audit
       '@oksai/auth':
         specifier: workspace:*
-        version: link:../../libs/auth
+        version: link:../../libs/sys-plugins/auth
       '@oksai/bootstrap':
         specifier: workspace:*
         version: link:../../libs/bootstrap
@@ -322,19 +445,19 @@ importers:
         version: link:../../libs/database
       '@oksai/organization':
         specifier: workspace:*
-        version: link:../../libs/organization
+        version: link:../../libs/sys-plugins/organization
       '@oksai/plugin':
         specifier: workspace:*
         version: link:../../libs/plugin
       '@oksai/reporting':
         specifier: workspace:*
-        version: link:../../libs/reporting
+        version: link:../../libs/sys-plugins/reporting
       '@oksai/role':
         specifier: workspace:*
-        version: link:../../libs/role
+        version: link:../../libs/sys-plugins/role
       '@oksai/tenant':
         specifier: workspace:*
-        version: link:../../libs/tenant
+        version: link:../../libs/sys-plugins/tenant
       '@scalar/nestjs-api-reference':
         specifier: ^1.0.23
         version: 1.0.23
@@ -384,151 +507,7 @@ importers:
         version: 29.7.0(@types/node@24.10.12)(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.18))(@types/node@24.10.12)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.4.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@24.10.12)(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.18))(@types/node@24.10.12)(typescript@5.9.3)))(typescript@5.9.3)
-
-  libs/analytics:
-    dependencies:
-      '@mikro-orm/core':
-        specifier: 'catalog:'
-        version: 6.6.6
-      '@mikro-orm/nestjs':
-        specifier: 'catalog:'
-        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
-      '@nestjs/common':
-        specifier: 'catalog:'
-        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: 'catalog:'
-        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@oksai/core':
-        specifier: workspace:*
-        version: link:../core
-      '@oksai/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      chalk:
-        specifier: 'catalog:'
-        version: 4.1.2
-      class-validator:
-        specifier: 'catalog:'
-        version: 0.14.3
-    devDependencies:
-      '@types/jest':
-        specifier: 29.5.14
-        version: 29.5.14
-      typescript:
-        specifier: ^5.8.0
-        version: 5.9.3
-
-  libs/audit:
-    dependencies:
-      '@mikro-orm/core':
-        specifier: 'catalog:'
-        version: 6.6.6
-      '@mikro-orm/nestjs':
-        specifier: 'catalog:'
-        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
-      '@nestjs/common':
-        specifier: 'catalog:'
-        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: 'catalog:'
-        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@oksai/core':
-        specifier: workspace:*
-        version: link:../core
-      '@oksai/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      chalk:
-        specifier: 'catalog:'
-        version: 4.1.2
-      class-validator:
-        specifier: 'catalog:'
-        version: 0.14.3
-    devDependencies:
-      '@types/jest':
-        specifier: 29.5.14
-        version: 29.5.14
-      typescript:
-        specifier: ^5.8.0
-        version: 5.9.3
-
-  libs/auth:
-    dependencies:
-      '@casl/ability':
-        specifier: ^6.8.0
-        version: 6.8.0
-      '@mikro-orm/core':
-        specifier: 'catalog:'
-        version: 6.6.6
-      '@mikro-orm/nestjs':
-        specifier: 'catalog:'
-        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
-      '@nestjs/axios':
-        specifier: ^4.0.1
-        version: 4.0.1(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.5)(rxjs@7.8.2)
-      '@nestjs/common':
-        specifier: 'catalog:'
-        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/config':
-        specifier: ^4.0.2
-        version: 4.0.3(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: 'catalog:'
-        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/passport':
-        specifier: 'catalog:'
-        version: 11.0.5(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(passport@0.7.0)
-      '@oksai/core':
-        specifier: workspace:*
-        version: link:../core
-      '@oksai/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      chalk:
-        specifier: 'catalog:'
-        version: 4.1.2
-      class-transformer:
-        specifier: 'catalog:'
-        version: 0.5.1
-      class-validator:
-        specifier: 'catalog:'
-        version: 0.14.3
-      passport-auth0:
-        specifier: ^1.4.5
-        version: 1.4.5
-      passport-github2:
-        specifier: ^0.1.12
-        version: 0.1.12
-      passport-google-oauth20:
-        specifier: ^2.0.0
-        version: 2.0.0
-      passport-microsoft:
-        specifier: ^2.1.0
-        version: 2.1.0
-    devDependencies:
-      '@types/express':
-        specifier: ^5.0.1
-        version: 5.0.6
-      '@types/jest':
-        specifier: 'catalog:'
-        version: 29.5.14
-      '@types/passport-auth0':
-        specifier: 'catalog:'
-        version: 1.0.9
-      '@types/passport-github2':
-        specifier: 'catalog:'
-        version: 1.2.9
-      '@types/passport-google-oauth20':
-        specifier: 'catalog:'
-        version: 2.0.17
-      '@types/passport-microsoft':
-        specifier: 'catalog:'
-        version: 2.1.1
-      typescript:
-        specifier: ^5.8.0
-        version: 5.9.3
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(esbuild@0.24.0)(jest-util@29.7.0)(jest@29.7.0(@types/node@24.10.12)(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.18))(@types/node@24.10.12)(typescript@5.9.3)))(typescript@5.9.3)
 
   libs/bootstrap:
     dependencies:
@@ -971,43 +950,6 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  libs/organization:
-    dependencies:
-      '@mikro-orm/core':
-        specifier: 'catalog:'
-        version: 6.6.6
-      '@mikro-orm/nestjs':
-        specifier: 'catalog:'
-        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
-      '@nestjs/common':
-        specifier: 'catalog:'
-        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core':
-        specifier: 'catalog:'
-        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@oksai/core':
-        specifier: workspace:*
-        version: link:../core
-      '@oksai/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      '@oksai/tenant':
-        specifier: workspace:*
-        version: link:../tenant
-      chalk:
-        specifier: 'catalog:'
-        version: 4.1.2
-      class-validator:
-        specifier: 'catalog:'
-        version: 0.14.3
-    devDependencies:
-      '@types/jest':
-        specifier: 29.5.14
-        version: 29.5.14
-      typescript:
-        specifier: ^5.8.0
-        version: 5.9.3
-
   libs/plugin:
     dependencies:
       '@nestjs/common':
@@ -1027,7 +969,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  libs/reporting:
+  libs/sys-plugins/analytics:
     dependencies:
       '@mikro-orm/core':
         specifier: 'catalog:'
@@ -1043,10 +985,191 @@ importers:
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@oksai/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../core
       '@oksai/plugin':
         specifier: workspace:*
-        version: link:../plugin
+        version: link:../../plugin
+      chalk:
+        specifier: 'catalog:'
+        version: 4.1.2
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
+    devDependencies:
+      '@types/jest':
+        specifier: 29.5.14
+        version: 29.5.14
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
+  libs/sys-plugins/audit:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.6
+      '@mikro-orm/nestjs':
+        specifier: 'catalog:'
+        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 'catalog:'
+        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@oksai/plugin':
+        specifier: workspace:*
+        version: link:../../plugin
+      chalk:
+        specifier: 'catalog:'
+        version: 4.1.2
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
+    devDependencies:
+      '@types/jest':
+        specifier: 29.5.14
+        version: 29.5.14
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
+  libs/sys-plugins/auth:
+    dependencies:
+      '@casl/ability':
+        specifier: ^6.8.0
+        version: 6.8.0
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.6
+      '@mikro-orm/nestjs':
+        specifier: 'catalog:'
+        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/axios':
+        specifier: ^4.0.1
+        version: 4.0.1(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.5)(rxjs@7.8.2)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^4.0.2
+        version: 4.0.3(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 'catalog:'
+        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/passport':
+        specifier: 'catalog:'
+        version: 11.0.5(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(passport@0.7.0)
+      '@oksai/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@oksai/plugin':
+        specifier: workspace:*
+        version: link:../../plugin
+      chalk:
+        specifier: 'catalog:'
+        version: 4.1.2
+      class-transformer:
+        specifier: 'catalog:'
+        version: 0.5.1
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
+      passport-auth0:
+        specifier: ^1.4.5
+        version: 1.4.5
+      passport-github2:
+        specifier: ^0.1.12
+        version: 0.1.12
+      passport-google-oauth20:
+        specifier: ^2.0.0
+        version: 2.0.0
+      passport-microsoft:
+        specifier: ^2.1.0
+        version: 2.1.0
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.1
+        version: 5.0.6
+      '@types/jest':
+        specifier: 'catalog:'
+        version: 29.5.14
+      '@types/passport-auth0':
+        specifier: 'catalog:'
+        version: 1.0.9
+      '@types/passport-github2':
+        specifier: 'catalog:'
+        version: 1.2.9
+      '@types/passport-google-oauth20':
+        specifier: 'catalog:'
+        version: 2.0.17
+      '@types/passport-microsoft':
+        specifier: 'catalog:'
+        version: 2.1.1
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
+  libs/sys-plugins/organization:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.6
+      '@mikro-orm/nestjs':
+        specifier: 'catalog:'
+        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 'catalog:'
+        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@oksai/plugin':
+        specifier: workspace:*
+        version: link:../../plugin
+      '@oksai/tenant':
+        specifier: workspace:*
+        version: link:../tenant
+      chalk:
+        specifier: 'catalog:'
+        version: 4.1.2
+      class-validator:
+        specifier: 'catalog:'
+        version: 0.14.3
+    devDependencies:
+      '@types/jest':
+        specifier: 29.5.14
+        version: 29.5.14
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
+  libs/sys-plugins/reporting:
+    dependencies:
+      '@mikro-orm/core':
+        specifier: 'catalog:'
+        version: 6.6.6
+      '@mikro-orm/nestjs':
+        specifier: 'catalog:'
+        version: 6.1.1(@mikro-orm/core@6.6.6)(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13)
+      '@nestjs/common':
+        specifier: 'catalog:'
+        version: 11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 'catalog:'
+        version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@oksai/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@oksai/plugin':
+        specifier: workspace:*
+        version: link:../../plugin
       chalk:
         specifier: 'catalog:'
         version: 4.1.2
@@ -1067,7 +1190,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  libs/role:
+  libs/sys-plugins/role:
     dependencies:
       '@mikro-orm/core':
         specifier: 'catalog:'
@@ -1083,10 +1206,10 @@ importers:
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@oksai/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../core
       '@oksai/plugin':
         specifier: workspace:*
-        version: link:../plugin
+        version: link:../../plugin
       chalk:
         specifier: 'catalog:'
         version: 4.1.2
@@ -1101,7 +1224,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  libs/tenant:
+  libs/sys-plugins/tenant:
     dependencies:
       '@mikro-orm/core':
         specifier: 'catalog:'
@@ -1117,10 +1240,10 @@ importers:
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@oksai/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../core
       '@oksai/plugin':
         specifier: workspace:*
-        version: link:../plugin
+        version: link:../../plugin
       chalk:
         specifier: 'catalog:'
         version: 4.1.2
@@ -1135,7 +1258,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  libs/user:
+  libs/sys-plugins/user:
     dependencies:
       '@mikro-orm/core':
         specifier: 'catalog:'
@@ -1151,13 +1274,13 @@ importers:
         version: 11.1.13(@nestjs/common@11.1.13(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@oksai/core':
         specifier: workspace:*
-        version: link:../core
+        version: link:../../core
       '@oksai/organization':
         specifier: workspace:*
         version: link:../organization
       '@oksai/plugin':
         specifier: workspace:*
-        version: link:../plugin
+        version: link:../../plugin
       chalk:
         specifier: 'catalog:'
         version: 4.1.2
@@ -1192,8 +1315,6 @@ importers:
       typescript:
         specifier: ^5.8.0
         version: 5.9.3
-
-  tools: {}
 
 packages:
 
@@ -15124,7 +15245,7 @@ snapshots:
       cli-width: 3.0.0
       external-editor: 3.1.0
       figures: 3.2.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
@@ -18090,26 +18211,6 @@ snapshots:
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.29.0)
       esbuild: 0.24.0
-      jest-util: 29.7.0
-
-  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@24.10.12)(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.18))(@types/node@24.10.12)(typescript@5.9.3)))(typescript@5.9.3):
-    dependencies:
-      bs-logger: 0.2.6
-      fast-json-stable-stringify: 2.1.0
-      handlebars: 4.7.8
-      jest: 29.7.0(@types/node@24.10.12)(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.18))(@types/node@24.10.12)(typescript@5.9.3))
-      json5: 2.2.3
-      lodash.memoize: 4.1.2
-      make-error: 1.3.6
-      semver: 7.7.4
-      type-fest: 4.41.0
-      typescript: 5.9.3
-      yargs-parser: 21.1.1
-    optionalDependencies:
-      '@babel/core': 7.29.0
-      '@jest/transform': 29.7.0
-      '@jest/types': 29.6.3
-      babel-jest: 29.7.0(@babel/core@7.29.0)
       jest-util: 29.7.0
 
   ts-loader@8.4.0(typescript@5.9.3)(webpack@5.105.0(@swc/core@1.5.29(@swc/helpers@0.5.18))(esbuild@0.24.0)):

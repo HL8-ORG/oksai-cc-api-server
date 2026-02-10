@@ -16,11 +16,4 @@
 		"baseUrl": "."
 	},
 	"exclude": ["coverage/**/*", "dist/**/*", "node_modules", "tmp", "qauzy-backup/**/*", "guides/**/*"],
-	"paths": {
-		"@mikro-orm/nestjs": ["./node_modules/@mikro-orm/nestjs"],
-		"@mikro-orm/core": ["./node_modules/@mikro-orm/core"],
-		"@oksai/analytics": ["./libs/analytics/src"],
-		"@oksai/reporting": ["./libs/reporting/src"],
-		"@oksai/organization": ["./libs/organization/src"]
-	}
 }

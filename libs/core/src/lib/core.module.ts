@@ -10,7 +10,8 @@ import { MailQueueProcessor } from './mail-queue-processor.service';
 import { MailQueueMonitorService } from './mail-queue-monitor.service';
 import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
 import { RequestContextMiddleware } from './context/request-context.middleware';
-import { PrometheusController } from './controllers/prometheus.controller';
+// TODO: PrometheusController 尚未完成依赖注入配置，暂不注册
+// import { PrometheusController } from './controllers/prometheus.controller';
 
 /**
  * OKSAI Core Module
@@ -43,7 +44,7 @@ import { PrometheusController } from './controllers/prometheus.controller';
 		CorrelationIdMiddleware,
 		RequestContextMiddleware
 	],
-	controllers: [PrometheusController],
+	controllers: [],
 	exports: [
 		// Guards
 		AuthGuard,

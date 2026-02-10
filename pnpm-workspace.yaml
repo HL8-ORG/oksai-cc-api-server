@@ -2,19 +2,9 @@
 # 定义 workspace 中包含的包路径
 # 所有列出的路径下的 package.json 都会被识别为 workspace 包
 packages:
-    # 原有 Gauzy 包（作为参考保留）
-    - 'apps/*'
-    - '!apps/mcp-auth'
-    - 'packages/*'
-    - 'packages/plugins/*'
-    - 'tools'
-
     # 新项目结构（@oksai/ 前缀）
-    - 'libs/auth'
-    - 'libs/core'
-    - 'libs/plugin'
-    - 'libs/*'
-    - 'apps/base-api'
+    - 'libs/**/*'
+    - 'apps/*'
 
 # pnpm Catalog - 统一管理依赖版本
 # 参考: https://pnpm.io/zh/catalogs

@@ -69,6 +69,7 @@ export class PluginStatusGuard implements CanActivate {
 		if (match && match[1]) {
 			const path = match[1].toLowerCase();
 			// 映射路径到插件名称
+			// 注意：plugins（插件管理端点）不在此映射中，因为它是管理端点，应始终可访问
 			const pluginMapping: Record<string, string> = {
 				auth: 'auth',
 				tenants: 'tenant',
@@ -78,8 +79,7 @@ export class PluginStatusGuard implements CanActivate {
 				permissions: 'permissions',
 				audit: 'audit',
 				analytics: 'analytics',
-				reporting: 'reporting',
-				plugins: 'plugin'
+				reporting: 'reporting'
 			};
 			return pluginMapping[path] || null;
 		}
