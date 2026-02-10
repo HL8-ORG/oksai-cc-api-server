@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User, UserRole } from './entities/user.entity';
+import { OAuthAccount } from './entities/oauth-account.entity';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import {
 	hashPassword,
@@ -28,6 +29,7 @@ jest.mock('@oksai/core', () => ({
 describe('AuthService', () => {
 	let service: AuthService;
 	let userRepo: any;
+	let oauthAccountRepo: any;
 	let em: any;
 	let mockJwtUtils: any;
 
@@ -40,12 +42,22 @@ describe('AuthService', () => {
 			getEntityManager: jest.fn()
 		};
 
+		oauthAccountRepo = {
+			findOne: jest.fn(),
+			find: jest.fn(),
+			create: jest.fn(),
+			nativeUpdate: jest.fn(),
+			getEntityManager: jest.fn()
+		};
+
 		em = {
 			persist: jest.fn(),
-			flush: jest.fn()
+			flush: jest.fn(),
+			remove: jest.fn()
 		};
 
 		userRepo.getEntityManager.mockReturnValue(em);
+		oauthAccountRepo.getEntityManager.mockReturnValue(em);
 
 		mockJwtUtils = {
 			generateTokenPair: jest.fn().mockReturnValue({
@@ -67,6 +79,10 @@ describe('AuthService', () => {
 				{
 					provide: getRepositoryToken(User),
 					useValue: userRepo
+				},
+				{
+					provide: getRepositoryToken(OAuthAccount),
+					useValue: oauthAccountRepo
 				},
 				{
 					provide: MailQueueService,
@@ -159,7 +175,7 @@ describe('AuthService', () => {
 	});
 
 	describe('register', () => {
-		it('should successfully register a new user', async () => {
+		it('should successfully register a new user with verification token', async () => {
 			userRepo.findOne.mockResolvedValue(null);
 
 			const createdUser = {
@@ -170,7 +186,10 @@ describe('AuthService', () => {
 				lastName: 'Doe',
 				role: UserRole.USER,
 				isActive: true,
-				tenantId: 'default'
+				tenantId: 'default',
+				verificationToken: expect.any(String),
+				verificationCode: expect.any(String),
+				verificationCodeExpiresAt: expect.any(Date)
 			} as any;
 
 			userRepo.create.mockReturnValue(createdUser);
@@ -189,6 +208,9 @@ describe('AuthService', () => {
 			expect(em.persist).toHaveBeenCalledWith(createdUser);
 			expect(em.flush).toHaveBeenCalled();
 			expect(hashPassword).toHaveBeenCalledWith('SecurePass123!');
+			expect(createdUser.verificationToken).toBeDefined();
+			expect(createdUser.verificationCode).toBeDefined();
+			expect(createdUser.verificationCodeExpiresAt).toBeDefined();
 		});
 
 		it('should throw BadRequestException when password is weak', async () => {
@@ -346,7 +368,7 @@ describe('AuthService', () => {
 	});
 
 	describe('verifyEmail', () => {
-		it('should successfully verify email', async () => {
+		it('should successfully verify email with valid token and code', async () => {
 			const mockUser = {
 				id: 'user123',
 				email: 'test@example.com',
@@ -366,6 +388,8 @@ describe('AuthService', () => {
 
 			expect(result.success).toBe(true);
 			expect(mockUser.emailVerifiedAt).toBeDefined();
+			expect(mockUser.verificationToken).toBeUndefined();
+			expect(mockUser.verificationCode).toBeUndefined();
 			expect(em.persist).toHaveBeenCalledWith(mockUser);
 			expect(em.flush).toHaveBeenCalled();
 		});
@@ -380,6 +404,166 @@ describe('AuthService', () => {
 			});
 
 			expect(result.success).toBe(false);
+		});
+
+		it('should throw BadRequestException when verification token is invalid', async () => {
+			const mockUser = {
+				id: 'user123',
+				email: 'test@example.com',
+				verificationToken: 'different_token',
+				verificationCode: '123456',
+				verificationCodeExpiresAt: new Date(Date.now() + 3600000)
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+
+			await expect(
+				service.verifyEmail({
+					email: 'test@example.com',
+					verificationToken: 'invalid_token',
+					verificationCode: '123456'
+				})
+			).rejects.toThrow(BadRequestException);
+		});
+
+		it('should throw BadRequestException when verification code is invalid', async () => {
+			const mockUser = {
+				id: 'user123',
+				email: 'test@example.com',
+				verificationToken: 'valid_token',
+				verificationCode: '654321',
+				verificationCodeExpiresAt: new Date(Date.now() + 3600000)
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+
+			await expect(
+				service.verifyEmail({
+					email: 'test@example.com',
+					verificationToken: 'valid_token',
+					verificationCode: '123456'
+				})
+			).rejects.toThrow(BadRequestException);
+		});
+
+		it('should throw BadRequestException when verification code is expired', async () => {
+			const mockUser = {
+				id: 'user123',
+				email: 'test@example.com',
+				verificationToken: 'valid_token',
+				verificationCode: '123456',
+				verificationCodeExpiresAt: new Date(Date.now() - 3600000)
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+
+			await expect(
+				service.verifyEmail({
+					email: 'test@example.com',
+					verificationToken: 'valid_token',
+					verificationCode: '123456'
+				})
+			).rejects.toThrow(BadRequestException);
+		});
+	});
+
+	describe('changePassword', () => {
+		it('should successfully change password without current password (OAuth user)', async () => {
+			const mockUser = {
+				id: 'user123',
+				email: 'oauth@example.com',
+				password: 'old_password',
+				role: UserRole.USER,
+				tenantId: 'default',
+				requirePasswordSetup: true
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+
+			const changePasswordDto = {
+				newPassword: 'NewSecurePass456!'
+			};
+
+			await service.changePassword('user123', changePasswordDto as any);
+
+			expect(em.persist).toHaveBeenCalledWith(mockUser);
+			expect(em.flush).toHaveBeenCalled();
+			expect(hashPassword).toHaveBeenCalledWith('NewSecurePass456!');
+		});
+
+		it('should successfully change password with current password (regular user)', async () => {
+			const mockUser = {
+				id: 'user456',
+				email: 'regular@example.com',
+				password: 'old_password',
+				role: UserRole.USER,
+				tenantId: 'default'
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+
+			const changePasswordDto = {
+				currentPassword: 'old_password',
+				newPassword: 'NewSecurePass456!'
+			};
+
+			await service.changePassword('user456', changePasswordDto as any);
+
+			expect(em.persist).toHaveBeenCalledWith(mockUser);
+			expect(em.flush).toHaveBeenCalled();
+			expect(verifyPassword).toHaveBeenCalledWith('old_password', 'old_password');
+			expect(hashPassword).toHaveBeenCalledWith('NewSecurePass456!');
+		});
+
+		it('should throw UnauthorizedException when user not found', async () => {
+			userRepo.findOne.mockResolvedValue(null);
+
+			const changePasswordDto = {
+				newPassword: 'NewSecurePass456!'
+			};
+
+			await expect(service.changePassword('nonexistent', changePasswordDto as any)).rejects.toThrow(
+				UnauthorizedException
+			);
+		});
+
+		it('should throw BadRequestException when new password is weak', async () => {
+			const mockUser = {
+				id: 'user789',
+				email: 'user@example.com',
+				password: 'old_password'
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+			(validatePasswordStrength as jest.Mock).mockReturnValue({ valid: false, errors: ['密码太短'] });
+
+			const changePasswordDto = {
+				newPassword: '123'
+			};
+
+			await expect(service.changePassword('user789', changePasswordDto as any)).rejects.toThrow(
+				BadRequestException
+			);
+		});
+
+		it('should throw BadRequestException when current password is wrong', async () => {
+			const mockUser = {
+				id: 'user999',
+				email: 'user@example.com',
+				password: 'correct_password'
+			} as any;
+
+			userRepo.findOne.mockResolvedValue(mockUser);
+			(verifyPassword as jest.Mock).mockResolvedValue(false);
+
+			const changePasswordDto = {
+				currentPassword: 'wrong_password',
+				newPassword: 'NewSecurePass456!'
+			};
+
+			await expect(service.changePassword('user999', changePasswordDto as any)).rejects.toThrow(
+				BadRequestException
+			);
 		});
 	});
 });

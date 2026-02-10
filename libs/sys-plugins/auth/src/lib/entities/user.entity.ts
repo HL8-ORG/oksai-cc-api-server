@@ -69,6 +69,18 @@ export class User extends BaseEntity {
 	@Property({ nullable: true })
 	emailVerifiedAt?: Date;
 
+	/** 邮箱验证令牌 */
+	@Property({ nullable: true })
+	verificationToken?: string;
+
+	/** 邮箱验证码 */
+	@Property({ nullable: true })
+	verificationCode?: string;
+
+	/** 邮箱验证码过期时间 */
+	@Property({ nullable: true })
+	verificationCodeExpiresAt?: Date;
+
 	/** 密码重置令牌 */
 	@Property({ nullable: true })
 	resetToken?: string;
@@ -88,4 +100,28 @@ export class User extends BaseEntity {
 	/** 登录次数 */
 	@Property({ nullable: true, default: 0 })
 	loginCount?: number;
+
+	/** 是否需要设置密码（OAuth 用户首次登录） */
+	@Property({ nullable: true, default: false })
+	requirePasswordSetup?: boolean;
+
+	/** 登录失败次数 */
+	@Property({ nullable: true, default: 0 })
+	loginFailCount?: number;
+
+	/** 账号锁定到期时间 */
+	@Property({ nullable: true })
+	lockedUntil?: Date;
+
+	/** 是否启用双因素认证 */
+	@Property({ nullable: true, default: false })
+	twoFactorEnabled?: boolean;
+
+	/** 双因素认证密钥 */
+	@Property({ nullable: true })
+	twoFactorSecret?: string;
+
+	/** 双因素认证验证时间 */
+	@Property({ nullable: true })
+	twoFactorVerifiedAt?: Date;
 }

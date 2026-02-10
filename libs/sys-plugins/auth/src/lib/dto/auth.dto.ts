@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsBoolean } from 'class-validator';
 
 /**
  * 登录 DTO
@@ -122,4 +122,103 @@ export class VerifyEmailDto {
 	@MinLength(6)
 	@MaxLength(10)
 	verificationCode!: string;
+}
+
+/**
+ * 修改密码 DTO
+ *
+ * 用于用户修改密码的数据传输对象
+ */
+export class ChangePasswordDto {
+	/** 当前密码（OAuth 用户可选） */
+	@IsOptional()
+	@IsString()
+	currentPassword?: string;
+
+	/** 新密码（8-50 位） */
+	@IsString()
+	@IsNotEmpty()
+	@MinLength(8)
+	@MaxLength(50)
+	newPassword!: string;
+}
+
+/**
+ * 绑定 OAuth 账号 DTO
+ *
+ * 用于绑定 OAuth 账号到已有账号的数据传输对象
+ */
+export class BindOAuthAccountDto {
+	/** OAuth 提供者 */
+	@IsString()
+	@IsNotEmpty()
+	provider!: string;
+
+	/** OAuth 提供者的用户 ID */
+	@IsString()
+	@IsNotEmpty()
+	providerId!: string;
+
+	/** 是否设为主账号 */
+	@IsOptional()
+	@IsBoolean()
+	isPrimary?: boolean;
+}
+
+/**
+ * 解绑 OAuth 账号 DTO
+ *
+ * 用于解绑 OAuth 账号的数据传输对象
+ */
+export class UnbindOAuthAccountDto {
+	/** OAuth 提供者 */
+	@IsString()
+	@IsNotEmpty()
+	provider!: string;
+
+	/** OAuth 提供者的用户 ID */
+	@IsString()
+	@IsNotEmpty()
+	providerId!: string;
+}
+
+/**
+ * 启用双因素认证 DTO
+ *
+ * 用于启用双因素认证的数据传输对象
+ */
+export class EnableTwoFactorAuthDto {
+	/** 验证代码 */
+	@IsString()
+	@IsNotEmpty()
+	@MinLength(6)
+	@MaxLength(6)
+	code!: string;
+}
+
+/**
+ * 禁用双因素认证 DTO
+ *
+ * 用于禁用双因素认证的数据传输对象
+ */
+export class DisableTwoFactorAuthDto {
+	/** 当前密码 */
+	@IsString()
+	@IsNotEmpty()
+	@MinLength(8)
+	password!: string;
+}
+
+/**
+ * 验证双因素认证 DTO
+ *
+ * 用于验证双因素认证的数据传输对象
+ */
+export class VerifyTwoFactorAuthDto {
+	/** 验证代码 */
+	@IsString()
+	@IsNotEmpty()
+	@MinLength(6)
+	@MaxLength(6)
+	code!: string;
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { User, UserRole } from './entities/user.entity';
 import { JwtPayload, getJwtUtils } from '@oksai/core';
+import { createOAuthUser, IOAuthUserInfo } from './oauth-user-helper';
 
 /**
  * OAuth 提供者类型
@@ -17,12 +18,8 @@ export enum OAuthProvider {
 /**
  * OAuth 用户信息
  */
-export interface IOAuthUser {
+export interface IOAuthUser extends IOAuthUserInfo {
 	id: string;
-	email: string;
-	displayName: string;
-	firstName?: string;
-	lastName?: string;
 	picture?: string;
 }
 
@@ -88,7 +85,12 @@ export class UnifiedOAuthCallbackService {
 			let user = await this.userRepo.findOne({ email });
 
 			if (!user) {
-				user = await this.createUser(oAuthUser);
+				user = await createOAuthUser(this.userRepo, {
+					email,
+					displayName: oAuthUser.displayName,
+					firstName: oAuthUser.firstName,
+					lastName: oAuthUser.lastName
+				});
 			}
 
 			const jwtUtils = getJwtUtils();
@@ -119,42 +121,6 @@ export class UnifiedOAuthCallbackService {
 				error: 'OAuth 认证失败，请稍后重试'
 			};
 		}
-	}
-
-	/**
-	 * 创建 OAuth 用户
-	 *
-	 * 根据 OAuth 用户信息创建新用户
-	 *
-	 * @param oAuthUser - OAuth 用户信息
-	 * @returns 已创建的用户
-	 */
-	private async createUser(oAuthUser: IOAuthUser): Promise<User> {
-		const { randomBytes } = await import('crypto');
-		const tempPassword = randomBytes(16).toString('hex');
-
-		const { hashPassword } = await import('@oksai/core');
-		const hashedPassword = await hashPassword(tempPassword);
-
-		const user = this.userRepo.create({
-			email: oAuthUser.email,
-			password: hashedPassword,
-			firstName: oAuthUser.firstName || '',
-			lastName: oAuthUser.lastName || '',
-			isActive: true,
-			tenantId: 'default',
-			emailVerifiedAt: new Date(),
-			role: UserRole.USER,
-			createdAt: new Date(),
-			updatedAt: new Date()
-		});
-
-		this.em.persist(user);
-		await this.em.flush();
-
-		this.logger.log(`创建新 OAuth 用户：${oAuthUser.email}`);
-
-		return user;
 	}
 
 	/**

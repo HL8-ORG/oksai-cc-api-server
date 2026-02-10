@@ -1,6 +1,16 @@
-import { Body, Controller, Get, Post, HttpCode, HttpStatus, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, HttpCode, HttpStatus, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, RefreshTokenDto, ForgotPasswordDto, ResetPasswordDto, VerifyEmailDto } from './dto';
+import {
+	LoginDto,
+	RegisterDto,
+	RefreshTokenDto,
+	ForgotPasswordDto,
+	ResetPasswordDto,
+	VerifyEmailDto,
+	ChangePasswordDto,
+	BindOAuthAccountDto,
+	UnbindOAuthAccountDto
+} from './dto';
 import { LoginResponse, RefreshTokenResponse, VerifyEmailResponse } from './interfaces';
 import { Public } from '@oksai/core';
 
@@ -203,5 +213,112 @@ export class AuthController {
 	@Public()
 	async verifyEmail(@Body() credentials: VerifyEmailDto): Promise<VerifyEmailResponse> {
 		return this.authService.verifyEmail(credentials);
+	}
+
+	/**
+	 * 修改密码
+	 *
+	 * 允许 OAuth 用户和普通用户修改密码
+	 * OAuth 用户不需要提供当前密码，普通用户需要验证当前密码
+	 *
+	 * @param credentials - 修改密码凭证
+	 * @returns Promise<void> 无返回值
+	 *
+	 * @example
+	 * ```bash
+	 * POST /auth/change-password
+	 * Authorization: Bearer <access_token>
+	 * {
+	 *   "currentPassword": "OldPassword123",
+	 *   "newPassword": "NewSecurePass456!"
+	 * }
+	 * ```
+	 */
+	@Post('change-password')
+	@HttpCode(HttpStatus.OK)
+	async changePassword(@Request() req: any, @Body() credentials: ChangePasswordDto): Promise<void> {
+		const userId = req.user?.id;
+		if (!userId) {
+			throw new UnauthorizedException('未登录用户无法访问此资源');
+		}
+		return this.authService.changePassword(userId, credentials);
+	}
+
+	/**
+	 * 绑定 OAuth 账号
+	 *
+	 * 将 OAuth 提供者的账号绑定到已有账号
+	 *
+	 * @param credentials - 绑定凭证（提供者、提供者用户 ID、是否主账号）
+	 * @returns Promise<void> 无返回值
+	 *
+	 * @example
+	 * ```bash
+	 * POST /auth/bind-oauth-account
+	 * Authorization: Bearer <access_token>
+	 * {
+	 *   "provider": "github",
+	 *   "providerId": "github123",
+	 *   "isPrimary": true
+	 * }
+	 * ```
+	 */
+	@Post('bind-oauth-account')
+	@HttpCode(HttpStatus.OK)
+	async bindOAuthAccount(@Request() req: any, @Body() credentials: BindOAuthAccountDto): Promise<void> {
+		const userId = req.user?.id;
+		if (!userId) {
+			throw new UnauthorizedException('未登录用户无法访问此资源');
+		}
+		return this.authService.bindOAuthAccount(userId, credentials);
+	}
+
+	/**
+	 * 解绑 OAuth 账号
+	 *
+	 * 解绑用户的 OAuth 提供者账号
+	 *
+	 * @param credentials - 解绑凭证（提供者、提供者用户 ID）
+	 * @returns Promise<void> 无返回值
+	 *
+	 * @example
+	 * ```bash
+	 * POST /auth/unbind-oauth-account
+	 * Authorization: Bearer <access_token>
+	 * {
+	 *   "provider": "github",
+	 *   "providerId": "github123"
+	 * }
+	 * ```
+	 */
+	@Post('unbind-oauth-account')
+	@HttpCode(HttpStatus.OK)
+	async unbindOAuthAccount(@Request() req: any, @Body() credentials: UnbindOAuthAccountDto): Promise<void> {
+		const userId = req.user?.id;
+		if (!userId) {
+			throw new UnauthorizedException('未登录用户无法访问此资源');
+		}
+		return this.authService.unbindOAuthAccount(userId, credentials);
+	}
+
+	/**
+	 * 获取用户的 OAuth 账号列表
+	 *
+	 * @returns OAuth 账号列表
+	 *
+	 * @example
+	 * ```bash
+	 * GET /auth/oauth-accounts
+	 * Authorization: Bearer <access_token>
+	 * ```
+	 */
+	@Get('oauth-accounts')
+	@HttpCode(HttpStatus.OK)
+	async getOAuthAccounts(@Request() req: any) {
+		const userId = req.user?.id;
+		if (!userId) {
+			throw new UnauthorizedException('未登录用户无法访问此资源');
+		}
+		return this.authService.getOAuthAccounts(userId);
 	}
 }

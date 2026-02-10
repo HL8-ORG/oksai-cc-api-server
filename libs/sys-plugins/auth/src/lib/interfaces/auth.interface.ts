@@ -12,6 +12,7 @@ export interface LoginResponse {
 		lastName: string;
 		tenantId: string;
 		role: string;
+		requirePasswordSetup?: boolean;
 	};
 }
 

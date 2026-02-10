@@ -2,13 +2,17 @@ import { Injectable, UnauthorizedException, ConflictException, BadRequestExcepti
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository, wrap, EntityManager } from '@mikro-orm/core';
 import { User, UserRole } from './entities/user.entity';
+import { OAuthAccount, OAuthProvider } from './entities/oauth-account.entity';
 import {
 	LoginDto,
 	RegisterDto,
 	RefreshTokenDto,
 	ForgotPasswordDto,
 	ResetPasswordDto,
-	VerifyEmailDto
+	VerifyEmailDto,
+	ChangePasswordDto,
+	BindOAuthAccountDto,
+	UnbindOAuthAccountDto
 } from './dto/index';
 import { LoginResponse, RefreshTokenResponse, VerifyEmailResponse } from './interfaces/index';
 import {
@@ -29,6 +33,8 @@ export class AuthService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepo: EntityRepository<User>,
+		@InjectRepository(OAuthAccount)
+		private readonly oauthAccountRepo: EntityRepository<OAuthAccount>,
 		private readonly mailQueueService: MailQueueService,
 		private readonly templateEngine: TemplateEngineService,
 		private readonly jwtBlacklistService: JwtBlacklistService
@@ -412,10 +418,219 @@ export class AuthService {
 			return { success: false };
 		}
 
+		if (user.verificationToken !== credentials.verificationToken) {
+			throw new BadRequestException('验证令牌无效');
+		}
+
+		if (user.verificationCode !== credentials.verificationCode) {
+			throw new BadRequestException('验证码无效');
+		}
+
+		if (user.verificationCodeExpiresAt && user.verificationCodeExpiresAt < new Date()) {
+			throw new BadRequestException('验证码已过期');
+		}
+
 		user.emailVerifiedAt = new Date();
+		user.verificationToken = undefined;
+		user.verificationCode = undefined;
+		user.verificationCodeExpiresAt = undefined;
+
 		this.em.persist(user);
 		await this.em.flush();
 
 		return { success: true };
+	}
+
+	/**
+	 * 修改密码
+	 *
+	 * 允许 OAuth 用户和普通用户修改密码
+	 * OAuth 用户不需要提供当前密码，普通用户需要验证当前密码
+	 *
+	 * @param userId - 用户 ID
+	 * @param credentials - 修改密码凭证
+	 * @returns Promise<void> 无返回值
+	 * @throws BadRequestException 当用户不存在或密码不符合要求时
+	 * @throws UnauthorizedException 当当前密码错误时（普通用户）
+	 *
+	 * @example
+	 * ```typescript
+	 * // OAuth 用户修改密码
+	 * await authService.changePassword('user123', { newPassword: 'NewSecurePass456!' });
+	 *
+	 * // 普通用户修改密码
+	 * await authService.changePassword('user456', {
+	 *   currentPassword: 'OldPassword123',
+	 *   newPassword: 'NewSecurePass456!'
+	 * });
+	 * ```
+	 */
+	async changePassword(userId: string, credentials: ChangePasswordDto): Promise<void> {
+		const user = await this.userRepo.findOne({ id: userId });
+
+		if (!user) {
+			throw new UnauthorizedException('未找到该用户');
+		}
+
+		// 验证新密码强度
+		const passwordValidation = validatePasswordStrength(credentials.newPassword);
+		if (!passwordValidation.valid) {
+			throw new BadRequestException(passwordValidation.errors.join(', '));
+		}
+
+		// OAuth 用户不需要验证当前密码
+		if (user.requirePasswordSetup) {
+			user.requirePasswordSetup = false;
+		} else {
+			// 普通用户需要验证当前密码
+			if (!credentials.currentPassword) {
+				throw new BadRequestException('请提供当前密码');
+			}
+
+			const isValidPassword = await verifyPassword(credentials.currentPassword, user.password);
+			if (!isValidPassword) {
+				throw new BadRequestException('当前密码错误');
+			}
+		}
+
+		// 加密并设置新密码
+		const hashedPassword = await hashPassword(credentials.newPassword);
+		user.password = hashedPassword;
+		user.updatedAt = new Date();
+
+		this.em.persist(user);
+		await this.em.flush();
+
+		this.logger.log(`用户 ${userId} 密码修改成功`);
+	}
+
+	/**
+	 * 绑定 OAuth 账号
+	 *
+	 * 将 OAuth 提供者的账号绑定到已有账号
+	 *
+	 * @param userId - 用户 ID
+	 * @param credentials - 绑定凭证（提供者、提供者用户 ID、是否主账号）
+	 * @returns Promise<void> 无返回值
+	 * @throws BadRequestException 当用户不存在或该 OAuth 账号已被绑定时
+	 *
+	 * @example
+	 * ```typescript
+	 * await authService.bindOAuthAccount('user123', {
+	 *   provider: 'github',
+	 *   providerId: 'github123',
+	 *   isPrimary: true
+	 * });
+	 * ```
+	 */
+	async bindOAuthAccount(userId: string, credentials: BindOAuthAccountDto): Promise<void> {
+		const user = await this.userRepo.findOne({ id: userId });
+
+		if (!user) {
+			throw new BadRequestException('未找到该用户');
+		}
+
+		// 验证并转换 OAuth 提供者
+		const provider = credentials.provider.toUpperCase() as keyof typeof OAuthProvider;
+		if (!OAuthProvider[provider]) {
+			throw new BadRequestException(`不支持的 OAuth 提供者：${credentials.provider}`);
+		}
+
+		// 检查该 OAuth 账号是否已被其他用户绑定
+		const existingAccount = await this.oauthAccountRepo.findOne({
+			provider: OAuthProvider[provider],
+			providerId: credentials.providerId
+		});
+
+		if (existingAccount) {
+			throw new BadRequestException('该 OAuth 账号已被绑定');
+		}
+
+		// 如果设置为主账号，将其他账号的主账号状态取消
+		if (credentials.isPrimary) {
+			await this.oauthAccountRepo.nativeUpdate({ userId, isPrimary: true }, { isPrimary: false });
+		}
+
+		const oauthAccount = this.oauthAccountRepo.create({
+			userId,
+			provider: OAuthProvider[provider],
+			providerId: credentials.providerId,
+			isPrimary: credentials.isPrimary || false
+		});
+
+		this.em.persist(oauthAccount);
+		await this.em.flush();
+
+		this.logger.log(`用户 ${userId} 成功绑定 ${credentials.provider} 账号`);
+	}
+
+	/**
+	 * 解绑 OAuth 账号
+	 *
+	 * 解绑用户的 OAuth 提供者账号
+	 *
+	 * @param userId - 用户 ID
+	 * @param credentials - 解绑凭证（提供者、提供者用户 ID）
+	 * @returns Promise<void> 无返回值
+	 * @throws BadRequestException 当用户不存在、OAuth 账号不存在或无法解绑时
+	 *
+	 * @example
+	 * ```typescript
+	 * await authService.unbindOAuthAccount('user123', {
+	 *   provider: 'github',
+	 *   providerId: 'github123'
+	 * });
+	 * ```
+	 */
+	async unbindOAuthAccount(userId: string, credentials: UnbindOAuthAccountDto): Promise<void> {
+		const user = await this.userRepo.findOne({ id: userId });
+
+		if (!user) {
+			throw new BadRequestException('未找到该用户');
+		}
+
+		// 验证并转换 OAuth 提供者
+		const provider = credentials.provider.toUpperCase() as keyof typeof OAuthProvider;
+		if (!OAuthProvider[provider]) {
+			throw new BadRequestException(`不支持的 OAuth 提供者：${credentials.provider}`);
+		}
+
+		// 查找要解绑的 OAuth 账号
+		const oauthAccount = await this.oauthAccountRepo.findOne({
+			userId,
+			provider: OAuthProvider[provider],
+			providerId: credentials.providerId
+		});
+
+		if (!oauthAccount) {
+			throw new BadRequestException('未找到要解绑的 OAuth 账号');
+		}
+
+		// 检查用户是否有密码，如果没有则不允许解绑主账号
+		if (oauthAccount.isPrimary && user.requirePasswordSetup) {
+			throw new BadRequestException('请先设置密码后再解绑主账号');
+		}
+
+		this.em.remove(oauthAccount);
+		await this.em.flush();
+
+		this.logger.log(`用户 ${userId} 成功解绑 ${credentials.provider} 账号`);
+	}
+
+	/**
+	 * 获取用户的 OAuth 账号列表
+	 *
+	 * @param userId - 用户 ID
+	 * @returns OAuth 账号列表
+	 *
+	 * @example
+	 * ```typescript
+	 * const accounts = await authService.getOAuthAccounts('user123');
+	 * console.log(accounts); // [{ id, provider, providerId, ... }, ...]
+	 * ```
+	 */
+	async getOAuthAccounts(userId: string): Promise<OAuthAccount[]> {
+		const accounts = await this.oauthAccountRepo.find({ userId });
+		return accounts;
 	}
 }
