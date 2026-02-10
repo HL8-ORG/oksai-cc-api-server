@@ -2,286 +2,270 @@
 
 ## 整体架构
 
-```mermaid
-classDiagram
-    package "客户端层" {
-        class UserClient {
-            <<客户端>>
-            connectToServer()
-            sendRequest()
-            receiveResponse()
-        }
+```plantuml
+@startuml
+!define RECTANGLE class
+
+package "客户端层" {
+    class UserClient <<客户端>> {
+        + connectToServer()
+        + sendRequest()
+        + receiveResponse()
+    }
+}
+
+package "MCP 服务端层" {
+    class McpServer <<服务器>> {
+        - server: Server
+        - transport: TransportResult
+        - toolRegistry: ToolRegistry
+        - sessionManager: SessionManager
+        - authManager: AuthManager
+        - config: McpServerConfig
+        - logger: Logger
+        - sessionId: String
+        - isStarted: boolean
+        - primaryServerId: String
+        __
+        + start(transportType?): Promise<boolean>
+        + stop(): Promise<void>
+        + registerTool(tool: BaseMcpTool): void
+        + invokeTool(name, args): Promise<McpServer>
+        + getStatus(): Promise<McpServerStatus>
+        + listTools(): McpToolDefinition[]
+        + cleanup(): Promise<void>
     }
 
-    package "MCP 服务端层" {
-        class McpServer {
-            <<服务器>>
-            - server: Server
-            - transport: TransportResult
-            - toolRegistry: ToolRegistry
-            - sessionManager: SessionManager
-            - authManager: AuthManager
-            - config: McpServerConfig
-            - logger: Logger
-            - sessionId: string | null
-            - isStarted: boolean
-            - primaryServerId: string | null
-
-            + start(transportType?: TransportType): Promise~boolean~
-            + stop(): Promise~void~
-            + registerTool(tool: BaseMcpTool): void
-            + invokeTool(name: string, args: Record~string, unknown~): Promise~McpServer~
-            + getStatus(): Promise~McpServerStatus~
-            + listTools(): McpToolDefinition[]
-            + cleanup(): Promise~void~
-        }
-
-        class McpServerManager {
-            <<服务器管理器>>
-            - servers: Map~string, ServerInstance~
-            - primaryServerId: string | null
-            - logger: Logger
-
-            + start(config: McpServerConfig, serverId?: string): Promise~boolean~
-            + stop(serverId?: string): Promise~boolean~
-            + restart(serverId?: string): Promise~boolean~
-            + getStatus(serverId?: string): Promise~McpServerStatus | null~
-            + getServer(serverId?: string): McpServer | null
-            + removeServer(serverId: string): Promise~boolean~
-            + stopAll(): Promise~number~
-            + setPrimaryServer(serverId: string): boolean
-            + getStats(): { total: number, running: number, stopped: number }
-        }
-
-        class ToolRegistry {
-            <<工具注册表>>
-            - tools: Map~string, BaseMcpTool~
-            - mcpServer: Server
-
-            + registerTool(tool: BaseMcpTool): void
-            + getTool(name: string): BaseMcpTool | null
-            + getAllTools(): BaseMcpTool[]
-            + getToolCount(): number
-            + invokeTool(name: string, args: Record~string, unknown~): Promise~McpToolResult~
-        }
-
-        class BaseMcpTool {
-            <<工具基类>>
-            # name: string
-            # description: string
-
-            +~abstract~ getToolDefinition(): McpToolDefinition
-            +~abstract~ execute(args: Record~string, unknown~): Promise~McpToolResult~
-            + createSuccessResult(content: unknown): McpToolResult
-            + createErrorResult(message: string): McpServerResult
-        }
+    class McpServerManager <<服务器管理器>> {
+        - servers: Map<String, ServerInstance>
+        - primaryServerId: String
+        - logger: Logger
+        __
+        + start(config, serverId?): Promise<boolean>
+        + stop(serverId?): Promise<boolean>
+        + restart(serverId?): Promise<boolean>
+        + getStatus(serverId?): Promise<McpServerStatus>
+        + getServer(serverId?): McpServer
+        + removeServer(serverId): Promise<boolean>
+        + stopAll(): Promise<number>
+        + setPrimaryServer(serverId): boolean
+        + getStats(): McpServerStats
     }
 
-    package "传输层" {
-        class TransportFactory {
-            <<工厂>>
-            + createTransportFromEnv(server: Server, transportType: TransportType): Promise~TransportResult~
-            + shutdownTransport(transport: TransportResult): Promise~void~
-            + getTransportTypeFromEnv(): TransportType
-        }
-
-        class TransportResult {
-            <<传输结果>>
-            type: TransportType
-            transport: StdioServerTransport | HttpServerTransport | WebSocketServerTransport
-            url?: string
-            config: TransportConfig
-        }
-
-        class StdioServerTransport {
-            <<Stdio 传输>>
-            + connect(): Promise~void~
-            + disconnect(): Promise~void~
-            + send(message: string): Promise~void~
-        }
-
-        class HttpServerTransport {
-            <<HTTP 传输>>
-            + connect(): Promise~void~
-            + disconnect(): Promise~void~
-            + send(message: string): Promise~void~
-        }
-
-        class WebSocketServerTransport {
-            <<WebSocket 传输>>
-            + connect(): Promise~void~
-            + disconnect(): Promise~void~
-            + send(message: string): Promise~void~
-        }
+    class ToolRegistry <<工具注册表>> {
+        - tools: Map<String, BaseMcpTool>
+        - mcpServer: Server
+        __
+        + registerTool(tool: BaseMcpTool): void
+        + getTool(name: String): BaseMcpTool
+        + getAllTools(): BaseMcpTool[]
+        + getToolCount(): number
+        + invokeTool(name, args): Promise<McpToolResult>
     }
 
-    package "会话管理层" {
-        class SessionManager {
-            <<会话管理器>>
-            - storage: SessionStorage
-            - ttl: number
-            - enableRedis: boolean
-            - redisConfig?: RedisConfig
+    abstract class BaseMcpTool <<工具基类>> {
+        # name: String
+        # description: String
+        __
+        + {abstract} getToolDefinition(): McpToolDefinition
+        + {abstract} execute(args): Promise<McpToolResult>
+        + createSuccessResult(content): McpToolResult
+        + createErrorResult(message: String): McpServerResult
+    }
+}
 
-            + createSession(userId?: string, organizationId?: string, tenantId?: string, data?: Record~string, unknown~): Promise~Session~
-            + findSession(id: string): Promise~Session | null~
-            + updateSession(id: string, data: Partial~Record~string, unknown~~): Promise~void~
-            + deleteSession(id: string): Promise~void~
-            + getSessionStats(): Promise~SessionStats~
-            + cleanup(): Promise~void~
-        }
-
-        class SessionStorage {
-            <<会话存储接口>>
-            + createSession(session: Omit~Session~)
-            + findSession(id: string): Promise~Session | null~
-            + updateSession(id: string, data: Partial~Session~): Promise~void~
-            + deleteSession(id: string): Promise~void~
-            + getAllSessions(): Promise~Session[]~
-            + cleanup(): Promise~void~
-        }
-
-        class MemoryStorage {
-            <<内存存储>>
-            + implements SessionStorage
-            - sessions: Map~string, Session~
-
-            + createSession(session: Omit~Session~): Promise~Session~
-            + findSession(id: string): Promise~Session | null~
-            + updateSession(id: string, data: Partial~Session~): Promise~void~
-            + deleteSession(id: string): Promise~void~
-            + getAllSessions(): Promise~Session[]~
-            + cleanup(): Promise~void~
-        }
-
-        class RedisStorage {
-            <<Redis 存储>>
-            + implements SessionStorage
-            - client: Redis
-            - prefix: string
-
-            + createSession(session: Omit~Session~): Promise~Session~
-            + findSession(id: string): Promise~Session | null~
-            + updateSession(id: string, data: Partial~Session~): Promise~void~
-            + deleteSession(id: string): Promise~void~
-            + getAllSessions(): Promise~Session[]~
-            + cleanup(): Promise~void~
-        }
+package "传输层" {
+    class TransportFactory <<工厂>> {
+        + createTransportFromEnv(server, transportType): Promise<TransportResult>
+        + shutdownTransport(transport): Promise<void>
+        + getTransportTypeFromEnv(): TransportType
     }
 
-    package "认证授权层" {
-        class AuthManager {
-            <<认证管理器>>
-            - instance: AuthManager
-
-            + getInstance(): AuthManager
-            + login(): Promise~boolean~
-            + logout(): Promise~void~
-            + getAuthStatus(): AuthStatus
-            + setAuthState(userId: string, tenantId?: string, organizationId?: string): void
-            + clearAuthState(): void
-            + getUserId(): string | null
-            + getTenantId(): string | null
-            + getOrganizationId(): string | null
-        }
-
-        class AuthStatus {
-            <<认证状态>>
-            isAuthenticated: boolean
-            userId: string | null
-            tenantId: string | null
-            organizationId: string | null
-        }
+    class TransportResult <<传输结果>> {
+        + type: TransportType
+        + url: String
+        + config: TransportConfig
     }
 
-    package "基础设施层" {
-        class Redis {
-            <<缓存数据库>>
-            store(key: string, value: any)
-            retrieve(key: string): any
-            expire(key: string, ttl: number)
-        }
-
-        class OAuthAuthServer {
-            <<OAuth 授权服务器>>
-            - jwtService: JwtService
-            - jwksService: JwksService
-
-            + generateAccessToken(payload: any): string
-            + generateRefreshToken(payload: any): string
-            + verifyToken(token: string): any
-            + getJwks(): JwksResponse
-            + introspectToken(token: string): IntrospectResponse
-        }
+    class StdioServerTransport <<Stdio 传输>> {
+        + connect(): Promise<void>
+        + disconnect(): Promise<void>
+        + send(message: String): Promise<void>
     }
 
-    UserClient --> McpServer: 连接
-    UserClient --> OAuthAuthServer: 获取令牌
+    class HttpServerTransport <<HTTP 传输>> {
+        + connect(): Promise<void>
+        + disconnect(): Promise<void>
+        + send(message: String): Promise<void>
+    }
 
-    McpServer --> McpServerManager: 被...管理
-    McpServer --> ToolRegistry: 使用
-    McpServer --> BaseMcpTool: 注册
-    McpServer --> SessionManager: 使用
-    McpServer --> AuthManager: 使用
-    McpServer --> TransportFactory: 使用
+    class WebSocketServerTransport <<WebSocket 传输>> {
+        + connect(): Promise<void>
+        + disconnect(): Promise<void>
+        + send(message: String): Promise<void>
+    }
+}
 
-    TransportFactory --> TransportResult: 创建
-    TransportResult --> StdioServerTransport: 可能包含
-    TransportResult --> HttpServerTransport: 可能包含
-    TransportResult --> WebSocketServerTransport: 可能包含
+package "会话管理层" {
+    class SessionManager <<会话管理器>> {
+        - storage: SessionStorage
+        - ttl: number
+        - enableRedis: boolean
+        __
+        + createSession(): Promise<Session>
+        + findSession(id: String): Promise<Session>
+        + updateSession(id, data): Promise<void>
+        + deleteSession(id: String): Promise<void>
+        + getSessionStats(): Promise<SessionStats>
+        + cleanup(): Promise<void>
+    }
 
-    SessionManager --> SessionStorage: 使用
-    SessionStorage <|-- MemoryStorage: 实现
-    SessionStorage <|-- RedisStorage: 实现
+    interface SessionStorage <<会话存储接口>> {
+        + createSession(): Promise<Session>
+        + findSession(id: String): Promise<Session>
+        + updateSession(id, data): Promise<void>
+        + deleteSession(id: String): Promise<void>
+        + getAllSessions(): Promise<Session[]>
+        + cleanup(): Promise<void>
+    }
 
-    RedisStorage --> Redis: 存储会话
+    class MemoryStorage <<内存存储>> {
+        - sessions: Map<String, Session>
+        __
+        + createSession(): Promise<Session>
+        + findSession(id: String): Promise<Session>
+        + updateSession(id, data): Promise<void>
+        + deleteSession(id: String): Promise<void>
+        + getAllSessions(): Promise<Session[]>
+        + cleanup(): Promise<void>
+    }
 
-    AuthManager --> OAuthAuthServer: 验证令牌
-    McpServer --> OAuthAuthServer: 验证令牌
+    class RedisStorage <<Redis 存储>> {
+        - client: Redis
+        - prefix: String
+        __
+        + createSession(): Promise<Session>
+        + findSession(id: String): Promise<Session>
+        + updateSession(id, data): Promise<void>
+        + deleteSession(id: String): Promise<void>
+        + getAllSessions(): Promise<Session[]>
+        + cleanup(): Promise<void>
+    }
+}
+
+package "认证授权层" {
+    class AuthManager <<认证管理器>> {
+        - {static} instance: AuthManager
+        __
+        + {static} getInstance(): AuthManager
+        + login(): Promise<boolean>
+        + logout(): Promise<void>
+        + getAuthStatus(): AuthStatus
+        + setAuthState(): void
+        + clearAuthState(): void
+        + getUserId(): String
+        + getTenantId(): String
+        + getOrganizationId(): String
+    }
+
+    interface AuthStatus <<认证状态>> {
+        + isAuthenticated: boolean
+        + userId: String
+        + tenantId: String
+        + organizationId: String
+    }
+}
+
+package "基础设施层" {
+    class RedisDB <<缓存数据库>> {
+        + store(key: String, value: unknown)
+        + retrieve(key: String): unknown
+        + expire(key: String, ttl: number)
+    }
+
+    class OAuthAuthServer <<OAuth 授权服务器>> {
+        - jwtService: JwtService
+        - jwksService: JwksService
+        __
+        + generateAccessToken(payload): String
+        + generateRefreshToken(payload): String
+        + verifyToken(token: String): unknown
+        + getJwks(): JwksResponse
+        + introspectToken(token: String): IntrospectResponse
+    }
+}
+
+UserClient --> McpServer : 连接
+UserClient --> OAuthAuthServer : 获取令牌
+
+McpServerManager --> McpServer : 管理
+McpServer --> ToolRegistry : 使用
+McpServer --> BaseMcpTool : 注册
+McpServer --> SessionManager : 使用
+McpServer --> AuthManager : 使用
+McpServer --> TransportFactory : 使用
+
+TransportFactory --> TransportResult : 创建
+TransportResult --> StdioServerTransport : 可能包含
+TransportResult --> HttpServerTransport : 可能包含
+TransportResult --> WebSocketServerTransport : 可能包含
+
+SessionManager --> SessionStorage : 使用
+SessionStorage <|.. MemoryStorage : 实现
+SessionStorage <|.. RedisStorage : 实现
+
+RedisStorage --> RedisDB : 存储会话
+
+AuthManager --> OAuthAuthServer : 验证令牌
+McpServer --> OAuthAuthServer : 验证令牌
+@enduml
 ```
 
 ## 部署架构
 
-```mermaid
-graph TB
-    subgraph "客户端层"
-        UserClient[用户客户端]
-        McpClient[MCP 客户端]
-        WebClient[Web 客户端]
-        WebSocketClient[WebSocket 客户端]
-    end
+```plantuml
+@startuml
+!define RECTANGLE class
 
-    subgraph "MCP 服务端"
-        StdioMcpServer[Stdio MCP 服务器]
-        HttpMcpServer[HTTP MCP 服务器]
-        WebSocketMcpServer[WebSocket MCP 服务器]
-        McpServerManager[MCP 服务器管理器]
-    end
+package "客户端层" {
+    [用户客户端] as UserClient
+    [MCP 客户端] as McpClient
+    [Web 客户端] as WebClient
+    [WebSocket 客户端] as WebSocketClient
+}
 
-    subgraph "基础设施"
-        OAuthAuthServer[OAuth 授权服务器]
-        SessionStorageRedis[Redis 会话存储]
-    end
+package "MCP 服务端" {
+    [Stdio MCP 服务器] as StdioMcpServer
+    [HTTP MCP 服务器] as HttpMcpServer
+    [WebSocket MCP 服务器] as WebSocketMcpServer
+    [MCP 服务器管理器] as McpServerManager
+}
 
-    UserClient --> StdioMcpServer: 使用 Stdio 协议
-    WebClient --> HttpMcpServer: 使用 HTTP 协议
-    WebSocketClient --> WebSocketMcpServer: 使用 WebSocket 协议
+package "基础设施" {
+    [OAuth 授权服务器] as OAuthAuthServer
+    [Redis 会话存储] as SessionStorageRedis
+}
 
-    McpServerManager --> StdioMcpServer: 管理 Stdio 服务器
-    McpServerManager --> HttpMcpServer: 管理 HTTP 服务器
-    McpServerManager --> WebSocketMcpServer: 管理 WebSocket 服务器
+UserClient --> StdioMcpServer : 使用 Stdio 协议
+WebClient --> HttpMcpServer : 使用 HTTP 协议
+WebSocketClient --> WebSocketMcpServer : 使用 WebSocket 协议
 
-    StdioMcpServer --> SessionStorageRedis: 存储会话
-    HttpMcpServer --> SessionStorageRedis: 存储会话
-    WebSocketMcpServer --> SessionStorageRedis: 存储会话
+McpServerManager --> StdioMcpServer : 管理
+McpServerManager --> HttpMcpServer : 管理
+McpServerManager --> WebSocketMcpServer : 管理
 
-    StdioMcpServer --> OAuthAuthServer: 验证令牌
-    HttpMcpServer --> OAuthAuthServer: 验证令牌
-    WebSocketMcpServer --> OAuthAuthServer: 验证令牌
+StdioMcpServer --> SessionStorageRedis : 存储会话
+HttpMcpServer --> SessionStorageRedis : 存储会话
+WebSocketMcpServer --> SessionStorageRedis : 存储会话
 
-    OAuthAuthServer --> StdioMcpServer: 返回 JWKS
-    OAuthAuthServer --> HttpMcpServer: 返回 JWKS
-    OAuthAuthServer --> WebSocketMcpServer: 返回 JWKS
+StdioMcpServer --> OAuthAuthServer : 验证令牌
+HttpMcpServer --> OAuthAuthServer : 验证令牌
+WebSocketMcpServer --> OAuthAuthServer : 验证令牌
+
+OAuthAuthServer --> StdioMcpServer : 返回 JWKS
+OAuthAuthServer --> HttpMcpServer : 返回 JWKS
+OAuthAuthServer --> WebSocketMcpServer : 返回 JWKS
+@enduml
 ```
 
 ## 架构说明
@@ -406,15 +390,15 @@ graph TB
 
 ```typescript
 export class CustomTransport extends BaseTransport {
-    async connect(): Promise~void~ {
+    async connect(): Promise<void> {
         // 连接逻辑
     }
 
-    async disconnect(): Promise~void~ {
+    async disconnect(): Promise<void> {
         // 断开连接逻辑
     }
 
-    async send(message: string): Promise~void~ {
+    async send(message: string): Promise<void> {
         // 发送消息逻辑
     }
 }
@@ -428,7 +412,7 @@ export class MyCustomTool extends BaseMcpTool {
         super('my_tool', '我的自定义工具');
     }
 
-    async execute(args: Record~string, unknown~): Promise~McpToolResult~ {
+    async execute(args: Record<string, unknown>): Promise<McpToolResult> {
         const input = args.input as string;
 
         // 业务逻辑
@@ -443,11 +427,11 @@ export class MyCustomTool extends BaseMcpTool {
 
 ```typescript
 export class PostgresSessionStorage implements SessionStorage {
-    async createSession(session: Omit~Session~): Promise~Session~ {
+    async createSession(session: Omit<Session, 'id'>): Promise<Session> {
         // 数据库逻辑
     }
 
-    async findSession(id: string): Promise~Session | null~ {
+    async findSession(id: string): Promise<Session | null> {
         // 数据库逻辑
     }
 

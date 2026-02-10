@@ -6,56 +6,57 @@
 
 ## 系统概览
 
-```mermaid
-class McpServer
-    << 依赖>> Server
-    << 依赖 >> BaseMcpTool
-    << 依赖 >> AuthManager
-    << 依赖 >> SessionManager
-    << 依赖 >> TransportFactory
+```plantuml
+@startuml
+!define RECTANGLE class
+
+class McpServer <<服务器>> {
     - mcpServerManager
     - server: Server
     - authManager: AuthManager
     - sessionManager: SessionManager
-end
+}
 
-class AuthManager
-    << 单例模式 >>
-    manageAuthState(userId, tenantId, organizationId)
-end
+class AuthManager <<单例模式>> {
+    + manageAuthState(userId, tenantId, organizationId)
+}
 
-class SessionManager
-    << 管理 >>
-    createSession(userId, organizationId, tenantId, data)
-    findSession(id)
-    updateSession(id, data)
-    deleteSession(id)
-    getSessionStats()
-    cleanup()
-end
+class SessionManager <<管理>> {
+    + createSession(userId, organizationId, tenantId, data)
+    + findSession(id)
+    + updateSession(id, data)
+    + deleteSession(id)
+    + getSessionStats()
+    + cleanup()
+}
 
-class ToolRegistry
-    << 注册 >>
-    registerTool(tool: BaseMcpTool): void
-    getTool(name: string): BaseMcpTool | null
-    getAllTools(): BaseMcpTool[]
-    getToolCount(): number
-    invokeTool(name: string, args: Record<string, unknown>): Promise<McpToolResult>
-end
+class ToolRegistry <<注册>> {
+    + registerTool(tool: BaseMcpTool): void
+    + getTool(name: string): BaseMcpTool
+    + getAllTools(): BaseMcpTool[]
+    + getToolCount(): number
+    + invokeTool(name, args): Promise<McpToolResult>
+}
 
-class TransportFactory
-    << 工厂模式 >>
-    createTransportFromEnv(server: Server, transportType: TransportType): Promise<TransportResult>
-    shutdownTransport(transport: TransportResult): Promise<void>
-    getTransportTypeFromEnv(): TransportType
-end
+class TransportFactory <<工厂模式>> {
+    + createTransportFromEnv(server, transportType): Promise<TransportResult>
+    + shutdownTransport(transport): Promise<void>
+    + getTransportTypeFromEnv(): TransportType
+}
+
+McpServer --> AuthManager : 依赖
+McpServer --> SessionManager : 依赖
+McpServer --> ToolRegistry : 依赖
+McpServer --> TransportFactory : 依赖
+@enduml
 ```
 
 ## 类图
 
 ### McpServer 类
 
-```mermaid
+```plantuml
+@startuml
 class McpServer {
     - server: Server
     - transport: TransportResult
@@ -64,524 +65,531 @@ class McpServer {
     - authManager: AuthManager
     - config: McpServerConfig
     - logger: Logger
-    - sessionId: string | null
+    - sessionId: String
     - isStarted: boolean
-    - primaryServerId: string | null
-
-    + McpServer(config: McpServerConfig, sessionId?: string)
+    - primaryServerId: String
+    __
+    + McpServer(config: McpServerConfig, sessionId?: String)
     + start(transportType?: TransportType): Promise<boolean>
     + stop(): Promise<void>
     + registerTool(tool: BaseMcpTool): void
     + registerTools(tools: BaseMcpTool[]): void
-    + invokeTool(name: string, args: Record<string, unknown>): Promise<McpServer>
+    + invokeTool(name, args): Promise<McpServer>
     + getStatus(): Promise<McpServerStatus>
     + listTools(): McpToolDefinition[]
     + cleanup(): Promise<void>
 }
+@enduml
 ```
 
 ### McpServerManager 类
 
-```mermaid
+```plantuml
+@startuml
 class McpServerManager {
-    - servers: Map<string, ServerInstance>
-    - primaryServerId: string | null
+    - servers: Map<String, ServerInstance>
+    - primaryServerId: String
     - logger: Logger
-
+    __
     + McpServerManager()
-    + start(config: McpServerConfig, serverId?: string, transportType?: TransportType): Promise<boolean>
-    + stop(serverId?: string): Promise<boolean>
-    + restart(serverId?: string): Promise<boolean>
-    + getStatus(serverId?: string): Promise<McpServerStatus | null>
-    + getServer(serverId?: string): McpServer | null
-    + getServerIds(): string[]
-    + getAllStatus(): Promise<Map<string, McpServerStatus>>
-    + removeServer(serverId: string): Promise<boolean>
+    + start(config, serverId?, transportType?): Promise<boolean>
+    + stop(serverId?): Promise<boolean>
+    + restart(serverId?): Promise<boolean>
+    + getStatus(serverId?): Promise<McpServerStatus>
+    + getServer(serverId?): McpServer
+    + getServerIds(): String[]
+    + getAllStatus(): Promise<Map<String, McpServerStatus>>
+    + removeServer(serverId): Promise<boolean>
     + stopAll(): Promise<number>
-    + setPrimaryServer(serverId: string): boolean
-    + getPrimaryServerId(): string | null
-    + getPrimaryServer(): McpServer | null
-    + getStats(): { total: number, running: number, stopped: number, primaryServerId: string | null }
+    + setPrimaryServer(serverId): boolean
+    + getPrimaryServerId(): String
+    + getPrimaryServer(): McpServer
+    + getStats(): McpServerStats
     + cleanup(): Promise<void>
 }
+@enduml
 ```
 
 ## 组件关系
 
 ### 1. 传输层组件
 
-```mermaid
+```plantuml
+@startuml
 class TransportFactory {
-    + createTransportFromEnv(server: Server, transportType: TransportType): Promise<TransportResult>
-    + shutdownTransport(transport: TransportResult): Promise<void>
+    + createTransportFromEnv(server, transportType): Promise<TransportResult>
+    + shutdownTransport(transport): Promise<void>
 }
 
 class TransportResult {
-    type: TransportType
-    transport: StdioServerTransport | HttpServerTransport | WebSocketServerTransport
-    url?: string
-    config: TransportConfig
+    + type: TransportType
+    + url: String
+    + config: TransportConfig
 }
+
+class StdioServerTransport <<Stdio 传输>> {
+    + connect(): Promise<void>
+    + disconnect(): Promise<void>
+    + send(message: String): Promise<void>
+}
+
+class HttpServerTransport <<HTTP 传输>> {
+    + connect(): Promise<void>
+    + disconnect(): Promise<void>
+    + send(message: String): Promise<void>
+}
+
+class WebSocketServerTransport <<WebSocket 传输>> {
+    + connect(): Promise<void>
+    + disconnect(): Promise<void>
+    + send(message: String): Promise<void>
+}
+
+TransportFactory --> TransportResult : 创建
+TransportResult --> StdioServerTransport : 可能包含
+TransportResult --> HttpServerTransport : 可能包含
+TransportResult --> WebSocketServerTransport : 可能包含
+@enduml
 ```
 
 ### 2. 工具层组件
 
-```mermaid
-class BaseMcpTool {
-    # 工具名称
-    name: string
-
-    # 工具描述
-    description: string
-
-    # 工具定义
-    abstract getToolDefinition(): McpToolDefinition
-
-    # 工具执行
-    abstract execute(args: Record<string, unknown>): Promise<McpToolResult>
-
-    # 创建工具结果
-    protected createSuccessResult(content: unknown): McpToolResult
-    protected createErrorResult(message: string): McpServerResult
+```plantuml
+@startuml
+abstract class BaseMcpTool <<工具基类>> {
+    # name: String
+    # description: String
+    __
+    + {abstract} getToolDefinition(): McpToolDefinition
+    + {abstract} execute(args): Promise<McpToolResult>
+    + createSuccessResult(content): McpToolResult
+    + createErrorResult(message: String): McpServerResult
 }
-```
 
-```mermaid
 class ToolRegistry {
-    - tools: Map<string, BaseMcpTool>
+    - tools: Map<String, BaseMcpTool>
     - mcpServer: Server
-
+    __
     + registerTool(tool: BaseMcpTool): void
-    + getTool(name: string): BaseMcpTool | null
+    + getTool(name: String): BaseMcpTool
     + getAllTools(): BaseMcpTool[]
     + getToolCount(): number
-    invokeTool(name: string, args: Record<string, unknown>): Promise<McpToolResult>
-
+    + invokeTool(name, args): Promise<McpToolResult>
     - setMcpServer(server: Server): void
     + getMcpServer(): Server
 }
+
+BaseMcpTool <|-- ToolRegistry : 注册到
+@enduml
 ```
 
 ### 3. 会话管理组件
 
-#### SessionManager 类
-
-```mermaid
-class SessionManager {
+```plantuml
+@startuml
+class SessionManager <<会话管理器>> {
     - storage: SessionStorage
     - ttl: number
     - enableRedis: boolean
-    - redisConfig?: RedisConfig
-
-    + createSession(userId?: string, organizationId?: string, tenantId?: string, data?: Record<string, unknown>): Promise<Session>
-    + findSession(id: string): Promise<Session | null>
-    + updateSession(id: string, data: Partial<Record<string, unknown>>): Promise<void>
-    + deleteSession(id: string): Promise<void>
+    __
+    + createSession(userId?, organizationId?, tenantId?, data?): Promise<Session>
+    + findSession(id: String): Promise<Session>
+    + updateSession(id: String, data): Promise<void>
+    + deleteSession(id: String): Promise<void>
     + getSessionStats(): Promise<SessionStats>
     + cleanup(): Promise<void>
 }
-```
 
-#### SessionStorage 接口
-
-```mermaid
-interface SessionStorage {
-    + createSession(session: Omit<Session>)
-    + findSession(id: string): Promise<Session | null>
-    + updateSession(id: string, data: Partial<Session>): Promise<void>
-    deleteSession(id: string): Promise<void>
-    getAllSessions(): Promise<Session[]>
-    cleanup(): Promise<void>
-}
-```
-
-#### MemoryStorage 类
-
-```mermaid
-class MemoryStorage implements SessionStorage {
-    - sessions: Map<string, Session>
-
-    + createSession(session: Omit<Session>): Promise<Session>
-    + findSession(id: string): Promise<Session | null>
-    + updateSession(id: string, data: Partial<Session>): Promise<void>
-    + deleteSession(id: string): Promise<void>
+interface SessionStorage <<接口>> {
+    + createSession(session): Promise<Session>
+    + findSession(id: String): Promise<Session>
+    + updateSession(id: String, data): Promise<void>
+    + deleteSession(id: String): Promise<void>
     + getAllSessions(): Promise<Session[]>
     + cleanup(): Promise<void>
 }
-```
 
-#### RedisStorage 类
-
-```mermaid
-class RedisStorage implements SessionStorage {
-    - client: Redis
-    - prefix: string
-
-    + createSession(session: Omit<Session>): Promise<Session>
-    + findSession(id: string): Promise<Session | null>
-    + updateSession(id: string, data: Partial<Session>): Promise<void>
-    + deleteSession(id: string): Promise<void>
-    getAllSessions(): Promise<Session[]>
+class MemoryStorage <<内存存储>> {
+    - sessions: Map<String, Session>
+    __
+    + createSession(session): Promise<Session>
+    + findSession(id: String): Promise<Session>
+    + updateSession(id: String, data): Promise<void>
+    + deleteSession(id: String): Promise<void>
+    + getAllSessions(): Promise<Session[]>
     + cleanup(): Promise<void>
-
-    private serialize(session: Session): string
-    private deserialize(json: string): Session
-    private async loadAllSessions(): Promise<Map<string, Session>>
 }
-```
 
-#### Session 数据结构
+class RedisStorage <<Redis 存储>> {
+    - client: Redis
+    - prefix: String
+    __
+    + createSession(session): Promise<Session>
+    + findSession(id: String): Promise<Session>
+    + updateSession(id: String, data): Promise<void>
+    + deleteSession(id: String): Promise<void>
+    + getAllSessions(): Promise<Session[]>
+    + cleanup(): Promise<void>
+    - serialize(session: Session): String
+    - deserialize(json: String): Session
+    - loadAllSessions(): Promise<Map<String, Session>>
+}
 
-```mermaid
 class Session {
-    id: string
-    userId: string | null
-    organizationId: string | null
-    tenantId: string | null
-    createdAt: Date
-    lastAccessedAt: Date
-    data: Record<string, unknown>
+    + id: String
+    + userId: String
+    + organizationId: String
+    + tenantId: String
+    + createdAt: Date
+    + lastAccessedAt: Date
+    + data: Record<String, unknown>
 }
+
+SessionManager --> SessionStorage : 使用
+SessionStorage <|.. MemoryStorage : 实现
+SessionStorage <|.. RedisStorage : 实现
+@enduml
 ```
 
 ### 4. 认证管理组件
 
-#### AuthManager 类
-
-```mermaid
-class AuthManager {
-    # 单例模式
-    - instance: AuthManager
-
-    + getInstance(): AuthManager
+```plantuml
+@startuml
+class AuthManager <<单例模式>> {
+    - {static} instance: AuthManager
+    __
+    + {static} getInstance(): AuthManager
     + login(): Promise<boolean>
     + logout(): Promise<void>
     + getAuthStatus(): AuthStatus
-
-    # 认证状态管理
-    + setAuthState(userId: string, tenantId?: string, organizationId?: string): void
+    .. 认证状态管理 ..
+    + setAuthState(userId, tenantId?, organizationId?): void
     + clearAuthState(): void
-
-    # 用户信息
-    + getUserId(): string | null
-    + getTenantId(): string | null
-    + getOrganizationId(): string | null
+    .. 用户信息 ..
+    + getUserId(): String
+    + getTenantId(): String
+    + getOrganizationId(): String
 }
-```
 
-#### AuthStatus 接口
-
-```mermaid
-interface AuthStatus {
-    isAuthenticated: boolean
-    userId: string | null
-    tenantId: string | null
-    organizationId: string | null
+interface AuthStatus <<接口>> {
+    + isAuthenticated: boolean
+    + userId: String
+    + tenantId: String
+    + organizationId: String
 }
+
+AuthManager --> AuthStatus : 返回
+@enduml
 ```
 
 ### 5. 服务器管理器组件
 
-#### ServerInstance 接口
-
-```mermaid
+```plantuml
+@startuml
 class ServerInstance {
-    id: string
-    server: McpServer
-    config: McpServerConfig
-    createdAt: Date
-    lastStartedAt?: Date
+    + id: String
+    + server: McpServer
+    + config: McpServerConfig
+    + createdAt: Date
+    + lastStartedAt: Date
 }
-```
 
-#### McpServerManager 类
-
-```mermaid
 class McpServerManager {
-    - servers: Map<string, ServerInstance>
-    - primaryServerId: string | null
+    - servers: Map<String, ServerInstance>
+    - primaryServerId: String
     - logger: Logger
-
-    # 服务器生命周期管理
-    + start(config: McpServerConfig, serverId?: string, transportType?: TransportType): Promise<boolean>
-    + stop(serverId?: string): Promise<boolean>
-    + restart(serverId?: string): Promise<boolean>
-    + removeServer(serverId: string): Promise<boolean>
-
-    # 查询方法
-    + getStatus(serverId?: string): Promise<McpServerStatus | null>
-    + getServer(serverId?: string): McpServer | null
-    + getServerIds(): string[]
-    + getAllStatus(): Promise<Map<string, McpServerStatus>>
-
-    # 统计方法
-    + getStats(): {
-        total: number;
-        running: number;
-        stopped: number;
-        primaryServerId: string | null;
-    }
-
-    # 主服务器管理
-    + setPrimaryServer(serverId: string): boolean
-    + getPrimaryServerId(): string | null
-    + getPrimaryServer(): McpServer | null
-
-    # 清理方法
+    .. 服务器生命周期管理 ..
+    + start(config, serverId?, transportType?): Promise<boolean>
+    + stop(serverId?): Promise<boolean>
+    + restart(serverId?): Promise<boolean>
+    + removeServer(serverId): Promise<boolean>
+    .. 查询方法 ..
+    + getStatus(serverId?): Promise<McpServerStatus>
+    + getServer(serverId?): McpServer
+    + getServerIds(): String[]
+    + getAllStatus(): Promise<Map<String, McpServerStatus>>
+    .. 统计方法 ..
+    + getStats(): McpServerStats
+    .. 主服务器管理 ..
+    + setPrimaryServer(serverId): boolean
+    + getPrimaryServerId(): String
+    + getPrimaryServer(): McpServer
+    .. 清理方法 ..
     + stopAll(): Promise<number>
     + cleanup(): Promise<void>
 }
+
+McpServerManager --> ServerInstance : 管理
+@enduml
 ```
 
 ## 请求响应序列图
 
 ### MCP 服务器启动流程
 
-```mermaid
-sequenceDiagram
-    actor User as User
-    participant McpServer as McpServer
-    participant Transport as Transport
-    participant ToolRegistry as ToolRegistry
-    participant SessionManager as SessionManager
+```plantuml
+@startuml
+actor 用户 as User
+participant McpServer
+participant "传输层" as Transport
+participant "工具注册表" as ToolRegistry
+participant "会话管理器" as SessionManager
 
-    User->McpServer: start(TransportType.STDIO)
-    activate McpServer
-    McpServer->Transport: connect()
-    Transport->McpServer: connected
-    McpServer->ToolRegistry: setMcpServer(server)
-    McpServer->SessionManager: setMcpServer(manager)
-    McpServer->McpServer: isStarted = true
-    McpServer->User: started
+User -> McpServer : start(TransportType.STDIO)
+activate McpServer
+McpServer -> Transport : connect()
+Transport --> McpServer : connected
+McpServer -> ToolRegistry : setMcpServer(server)
+McpServer -> SessionManager : setMcpServer(manager)
+McpServer -> McpServer : isStarted = true
+McpServer --> User : started
+deactivate McpServer
+@enduml
 ```
 
 ### 工具调用流程
 
-```mermaid
-sequenceDiagram
-    actor User as User
-    participant McpServer as McpServer
-    participant ToolRegistry as ToolRegistry
-    participant AuthManager as AuthManager
-    participant BaseMcpTool as Tool
+```plantuml
+@startuml
+actor 用户 as User
+participant McpServer
+participant "工具注册表" as ToolRegistry
+participant "认证管理器" as AuthManager
+participant "工具" as BaseMcpTool
 
-    User->McpServer: invokeTool(toolName, args)
-    activate McpServer
-    McpServer->ToolRegistry: getTool(toolName)
-    ToolRegistry->Tool: getToolDefinition()
-    McpServer->AuthManager: getAuthStatus()
-    AuthManager->McpServer: authStatus.isAuthenticated
-    McpServer->AuthManager: getUserId()
-    AuthManager->McpServer: authStatus.userId
-    McpServer->Tool: execute(args)
-    activate Tool
-    Tool->McpServer: createSuccessResult(content)
-    McpServer->User: result
+User -> McpServer : invokeTool(toolName, args)
+activate McpServer
+McpServer -> ToolRegistry : getTool(toolName)
+ToolRegistry -> BaseMcpTool : getToolDefinition()
+McpServer -> AuthManager : getAuthStatus()
+AuthManager --> McpServer : authStatus.isAuthenticated
+McpServer -> AuthManager : getUserId()
+AuthManager --> McpServer : authStatus.userId
+McpServer -> BaseMcpTool : execute(args)
+activate BaseMcpTool
+BaseMcpTool --> McpServer : createSuccessResult(content)
+deactivate BaseMcpTool
+McpServer --> User : result
+deactivate McpServer
+@enduml
 ```
 
 ### 会话管理流程
 
-```mermaid
-sequenceDiagram
-    actor User as User
-    participant McpServer as McpServer
-    participant SessionManager as SessionManager
-    participant MemoryStorage as MemoryStorage
+```plantuml
+@startuml
+actor 用户 as User
+participant McpServer
+participant "会话管理器" as SessionManager
+participant "内存存储" as MemoryStorage
 
-    User->McpServer: invokeTool(toolName, args)
-    activate McpServer
-    McpServer->SessionManager: findSession(sessionId)
-    SessionManager->MemoryStorage: findSession(id)
-    MemoryStorage->SessionManager: session object
-    SessionManager->MemoryStorage: updateSession(id, { lastAccessedAt })
-    SessionManager->McpServer: session object
-    McpServer->Tool: execute(args)
-    activate Tool
-    McpServer->SessionManager: updateSession(id, { lastAccessedAt })
-    SessionManager->MemoryStorage: updateSession(id, data)
-    SessionManager->MemoryStorage: updated session object
-    McpServer->User: result
+User -> McpServer : invokeTool(toolName, args)
+activate McpServer
+McpServer -> SessionManager : findSession(sessionId)
+SessionManager -> MemoryStorage : findSession(id)
+MemoryStorage --> SessionManager : session object
+SessionManager -> MemoryStorage : updateSession(id, lastAccessedAt)
+SessionManager --> McpServer : session object
+McpServer -> BaseMcpTool : execute(args)
+activate BaseMcpTool
+BaseMcpTool --> McpServer : result
+deactivate BaseMcpTool
+McpServer -> SessionManager : updateSession(id, lastAccessedAt)
+SessionManager -> MemoryStorage : updateSession(id, data)
+MemoryStorage --> SessionManager : updated session
+McpServer --> User : result
+deactivate McpServer
+@enduml
 ```
 
 ## 部署架构
 
-```mermaid
-graph TB
-    subgraph "客户端层"
-        UserClient
-        McpClient
-        WebClient
-        WebSocketClient
-    end subgraph
+```plantuml
+@startuml
+!define RECTANGLE class
 
-    subgraph "MCP 服务端"
-        StdioMcpServer
-        HttpMcpServer
-        WebSocketMcpServer
-        McpServerManager
-    end subgraph
+package "客户端层" {
+    [用户客户端] as UserClient
+    [MCP 客户端] as McpClient
+    [Web 客户端] as WebClient
+    [WebSocket 客户端] as WebSocketClient
+}
 
-    subgraph "基础设施"
-        OAuthAuthServer
-        SessionStorageRedis
-    end subgraph
+package "MCP 服务端" {
+    [Stdio MCP 服务器] as StdioMcpServer
+    [HTTP MCP 服务器] as HttpMcpServer
+    [WebSocket MCP 服务器] as WebSocketMcpServer
+    [MCP 服务器管理器] as McpServerManager
+}
 
-    UserClient --> StdioMcpServer : 使用 Stdio 协议
-    WebClient --> HttpMcpServer : 使用 HTTP 协议
-    WebSocketClient --> WebSocketMcpServer : 使用 WebSocket 协议
+package "基础设施" {
+    [OAuth 授权服务器] as OAuthAuthServer
+    [Redis 会话存储] as SessionStorageRedis
+}
 
-    McpServerManager --> StdioMcpServer : 管理 Stdio 服务器
-    McpServerManager --> HttpMcpServer : 管理 HTTP 服务器
-    McpServerManager --> WebSocketMcpServer : 管理 WebSocket 服务器
+UserClient --> StdioMcpServer : 使用 Stdio 协议
+WebClient --> HttpMcpServer : 使用 HTTP 协议
+WebSocketClient --> WebSocketMcpServer : 使用 WebSocket 协议
 
-    StdioMcpServer --> SessionStorageRedis : 存储会话
-    HttpMcpServer --> SessionStorageRedis : 存储会话
-    WebSocketMcpServer --> SessionStorageRedis : 存储会话
+McpServerManager --> StdioMcpServer : 管理
+McpServerManager --> HttpMcpServer : 管理
+McpServerManager --> WebSocketMcpServer : 管理
 
-    StdioMcpServer --> OAuthAuthServer : 验证令牌
-    HttpMcpServer --> OAuthAuthServer : 验证令牌
-    WebSocketMcpServer --> OAuthAuthServer : 验证令牌
+StdioMcpServer --> SessionStorageRedis : 存储会话
+HttpMcpServer --> SessionStorageRedis : 存储会话
+WebSocketMcpServer --> SessionStorageRedis : 存储会话
 
-    OAuthAuthServer --> StdioMcpServer : 返回 JWKS
-    OAuthAuthServer --> HttpMcpServer : 返回 JWKS
-    OAuthAuthServer --> WebSocketMcpServer : 返回 JWKS
+StdioMcpServer --> OAuthAuthServer : 验证令牌
+HttpMcpServer --> OAuthAuthServer : 验证令牌
+WebSocketMcpServer --> OAuthAuthServer : 验证令牌
+
+OAuthAuthServer --> StdioMcpServer : 返回 JWKS
+OAuthAuthServer --> HttpMcpServer : 返回 JWKS
+OAuthAuthServer --> WebSocketMcpServer : 返回 JWKS
+@enduml
 ```
 
 ## 测试架构
 
 ### 单元测试结构
 
-```mermaid
-graph TB
-    subgraph "McpServer Tests"
-        McpServerSpec
-        McpServerManagerSpec
-        BaseMcpToolSpec
-        ToolRegistrySpec
-        SessionManagerSpec
-        AuthManagerSpec
-        SessionStorageSpec
-        RedisStorageSpec
-        TransportFactorySpec
-    end subgraph
+```plantuml
+@startuml
+package "McpServer 单元测试" {
+    [McpServerSpec]
+    [McpServerManagerSpec]
+    [BaseMcpToolSpec]
+    [ToolRegistrySpec]
+    [SessionManagerSpec]
+    [AuthManagerSpec]
+    [SessionStorageSpec]
+    [RedisStorageSpec]
+    [TransportFactorySpec]
+}
 
-    subgraph "AuthManager Tests"
-        AuthManagerSpec
-        JwtServiceSpec
-        JwksServiceSpec
-        OAuthControllerSpec
-        AuthControllerSpec
-        OAuthE2eSpec
-    end subgraph
+package "认证测试" {
+    [AuthManagerSpec2] as AuthMgrSpec2
+    [JwtServiceSpec]
+    [JwksServiceSpec]
+    [OAuthControllerSpec]
+    [AuthControllerSpec]
+    [OAuthE2eSpec]
+}
 
-    subgraph "集成测试"
-        McpServerIntegrationSpec
-        OAuthIntegrationSpec
-        SessionIntegrationSpec
-        TransportIntegrationSpec
-    end subgraph
-    McpServerSpec --> ToolRegistrySpec : 依赖
-    McpServerSpec --> SessionManagerSpec : 依赖
-    McpServerSpec --> AuthManagerSpec : 依赖
-    McpServerSpec -> TransportFactorySpec : 依赖
-    McpServerManagerSpec -> McpServerSpec : 依赖
+package "集成测试" {
+    [McpServerIntegrationSpec]
+    [OAuthIntegrationSpec]
+    [SessionIntegrationSpec]
+    [TransportIntegrationSpec]
+}
 
-    OAuthControllerSpec -> JwksServiceSpec : 依赖
-    OAuthControllerSpec -> JwtServiceSpec : 依赖
-    OAuthControllerSpec -> OAuthControllerSpec : 依赖
+[McpServerSpec] ..> [ToolRegistrySpec] : 依赖
+[McpServerSpec] ..> [SessionManagerSpec] : 依赖
+[McpServerSpec] ..> [AuthManagerSpec] : 依赖
+[McpServerSpec] ..> [TransportFactorySpec] : 依赖
+[McpServerManagerSpec] ..> [McpServerSpec] : 依赖
 
-    McpServerIntegrationSpec -> SessionIntegrationSpec : 依赖
-    OAuthIntegrationSpec -> AuthControllerSpec : 依赖
-    McpServerIntegrationSpec -> TransportIntegrationSpec : 依赖
-end
+[OAuthControllerSpec] ..> [JwksServiceSpec] : 依赖
+[OAuthControllerSpec] ..> [JwtServiceSpec] : 依赖
+[OAuthControllerSpec] ..> [AuthControllerSpec] : 依赖
+
+[McpServerIntegrationSpec] ..> [SessionIntegrationSpec] : 依赖
+[OAuthIntegrationSpec] ..> [AuthControllerSpec] : 依赖
+[McpServerIntegrationSpec] ..> [TransportIntegrationSpec] : 依赖
+@enduml
 ```
 
 ## 状态转换图
 
 ### McpServer 状态机
 
-```mermaid
-stateDiagram-v2
-    [*] --> Stopped: 启动失败
-    [*] --> Initializing: 调用 start()
+```plantuml
+@startuml
+[*] --> Stopped : 启动失败
+[*] --> Initializing : 调用 start()
 
-    Initializing --> Running: 传输层连接成功
-    Initializing --> Stopped: 启动失败
+Initializing --> Running : 传输层连接成功
+Initializing --> Stopped : 启动失败
 
-    Running --> Stopping: 调用 stop()
-    Running --> Stopped: 发生错误
-    Running --> Restarting: 调用 restart()
+Running --> Stopping : 调用 stop()
+Running --> Stopped : 发生错误
+Running --> Restarting : 调用 restart()
 
-    Restarting --> Stopped: 重启失败
+Restarting --> Stopped : 重启失败
 
-    Stopping --> [*]: 停止完成
+Stopping --> [*] : 停止完成
 
-    Restarting --> Running: 重启成功
-    Running -> Running : 重启后回到运行状态
+Restarting --> Running : 重启成功
+Running --> Running : 重启后回到运行状态
+@enduml
 ```
 
 ### 工具注册状态机
 
-```mermaid
-stateDiagram-v2
-    [*] --> Unregistered: 工具未注册
-    Unregistered --> Registered: 调用 registerTool()
-    Unregistered --> DuplicateError: 重复注册同名工具
+```plantuml
+@startuml
+[*] --> Unregistered : 工具未注册
+Unregistered --> Registered : 调用 registerTool()
+Unregistered --> DuplicateError : 重复注册同名工具
 
-    Registered -> Active: 调用 invokeTool()
+Registered --> Active : 调用 invokeTool()
 
-    Active -> Executing: 工具执行中
-    Active -> Failed: 工具执行失败
+Active --> Executing : 工具执行中
+Active --> Failed : 工具执行失败
 
-    Executing -> Completed: 工具执行成功
-    Completed -> Active: 可以再次调用
+Executing --> Completed : 工具执行成功
+Completed --> Active : 可以再次调用
 
-    Failed -> Active: 重试执行
+Failed --> Active : 重试执行
+@enduml
 ```
 
 ### 会话生命周期状态机
 
-```mermaid
-stateDiagram-v2
-    [*] --> Active: 创建会话
+```plantuml
+@startuml
+[*] --> Active : 创建会话
 
-    Active -> Inactive: 会话过期
-    Active -> Deleted: 会话被删除
+Active --> Inactive : 会话过期
+Active --> Deleted : 会话被删除
 
-    Inactive -> [*] : 清理
+Inactive --> [*] : 清理
 
-    Deleted --> [*] : 清理
+Deleted --> [*] : 清理
+@enduml
 ```
 
 ### 认证状态机
 
-```mermaid
-stateDiagram-v2
-    [*] --> Unauthenticated: 未认证
+```plantuml
+@startuml
+[*] --> Unauthenticated : 未认证
 
-    Unauthenticated -> Authenticated: 调用 setAuthState()
+Unauthenticated --> Authenticated : 调用 setAuthState()
 
-    Authenticated -> Unauthenticated: 调用 clearAuthState()
+Authenticated --> Unauthenticated : 调用 clearAuthState()
 
-    Authenticated -> Failed: 认证失败
+Authenticated --> Failed : 认证失败
 
-    Failed -> Unauthenticated: 清理失败后重试
+Failed --> Unauthenticated : 清理失败后重试
+@enduml
 ```
 
 ### 传输层状态机
 
-```mermaid
-stateDiagram-v2
-    [*] -> Disconnected: 初始状态
-    Disconnected -> Connecting: 连接中
+```plantuml
+@startuml
+[*] --> Disconnected : 初始状态
+Disconnected --> Connecting : 连接中
 
-    Connecting -> Connected: 连接成功
-    Connecting -> Disconnected: 连接失败
+Connecting --> Connected : 连接成功
+Connecting --> Disconnected : 连接失败
 
-    Connected -> Disconnected: 连接断开
-    Connected -> Disconnecting: 断开中
+Connected --> Disconnected : 连接断开
+Connected --> Disconnecting : 断开中
 
-    Disconnecting -> Disconnected: 断开完成
+Disconnecting --> Disconnected : 断开完成
+@enduml
 ```
 
 ## 接口定义
@@ -619,7 +627,7 @@ interface McpToolDefinition {
 
 interface McpToolResult {
 	isError: boolean;
-	content: any;
+	content: unknown;
 	error?: string;
 }
 ```
@@ -644,7 +652,7 @@ interface SessionStats {
 }
 
 interface SessionStorage {
-	createSession(session: Omit<Session>): Promise<Session>;
+	createSession(session: Omit<Session, 'id'>): Promise<Session>;
 	findSession(id: string): Promise<Session | null>;
 	updateSession(id: string, data: Partial<Record<string, unknown>>): Promise<void>;
 	deleteSession(id: string): Promise<void>;
@@ -666,9 +674,9 @@ interface AuthStatus {
 
 ```typescript
 enum TransportType {
-	STDIO = 'stdio';
-	HTTP = 'http';
-	WEBSOCKET = 'websocket';
+	STDIO = 'stdio',
+	HTTP = 'http',
+	WEBSOCKET = 'websocket'
 }
 
 interface TransportConfig {
@@ -701,7 +709,7 @@ interface TransportResult {
 
 **决策**: 使用工厂模式
 
--   � 厂方法：`TransportFactory.createTransportFromEnv(server, transportType)`
+-   工厂方法：`TransportFactory.createTransportFromEnv(server, transportType)`
 -   优点：
     -   统一传输层创建逻辑
     -   支持通过环境变量配置
@@ -730,7 +738,7 @@ interface TransportResult {
 -   优点：
     -   统一的会话管理接口
     -   易于切换存储实现
-    -   遵免业务代码直接依赖具体存储实现
+    -   避免业务代码直接依赖具体存储实现
 
 ### 4. 为什么使用 ToolRegistry 管理工具？
 
@@ -806,26 +814,25 @@ export class CustomTransport extends BaseTransport {
 ```typescript
 import { SessionStorage, Session } from '@oksai/mcp-server';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class PostgresSessionStorage implements SessionStorage {
 	constructor(
-		@InjectRepository(User)
-	private readonly userRepo: EntityRepository<User>
+		@InjectRepository(SessionEntity)
+		private readonly sessionRepo: EntityRepository<SessionEntity>
 	) {}
 
-	async createSession(session: Omit<Session>): Promise< Session> {
-		const user = await this.userRepo.findOne({ id: session.userId });
-		if (!user) {
-			throw new NotFoundException(`用户 ${session.userId} 未找到`);
-		}
+	async createSession(session: Omit<Session, 'id'>): Promise<Session> {
+		// 数据库逻辑
+		const entity = this.sessionRepo.create(session);
+		await this.sessionRepo.getEntityManager().persistAndFlush(entity);
+		return entity;
+	}
 
-		const sessionEntity = new Session({
-		... // 字段映射
-	} as unknown as Session;
-
-		return await this.userRepo.persist(sessionEntity);
+	async findSession(id: string): Promise<Session | null> {
+		// 数据库逻辑
+		return await this.sessionRepo.findOne({ id });
 	}
 
 	// 其他方法实现...
